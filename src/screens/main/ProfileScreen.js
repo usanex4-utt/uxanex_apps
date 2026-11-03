@@ -32,6 +32,9 @@ export default function ProfileScreen({ navigation, route }) {
   const [form, setForm] = useState({ name: "", bio: "", website: "", instagram: "", social_link: "" });
   const [saving, setSaving] = useState(false);
   const [videoFocused, setVideoFocused] = useState(true);
+  
+  // ── Toast State ──
+  const [toast, setToast] = useState(null);
 
   const load = useCallback(async () => {
     if (!uid) { setLoading(false); return; }
@@ -71,12 +74,28 @@ export default function ProfileScreen({ navigation, route }) {
   const posts = (p?.content || []).filter((x) => x.media_url);
 
   const saveProfile = async () => {
-    if (!form.name.trim()) return Alert.alert("Name required", "Please enter your name.");
+    if (!form.name.trim()) {
+      const msg = "Please enter your name.";
+      if (Platform.OS === "web") window.alert(msg);
+      else Alert.alert("Name required", msg);
+      return;
+    }
     setSaving(true);
     try {
       const d = await api(EP.myProfile, { method: "PUT", body: { ...form, name: form.name.trim() } });
-      patchUser({ name: d.user.name }); setEditing(false); load();
-    } catch (e) { Alert.alert("Could not save", e.message); }
+      patchUser({ name: d.user.name });
+      setEditing(false);
+      
+      // Success Toast
+      setToast({ type: "success", msg: "Profile updated!" });
+      setTimeout(() => setToast(null), 1500);
+      
+      load();
+    } catch (e) {
+      const msg = e.message || "Could not save";
+      if (Platform.OS === "web") window.alert(msg);
+      else Alert.alert("Could not save", msg);
+    }
     setSaving(false);
   };
 
@@ -97,7 +116,13 @@ export default function ProfileScreen({ navigation, route }) {
         fd.append("photo", fileObj, filename);
       } else { fd.append("photo", { uri: a.uri, name: filename, type: mimeType }); }
       const d = await api(EP.myPhoto, { method: "POST", form: fd });
-      patchUser({ profile_photo: d.profile_photo }); load();
+      patchUser({ profile_photo: d.profile_photo }); 
+      load();
+      
+      // Success Toast
+      setToast({ type: "success", msg: "Photo updated!" });
+      setTimeout(() => setToast(null), 1500);
+      
     } catch (e) { Alert.alert("Upload failed", e.message || "Please try again."); }
   };
 
@@ -167,6 +192,21 @@ export default function ProfileScreen({ navigation, route }) {
         saving={saving} onSave={saveProfile} onChangePhoto={changePhoto} u={u} />
 
       <ReelPlayerModal player={player} onClose={() => setPlayer(null)} videoFocused={videoFocused} insets={insets} />
+
+      {/* ── SUCCESS TOAST ── */}
+      {toast && (
+        <View className="absolute top-1/2 left-0 right-0 items-center justify-center z-50 pointer-events-none">
+          <View className="bg-black/90 px-6 py-4 rounded-2xl items-center border border-white/20 shadow-xl">
+            <Ionicons 
+              name="checkmark-circle" 
+              size={44} 
+              color="#43d9a3" 
+            />
+            <Text className="text-white font-bold mt-2 text-[14px]">{toast.msg}</Text>
+          </View>
+        </View>
+      )}
+
     </SafeAreaView>
   );
 }

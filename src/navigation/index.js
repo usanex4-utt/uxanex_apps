@@ -24,6 +24,10 @@ import CoupleChatScreen     from "../screens/detail/CoupleChatScreen";
 import ReelUploadScreen     from "../screens/detail/ReelUploadScreen";
 import NexaScreen           from "../screens/detail/NexaScreen";
 
+
+import MomentEditorScreen   from "../components/moments/MomentEditorScreen";
+import MomentArchiveScreen  from "../components/moments/MomentArchiveScreen";
+import MomentSettingsScreen from "../components/moments/MomentSettingsScreen";
 const Stack = createNativeStackNavigator();
 const Tab   = createBottomTabNavigator();
 
@@ -114,6 +118,12 @@ export default function Navigation() {
             <Stack.Screen name="Chat"       component={ChatScreen} />
             <Stack.Screen name="CoupleChat" component={CoupleChatScreen} />
             <Stack.Screen name="Nexa"       component={NexaScreen} />
+
+           <Stack.Screen name="MomentCreate" component={MomentEditorScreen}
+           options={{ animation: "slide_from_bottom", presentation: "modal" }}
+           />
+            <Stack.Screen name="MomentArchive"  component={MomentArchiveScreen} />
+          <Stack.Screen name="MomentSettings" component={MomentSettingsScreen} />
           </>
         ) : (
           <>

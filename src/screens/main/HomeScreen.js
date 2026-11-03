@@ -1,64 +1,47 @@
-import React, { useCallback, useState, useRef, useEffect } from "react";
-import { View, Text, Pressable, FlatList, RefreshControl, ScrollView, Image, Platform, AppState, Alert, ActivityIndicator, Modal } from "react-native";
+import React, { useCallback, useState, useEffect } from "react";
+import { View, Text, Pressable, FlatList, RefreshControl, ScrollView, Platform, Alert, Modal } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
-import * as ImagePicker from "expo-image-picker";
-import { Video, ResizeMode } from "expo-av";
-import { api, absUrl } from "../../api/client";
+import { api } from "../../api/client";
 import { EP } from "../../api/endpoints";
 import { useAuth } from "../../context/AuthContext";
 import CreateSheet from "../../components/CreateSheet";
 import { Avatar } from "../../components/ui";
-import StatusBarStrip from "../../components/home/StatusBarStrip";
-import StatusViewer from "../../components/home/StatusViewer";
 import HomeDrawer from "../../components/home/HomeDrawer";
 import ConnectionRow from "../../components/home/ConnectionRow";
+import MomentStrip from "../../components/moments/MomentStrip";
 
 const FILTERS = [
   { key: "all", label: "All Connected", chip: "All", icon: "people-outline" },
   { key: "family", label: "Family", chip: "Family", icon: "heart-outline" },
   { key: "friend", label: "Friends", chip: "Friends", icon: "person-outline" },
 ];
+
 const CATEGORY_OPTIONS = [
   ["friend", "Mark as Friend", "person-outline"],
   ["family", "Mark as Family", "heart-outline"],
   [null, "Remove category", "close-circle-outline"],
 ];
-const IMAGE_STATUS_DURATION = 5000;
 
 export default function HomeScreen({ navigation }) {
   const { signOut, user } = useAuth();
   const [people, setPeople] = useState([]);
-  const [myStatus, setMyStatus] = useState(null);
-  const [friendsStatus, setFriendsStatus] = useState([]);
   const [filter, setFilter] = useState("all");
   const [menu, setMenu] = useState(false);
   const [create, setCreate] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [picked, setPicked] = useState(null);
   const [error, setError] = useState("");
-  const [uploading, setUploading] = useState(false);
-
-  const [viewerVisible, setViewerVisible] = useState(false);
-  const [viewerData, setViewerData] = useState([]);
-  const [viewerOwner, setViewerOwner] = useState(null);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [progress, setProgress] = useState(0);
-
-  const videoRef = useRef(null);
-  const finishedRef = useRef(false);
-  const progressTimerRef = useRef(null);
 
   const load = useCallback(async () => {
     try {
       const c = await api(EP.connections);
       setPeople(c.connections || c.users || []);
-      const s = await api(EP.statusFeed);
-      setMyStatus(s.my_status || null);
-      setFriendsStatus(s.friends || []);
       setError("");
-    } catch (e) { setError(e?.message || "Could not load"); }
+    } catch (e) { 
+      setError(e?.message || "Could not load connections"); 
+    }
   }, []);
 
   useFocusEffect(useCallback(() => { load(); }, [load]));
@@ -86,93 +69,6 @@ export default function HomeScreen({ navigation }) {
     }
   };
 
-  const uploadStatus = async () => {
-    if (uploading) return;
-    try {
-      if (Platform.OS !== "web") {
-        const p = await ImagePicker.requestMediaLibraryPermissionsAsync();
-        if (!p.granted) return Alert.alert("Permission needed", "Allow photo library access.");
-      }
-      const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ImagePicker.MediaTypeOptions.All, allowsEditing: false, quality: 0.7 });
-      if (result.canceled) return;
-      const asset = result.assets[0];
-      const isVideo = (asset.type || "").toLowerCase() === "video" || (asset.mimeType || "").startsWith("video/");
-      const ext = isVideo ? "mp4" : "jpg";
-      const mimeType = asset.mimeType || (isVideo ? "video/mp4" : "image/jpeg");
-      const filename = asset.fileName && /\.\w+$/.test(asset.fileName) ? asset.fileName : `status_${Date.now()}.${ext}`;
-      const form = new FormData();
-      if (Platform.OS === "web") {
-        let blob;
-        if (asset.file) blob = asset.file;
-        else { const resp = await fetch(asset.uri); blob = await resp.blob(); }
-        const fileObj = new File([blob], filename, { type: mimeType });
-        form.append("file", fileObj, filename);
-      } else {
-        form.append("file", { uri: asset.uri, name: filename, type: mimeType });
-      }
-      setUploading(true);
-      await api(EP.statusUpload, { method: "POST", form });
-      await load();
-      Alert.alert("Success", "Status uploaded!");
-    } catch (e) {
-      Alert.alert("Upload failed", e?.message || "Please try again.");
-    } finally { setUploading(false); }
-  };
-
-  const clearProgressTimer = () => {
-    if (progressTimerRef.current) { clearInterval(progressTimerRef.current); progressTimerRef.current = null; }
-  };
-
-  const openViewer = (statuses, owner, startIndex = 0) => {
-    if (!statuses?.length) return;
-    setViewerData(statuses); setViewerOwner(owner || null); setCurrentIndex(startIndex);
-    setProgress(0); finishedRef.current = false; setViewerVisible(true);
-  };
-
-  const closeViewer = () => {
-    clearProgressTimer();
-    videoRef.current?.pauseAsync().catch(() => {});
-    setViewerVisible(false);
-  };
-
-  const nextStatus = () => {
-    setCurrentIndex((idx) => {
-      if (idx < viewerData.length - 1) return idx + 1;
-      clearProgressTimer(); videoRef.current?.pauseAsync().catch(() => {}); setViewerVisible(false);
-      return idx;
-    });
-  };
-
-  const prevStatus = () => setCurrentIndex((idx) => (idx > 0 ? idx - 1 : 0));
-
-  useEffect(() => {
-    if (!viewerVisible) return;
-    const s = viewerData[currentIndex];
-    if (!s) return;
-    finishedRef.current = false; setProgress(0);
-    if (s.id) api(EP.statusView(s.id), { method: "POST" }).catch(() => {});
-    clearProgressTimer();
-    if (s.media_type !== "video") {
-      const start = Date.now();
-      progressTimerRef.current = setInterval(() => {
-        const elapsed = Date.now() - start;
-        setProgress(Math.min(1, elapsed / IMAGE_STATUS_DURATION));
-        if (elapsed >= IMAGE_STATUS_DURATION) { clearProgressTimer(); nextStatus(); }
-      }, 50);
-    }
-    return () => clearProgressTimer();
-  }, [viewerVisible, currentIndex, viewerData]);
-
-  useEffect(() => {
-    const sub = AppState.addEventListener("change", (state) => {
-      if (state !== "active") videoRef.current?.pauseAsync().catch(() => {});
-      else if (viewerVisible && videoRef.current && !finishedRef.current) videoRef.current?.playAsync().catch(() => {});
-    });
-    return () => sub.remove();
-  }, [viewerVisible]);
-
-  useEffect(() => () => { clearProgressTimer(); videoRef.current?.pauseAsync().catch(() => {}); }, []);
-
   return (
     <SafeAreaView className="flex-1 bg-bg" edges={["top"]}>
       <View className="h-16 flex-row items-center justify-between px-4">
@@ -193,8 +89,13 @@ export default function HomeScreen({ navigation }) {
           onRefresh={async () => { setRefreshing(true); try { await load(); } finally { setRefreshing(false); } }} />}
         ListHeaderComponent={
           <View className="pt-1">
-            <StatusBarStrip myStatus={myStatus} friendsStatus={friendsStatus} user={user} uploading={uploading}
-              onUpload={uploadStatus} onOpenViewer={openViewer} />
+            {/* Moments Strip */}
+            <MomentStrip
+              refreshKey={refreshing}
+              onCreate={() => navigation.navigate("MomentCreate")}
+            />
+
+            {/* Filters */}
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerClassName="px-4 gap-2.5 py-2 mt-1">
               {FILTERS.map((f) => {
                 const on = filter === f.key;
@@ -210,12 +111,14 @@ export default function HomeScreen({ navigation }) {
                 );
               })}
             </ScrollView>
+
             {error ? (
               <View className="flex-row items-center mx-4 mt-3 px-3.5 py-2.5 rounded-2xl bg-danger/10 border border-danger/20">
                 <Ionicons name="alert-circle-outline" size={16} color="#ff6b6b" />
                 <Text className="text-danger text-xs ml-2 flex-1">{error}</Text>
               </View>
             ) : null}
+            
             <View className="flex-row justify-between items-end px-5 mt-5 mb-3">
               <View>
                 <Text className="text-ink text-[20px] font-extrabold tracking-tight">{title}</Text>
@@ -280,11 +183,6 @@ export default function HomeScreen({ navigation }) {
 
       <HomeDrawer visible={menu} onClose={() => setMenu(false)} user={user} filter={filter} setFilter={setFilter}
         FILTERS={FILTERS} navigation={navigation} onSignOut={signOut} />
-
-      <StatusViewer visible={viewerVisible} onClose={closeViewer} viewerData={viewerData}
-        viewerOwner={viewerOwner} currentIndex={currentIndex} progress={progress}
-        videoRef={videoRef} finishedRef={finishedRef} nextStatus={nextStatus} prevStatus={prevStatus}
-        setProgress={setProgress} />
     </SafeAreaView>
   );
 }

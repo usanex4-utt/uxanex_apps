@@ -28,18 +28,21 @@ export default function EditProfileModal({ visible, onClose, form, setForm, savi
         <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} className="flex-1">
           <ScrollView contentContainerClassName="px-4 pt-6 pb-16" keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
             <View className="items-center mb-6">
-              <Pressable onPress={onChangePhoto} className="items-center justify-center active:opacity-90">
+              <Pressable onPress={onChangePhoto} disabled={saving} className="items-center justify-center active:opacity-90">
                 <View className="rounded-full p-[3px] bg-brand" style={{ width: 96, height: 96 }}>
-                  {u?.profile_photo ? <Image source={{ uri: absUrl(u.profile_photo) }} className="w-full h-full rounded-full bg-[#0d1729]" />
-                    : <View className="w-full h-full rounded-full bg-[#0d1729] items-center justify-center">
-                        <Text className="text-white text-4xl font-extrabold">{(u?.name || "U").charAt(0).toUpperCase()}</Text>
-                      </View>}
+                  {u?.profile_photo ? (
+                    <Image source={{ uri: absUrl(u.profile_photo) }} className="w-full h-full rounded-full bg-[#0d1729]" />
+                  ) : (
+                    <View className="w-full h-full rounded-full bg-[#0d1729] items-center justify-center">
+                      <Text className="text-white text-4xl font-extrabold">{(u?.name || "U").charAt(0).toUpperCase()}</Text>
+                    </View>
+                  )}
                 </View>
                 <View className="absolute right-0 bottom-1 w-8 h-8 rounded-full bg-brand items-center justify-center border-[3px] border-[#050b18]">
                   <Ionicons name="camera" size={14} color="#fff" />
                 </View>
               </Pressable>
-              <Pressable onPress={onChangePhoto} className="mt-3 h-9 px-4 rounded-full bg-white/6 border border-white/10 flex-row items-center justify-center active:opacity-70">
+              <Pressable onPress={onChangePhoto} disabled={saving} className="mt-3 h-9 px-4 rounded-full bg-white/6 border border-white/10 flex-row items-center justify-center active:opacity-70">
                 <Ionicons name="image-outline" size={15} color="#6aa8ff" />
                 <Text className="text-brandLight text-[13px] font-semibold ml-1.5">Change profile photo</Text>
               </Pressable>

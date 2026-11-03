@@ -18,6 +18,10 @@ export default function ReelUploadScreen({ navigation }) {
   const [language, setLanguage] = useState("");
   const [category, setCategory] = useState("reels");
   const [busy, setBusy] = useState(false);
+  
+  // ── Toast State ──
+  const [toast, setToast] = useState(null);
+  
   const abortRef = useRef(null);
 
   const buildFormData = async () => {
@@ -46,17 +50,26 @@ export default function ReelUploadScreen({ navigation }) {
   const post = async () => {
     if (!video || busy) return;
     setBusy(true);
+    setToast(null);
     const ctrl = new AbortController();
     abortRef.current = ctrl;
+    
     try {
       const fd = await buildFormData();
       await api(EP.reelUpload, { method: "POST", form: fd, signal: ctrl.signal });
-      Alert.alert("Reel posted 🎉", "Your reel is live.", [
-        { text: "OK", onPress: () => navigation.navigate("Tabs", { screen: "Reels", params: { refresh: Date.now() } }) },
-      ]);
+      
+      // SUCCESS TOAST
+      setToast({ type: "success", msg: "Reel posted successfully!" });
+      setTimeout(() => {
+        setToast(null);
+        navigation.navigate("Tabs", { screen: "Reels", params: { refresh: Date.now() } });
+      }, 1500);
+
     } catch (e) {
       if (e?.name === "AbortError") return;
-      Alert.alert("Upload failed", e?.message || "Please try again.");
+      // ERROR TOAST
+      setToast({ type: "error", msg: e?.message || "Upload failed. Try again." });
+      setTimeout(() => setToast(null), 3000);
     } finally {
       abortRef.current = null; setBusy(false);
     }
@@ -136,6 +149,20 @@ export default function ReelUploadScreen({ navigation }) {
           )}
         </ScrollView>
       </KeyboardAvoidingView>
+
+      {/* ── SUCCESS / ERROR TOAST ── */}
+      {toast && (
+        <View className="absolute top-1/2 left-0 right-0 items-center justify-center z-50 pointer-events-none">
+          <View className="bg-black/90 px-6 py-4 rounded-2xl items-center border border-white/20 shadow-xl">
+            <Ionicons 
+              name={toast.type === "success" ? "checkmark-circle" : "alert-circle"} 
+              size={44} 
+              color={toast.type === "success" ? "#43d9a3" : "#ff6b6b"} 
+            />
+            <Text className="text-white font-bold mt-2 text-[14px]">{toast.msg}</Text>
+          </View>
+        </View>
+      )}
     </SafeAreaView>
   );
 }
