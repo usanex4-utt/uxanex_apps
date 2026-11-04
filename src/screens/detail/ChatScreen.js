@@ -65,7 +65,12 @@ export default function ChatScreen({ navigation, route }) {
     } catch (e) { setError(e.message || "Unable to load messages."); }
   }, [peer.user_id]);
 
-  useEffect(() => { load(); const t = setInterval(load, 3500); return () => clearInterval(t); }, [load]);
+  useFocusEffect(useCallback(() => {
+  load();
+  const t = setInterval(load, 5000);      // was 3500 → 5000, now paused off-screen
+  return () => clearInterval(t);
+}, [load]));
+
   useEffect(() => {
     if (searchOpen && query) return;
     setTimeout(() => listRef.current?.scrollToEnd({ animated: true }), 80);
@@ -130,16 +135,17 @@ export default function ChatScreen({ navigation, route }) {
     setSending(false);
   };
 
-  const del = (m) => {
-    if (m.sender_id !== user.id || m.pending) return;
-    Alert.alert("Delete message", "Delete this message for everyone?", [
-      { text: "Cancel", style: "cancel" },
-      { text: "Delete", style: "destructive", onPress: async () => {
-          try { await api(EP.chatDelete(m.id), { method: "POST" }); setMessages((l) => l.filter((x) => x.id !== m.id)); }
-          catch (e) { Alert.alert("Could not delete", e.message); }
-        } },
-    ]);
-  };
+const del = useCallback((m) => {
+  if (m.sender_id !== user.id || m.pending) return;
+  Alert.alert("Delete message", "Delete this message for everyone?", [
+    { text: "Cancel", style: "cancel" },
+    { text: "Delete", style: "destructive", onPress: async () => {
+        try { await api(EP.chatDelete(m.id), { method: "POST" });
+              setMessages((l) => l.filter((x) => x.id !== m.id)); }
+        catch (e) { Alert.alert("Could not delete", e.message); }
+      } },
+  ]);
+}, [user.id]);
 
   const pickMedia = async () => {
     setAttachOpen(false);
@@ -243,6 +249,10 @@ export default function ChatScreen({ navigation, route }) {
 
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} className="flex-1">
         <FlatList ref={listRef} data={displayMessages} keyExtractor={(m, i) => String(m.id ?? i)}
+          initialNumToRender={15}
+          maxToRenderPerBatch={10}
+          windowSize={7}
+          removeClippedSubviews
           showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled"
           onScrollBeginDrag={() => { closeAll(); Keyboard.dismiss(); }}
           contentContainerClassName="px-3.5 pb-3 gap-1.5"

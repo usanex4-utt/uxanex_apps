@@ -1,8 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
   Modal, View, Text, Pressable, Image, TextInput, ScrollView,
-  KeyboardAvoidingView, Platform, ActivityIndicator, Alert, Share,
-  useWindowDimensions,
+  KeyboardAvoidingView, Platform, ActivityIndicator, Alert, Share
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -35,8 +34,7 @@ export default function MomentViewer({
   visible, moments: initial, startIndex = 0, owner, viewerId, onClose, onMutated,
 }) {
   const insets = useSafeAreaInsets();
-  const { width } = useWindowDimensions();
-
+  
   const [moments, setMoments] = useState(initial || []);
   const [index, setIndex] = useState(startIndex);
   const [progress, setProgress] = useState(0);
@@ -47,9 +45,7 @@ export default function MomentViewer({
   const [viewsOpen, setViewsOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
   
-  // ── Share Success Toast State ──
   const [shareToast, setShareToast] = useState(false);
-
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
@@ -61,6 +57,7 @@ export default function MomentViewer({
   const timerRef = useRef(null);
   const finishedRef = useRef(false);
 
+  // Ref for Hold to Pause
   const holdTimeout = useRef(null);
   const didHold = useRef(false);
   const wasPausedBeforeHold = useRef(false);
@@ -79,6 +76,7 @@ export default function MomentViewer({
     setProgress(0); finishedRef.current = false;
     setImgError(false); setImgLoading(false); setFailedUrl(null);
     if (current.id) MomentsAPI.view(current.id).catch(() => {});
+    
     clearInterval(timerRef.current);
     if (current.moment_type !== "video") {
       const started = Date.now();
@@ -92,29 +90,34 @@ export default function MomentViewer({
     return () => clearInterval(timerRef.current);
   }, [visible, index, moments, paused]);
 
-  const next = () => { if (index < moments.length - 1) setIndex(index + 1); else onClose && onClose(); };
-  const prev = () => { if (index > 0) setIndex(index - 1); };
+  const next = () => { 
+    if (index < moments.length - 1) setIndex(index + 1); 
+    else onClose && onClose(); 
+  };
+  const prev = () => { 
+    if (index > 0) setIndex(index - 1); 
+  };
 
+  // ── HOLD TO PAUSE HANDLERS ──
   const handlePressIn = () => {
     didHold.current = false;
     wasPausedBeforeHold.current = paused;
     holdTimeout.current = setTimeout(() => {
       didHold.current = true;
-      setPaused(true);
-    }, 200);
+      setPaused(true); // Pause on hold
+    }, 200); // 200ms hold time
   };
 
   const handlePressOut = () => {
     if (holdTimeout.current) clearTimeout(holdTimeout.current);
-    if (didHold.current) setPaused(wasPausedBeforeHold.current);
+    if (didHold.current) {
+      setPaused(wasPausedBeforeHold.current); // Resume on release
+    }
   };
 
-  const handleTap = (e) => {
-    if (didHold.current) return;
-    const x = e?.nativeEvent?.locationX ?? 0;
-    if (x < width * 0.25) return prev();
-    if (x > width * 0.75) return next();
-    setPaused((p) => !p);
+  const handleCenterTap = () => {
+    if (didHold.current) return; // Ignore if it was a hold
+    setPaused((p) => !p); // Short tap to toggle play/pause
   };
 
   const react = async (emoji) => {
@@ -163,7 +166,6 @@ export default function MomentViewer({
     } catch (e) { notify("Failed", e.message); }
   };
 
-  // ── UPDATED SHARE FUNCTION ──
   const share = async () => {
     const text = `Check out ${owner?.username || "this"} on UtaNexa`;
     try {
@@ -176,12 +178,9 @@ export default function MomentViewer({
       } else {
         await Share.share({ message: text });
       }
-      // Show custom checkmark toast instead of alert
       setShareToast(true);
-      setTimeout(() => setShareToast(false), 2000); // Hide after 2 sec
-    } catch (error) {
-      // User cancelled share
-    }
+      setTimeout(() => setShareToast(false), 2000); 
+    } catch (error) {}
   };
 
   if (!current) return null;
@@ -286,15 +285,33 @@ export default function MomentViewer({
           </Pressable>
         </View>
 
-        {/* Body */}
-        <Pressable className="flex-1 justify-center" onPressIn={handlePressIn} onPressOut={handlePressOut} onPress={handleTap}>
+        {/* Body / Media Area */}
+        <View className="flex-1 justify-center">
           {renderBody()}
+          
           {current.caption && current.moment_type !== "text" && (
-            <View className="absolute left-4 right-4 bottom-24 px-4 py-3 rounded-2xl bg-black/55">
+            <View pointerEvents="none" className="absolute left-4 right-4 bottom-24 px-4 py-3 rounded-2xl bg-black/55">
               <Text className="text-white text-[14px] leading-5">{current.caption}</Text>
             </View>
           )}
-        </Pressable>
+
+          {/* FULL SCREEN TOUCH ZONES (FIXED CLICKS & HOLD TO PAUSE) */}
+          <View className="absolute inset-0 flex-row z-10">
+            {/* LEFT ZONE (25%) - Prev */}
+            <Pressable className="flex-1" onPress={prev} />
+            
+            {/* CENTER ZONE (50%) - Pause / Hold to Pause */}
+            <Pressable 
+              className="flex-[2]" 
+              onPressIn={handlePressIn} 
+              onPressOut={handlePressOut} 
+              onPress={handleCenterTap} 
+            />
+            
+            {/* RIGHT ZONE (25%) - Next */}
+            <Pressable className="flex-1" onPress={next} />
+          </View>
+        </View>
 
         {/* Footer */}
         <View className="absolute left-0 right-0 z-20 px-4" style={{ bottom: insets.bottom + 16 }}>
@@ -325,16 +342,14 @@ export default function MomentViewer({
         <ConfirmDialog visible={deleteOpen} title={deleting ? "Deleting…" : "Delete moment?"} message="This moment will be permanently removed. This cannot be undone."
           confirmText={deleting ? "…" : "Delete"} cancelText="Cancel" danger onCancel={() => { if (!deleting) setDeleteOpen(false); }} onConfirm={executeDelete} />
 
-        {/* ── SHARE SUCCESS TOAST (SIGN SHOWING HERE) ── */}
         {shareToast && (
-          <View className="absolute inset-0 z-50 items-center justify-center" style={{ pointerEvents: "none" }}>
-            <View className="bg-black/85 px-7 py-5 rounded-3xl items-center justify-center border border-white/20 shadow-2xl">
-              <Ionicons name="checkmark-circle" size={50} color="#43d9a3" />
-              <Text className="text-white font-bold mt-3 text-[15px]">Shared successfully!</Text>
+          <View className="absolute inset-0 z-50 items-center justify-center pointer-events-none">
+            <View className="bg-black/90 px-6 py-4 rounded-2xl items-center border border-white/20 shadow-xl">
+              <Ionicons name="checkmark-circle" size={44} color="#43d9a3" />
+              <Text className="text-white font-bold mt-2 text-[14px]">Shared successfully!</Text>
             </View>
           </View>
         )}
-        
       </View>
     </Modal>
   );

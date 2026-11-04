@@ -4,16 +4,25 @@ import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useRoute } from "@react-navigation/native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
+import { useDispatch, useSelector } from "react-redux";
 import { api } from "../../api/client";
 import { EP } from "../../api/endpoints";
 import { useAuth } from "../../context/AuthContext";
 import ReelItem from "../../components/reels/ReelItem";
 import { ReelCommentsSheet, ReelMenuSheet } from "../../components/reels/ReelSheets";
+import {
+  fetchReelsFeed, fetchSavedReels, toggleReelLike, toggleReelSave,
+  setLiked, setSaved, setFollowState, patchReel, removeFeedItem,
+} from "../../store/slices/reelsSlice";
+import {
+  selectFeedReels, selectLikedById, selectSavedById, selectFollowStates,
+} from "../../store/selectors";
 
 const PAGE = 10;
 const SESSION_ID = `s${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
 
 export default function ReelsScreen({ navigation }) {
+  const dispatch = useDispatch();
   const { user } = useAuth();
   const route = useRoute();
   const { height } = useWindowDimensions();
@@ -21,18 +30,21 @@ export default function ReelsScreen({ navigation }) {
   const insets = useSafeAreaInsets();
   const h = height - tabH;
 
-  const [reels, setReels] = useState([]);
-  const [cursor, setCursor] = useState(null);
-  const [more, setMore] = useState(true);
-  const [loading, setLoading] = useState(true);
+  // ── Redux state ──────────────────────────────────────
+  const reels        = useSelector(selectFeedReels);
+  const liked        = useSelector(selectLikedById);
+  const saved        = useSelector(selectSavedById);
+  const followStates = useSelector(selectFollowStates);
+  const loading      = useSelector((s) => s.reels.feed.status === "loading");
+  const more         = useSelector((s) => s.reels.feed.more);
+  const lastFetched  = useSelector((s) => s.reels.feed.lastFetchedAt);
+
+  // ── Local playback / UI state ────────────────────────
   const [active, setActive] = useState(0);
   const [focused, setFocused] = useState(true);
   const [muted, setMuted] = useState(false);
   const [paused, setPaused] = useState(false);
   const [pauseIcon, setPauseIcon] = useState(null);
-  const [saved, setSaved] = useState({});
-  const [liked, setLiked] = useState({});
-  const [followStates, setFollowStates] = useState({});
   const [sheet, setSheet] = useState(null);
   const [comments, setComments] = useState([]);
   const [cLoading, setCLoading] = useState(false);
@@ -60,8 +72,6 @@ export default function ReelsScreen({ navigation }) {
   const heartScale = useRef(new Animated.Value(0)).current;
   const heartOpacity = useRef(new Animated.Value(0)).current;
 
-  const patch = (id, fields) => setReels((l) => l.map((r) => (r.id === id ? { ...r, ...fields } : r)));
-
   const silenceAllVideos = useCallback(() => {
     Object.values(videoRefs.current).forEach((ref) => {
       if (ref) { ref.pauseAsync().catch(() => {}); ref.setIsMutedAsync(true).catch(() => {}); }
@@ -71,24 +81,12 @@ export default function ReelsScreen({ navigation }) {
   const fetchPage = useCallback(async (reset) => {
     if (fetching.current) return;
     fetching.current = true;
-    try {
-      const q = `?limit=${PAGE}${!reset && cursor ? `&cursor=${cursor}` : ""}`;
-      const d = await api(EP.reelsFeed + q);
-      const list = d.reels || [];
-      setReels((prev) => (reset ? list : [...prev, ...list.filter((r) => !prev.some((p) => p.id === r.id))]));
-      setCursor(d.next_cursor || null);
-      setMore(list.length >= PAGE && !!d.next_cursor);
-    } catch { if (reset) setReels([]); }
+    try { await dispatch(fetchReelsFeed({ reset })).unwrap(); }
+    catch {}
     fetching.current = false;
-    setLoading(false);
-  }, [cursor]);
+  }, [dispatch]);
 
-  const loadSaved = useCallback(async () => {
-    try {
-      const d = await api(EP.reelsSaved);
-      const m = {}; (d.reels || []).forEach((r) => { m[r.id] = true; }); setSaved(m);
-    } catch {}
-  }, []);
+  const loadSaved = useCallback(() => { dispatch(fetchSavedReels()); }, [dispatch]);
 
   const flushWatch = useCallback(() => {
     const { id, index } = activeRef.current;
@@ -111,7 +109,8 @@ export default function ReelsScreen({ navigation }) {
       activeVideo.setIsMutedAsync(mutedRef.current).catch(() => {});
       activeVideo.playAsync().catch(() => {});
     }
-    if (!loadedOnce.current || route.params?.refresh) {
+    const stale = !lastFetched || Date.now() - lastFetched > 30_000;
+    if (!loadedOnce.current || route.params?.refresh || stale) {
       loadedOnce.current = true;
       fetchPage(true);
       navigation.setParams({ refresh: undefined });
@@ -121,7 +120,7 @@ export default function ReelsScreen({ navigation }) {
       setFocused(false); focusedRef.current = false;
       silenceAllVideos(); flushWatch();
     };
-  }, [route.params?.refresh]));
+  }, [route.params?.refresh, lastFetched, fetchPage, loadSaved, navigation, silenceAllVideos, flushWatch]));
 
   useEffect(() => {
     const sub = AppState.addEventListener("change", (state) => {
@@ -170,18 +169,21 @@ export default function ReelsScreen({ navigation }) {
     if (c.user_id && !fetchedFollow.current[c.user_id]) {
       fetchedFollow.current[c.user_id] = true;
       api(EP.followStatus(c.user_id), { silent401: true })
-        .then((d) => { const st = d?.status || (d?.is_following ? "following" : "not_following"); setFollowStates((s) => ({ ...s, [c.user_id]: st })); })
+        .then((d) => {
+          const st = d?.status || (d?.is_following ? "following" : "not_following");
+          dispatch(setFollowState({ userId: c.user_id, state: st }));
+        })
         .catch(() => {});
     }
     if (!fetchedStatus.current[r.id]) {
       fetchedStatus.current[r.id] = true;
       api(EP.reelStatus(r.id), { silent401: true })
         .then((d) => {
-          if (typeof d?.rating === "number") setLiked((m) => ({ ...m, [r.id]: d.rating >= 2 }));
-          if (d?.saved) setSaved((s) => ({ ...s, [r.id]: true }));
+          if (typeof d?.rating === "number") dispatch(setLiked({ id: r.id, on: d.rating >= 2 }));
+          if (d?.saved) dispatch(setSaved({ id: r.id, save: true }));
         }).catch(() => {});
     }
-  }, [active, reels]);
+  }, [active, reels, dispatch]);
 
   const openUser = useCallback((publicId) => {
     if (!publicId) return;
@@ -212,7 +214,7 @@ export default function ReelsScreen({ navigation }) {
     if (ref) { if (next) ref.pauseAsync().catch(() => {}); else ref.playAsync().catch(() => {}); }
   };
 
-  const playHeartAnim = (x, y) => {
+  const playHeartAnim = () => {
     heartScale.setValue(0); heartOpacity.setValue(1);
     Animated.parallel([
       Animated.sequence([
@@ -223,27 +225,18 @@ export default function ReelsScreen({ navigation }) {
     ]).start();
   };
 
-  const setLike = async (reel, on) => {
-    const prev = !!liked[reel.id];
-    setLiked((m) => ({ ...m, [reel.id]: on }));
-    try {
-      if (on) {
-        const d = await api(EP.reelRating(reel.id), { method: "POST", body: { rating: 3 } });
-        patch(reel.id, { one_star_count: d.one_star_count, two_star_count: d.two_star_count, three_star_count: d.three_star_count });
-      } else {
-        const d = await api(EP.reelRating(reel.id), { method: "DELETE" });
-        patch(reel.id, { one_star_count: d.one_star_count, two_star_count: d.two_star_count, three_star_count: d.three_star_count });
-      }
-    } catch (e) { setLiked((m) => ({ ...m, [reel.id]: prev })); Alert.alert("Could not update like", e.message); }
-  };
+  const setLike = useCallback((reel, on) => {
+    dispatch(toggleReelLike({ reel, on })).unwrap().catch((e) => {
+      Alert.alert("Could not update like", e?.message || "Try again");
+    });
+  }, [dispatch]);
 
-  const handleVideoTap = (event, reel) => {
+  const handleVideoTap = useCallback((event, reel) => {
     const now = Date.now();
-    const { locationX = 0, locationY = 0 } = event?.nativeEvent || {};
     if (now - lastTapRef.current < 280) {
       if (singleTapTimer.current) { clearTimeout(singleTapTimer.current); singleTapTimer.current = null; }
       lastTapRef.current = 0;
-      playHeartAnim(locationX, locationY);
+      playHeartAnim();
       if (!liked[reel.id]) setLike(reel, true);
     } else {
       lastTapRef.current = now;
@@ -252,40 +245,41 @@ export default function ReelsScreen({ navigation }) {
         if (lastTapRef.current === now) { lastTapRef.current = 0; togglePause(); }
       }, 260);
     }
-  };
+  }, [liked, setLike]);
 
-  const toggleFollow = async (publicId) => {
+  const toggleFollow = useCallback(async (publicId) => {
     if (!publicId) return;
     const following = followStates[publicId] === "following";
-    setFollowStates((s) => ({ ...s, [publicId]: following ? "not_following" : "following" }));
+    const next = following ? "not_following" : "following";
+    dispatch(setFollowState({ userId: publicId, state: next }));
     try { await api(following ? EP.unfollow : EP.follow, { method: "POST", body: { user_id: publicId } }); }
-    catch (e) { setFollowStates((s) => ({ ...s, [publicId]: following ? "following" : "not_following" })); Alert.alert("Could not follow", e.message); }
-  };
+    catch (e) {
+      dispatch(setFollowState({ userId: publicId, state: following ? "following" : "not_following" }));
+      Alert.alert("Could not follow", e.message);
+    }
+  }, [followStates, dispatch]);
 
-  const toggleSave = async (reel) => {
-    const was = !!saved[reel.id];
-    setSaved((s) => ({ ...s, [reel.id]: !was }));
-    try {
-      const d = await api(EP.reelSave(reel.id), { method: was ? "DELETE" : "POST" });
-      if (typeof d.save_count === "number") patch(reel.id, { save_count: d.save_count });
-    } catch (e) { setSaved((s) => ({ ...s, [reel.id]: was })); Alert.alert("Failed", e.message); }
-  };
+  const toggleSave = useCallback((reel) => {
+    dispatch(toggleReelSave({ reel, save: !saved[reel.id] })).unwrap().catch((e) => {
+      Alert.alert("Failed", e?.message || "Try again");
+    });
+  }, [saved, dispatch]);
 
-  const share = async (reel) => {
+  const share = useCallback(async (reel) => {
     try {
       const r = await Share.share({ message: `${reel.caption ? reel.caption + "\n" : ""}${reel.video_url}` });
       if (r.action === Share.sharedAction) {
         const d = await api(EP.reelShare(reel.id), { method: "POST", body: { share_type: "native" } });
-        if (typeof d.share_count === "number") patch(reel.id, { share_count: d.share_count });
+        if (typeof d.share_count === "number") dispatch(patchReel({ id: reel.id, fields: { share_count: d.share_count } }));
       }
     } catch {}
-  };
+  }, [dispatch]);
 
-  const openComments = async (reel) => {
+  const openComments = useCallback(async (reel) => {
     setSheet({ type: "comments", reel }); setComments([]); setDraft(""); setCLoading(true);
     try { const d = await api(EP.reelComments(reel.id) + "?limit=100"); setComments(d.comments || []); } catch {}
     setCLoading(false);
-  };
+  }, []);
 
   const sendComment = async () => {
     const reel = sheet?.reel; const content = draft.trim();
@@ -294,31 +288,41 @@ export default function ReelsScreen({ navigation }) {
     try {
       const d = await api(EP.reelComments(reel.id), { method: "POST", body: { content } });
       setComments((l) => [d.comment, ...l]);
-      patch(reel.id, { comment_count: (reel.comment_count || 0) + 1 });
+      dispatch(patchReel({ id: reel.id, fields: { comment_count: (reel.comment_count || 0) + 1 } }));
       setSheet((s) => s && { ...s, reel: { ...s.reel, comment_count: (s.reel.comment_count || 0) + 1 } });
     } catch (e) { Alert.alert("Could not comment", e.message); setDraft(content); }
   };
 
   const deleteComment = async (c) => {
     const reel = sheet.reel;
-    try { await api(EP.reelComment(reel.id, c.id), { method: "DELETE" }); setComments((l) => l.filter((x) => x.id !== c.id)); patch(reel.id, { comment_count: Math.max(0, (reel.comment_count || 1) - 1) }); }
-    catch (e) { Alert.alert("Could not delete", e.message); }
+    try {
+      await api(EP.reelComment(reel.id, c.id), { method: "DELETE" });
+      setComments((l) => l.filter((x) => x.id !== c.id));
+      dispatch(patchReel({ id: reel.id, fields: { comment_count: Math.max(0, (reel.comment_count || 1) - 1) } }));
+    } catch (e) { Alert.alert("Could not delete", e.message); }
   };
 
-  const notInterested = async (reel) => { setSheet(null); setReels((l) => l.filter((r) => r.id !== reel.id)); try { await api(EP.reelNotInterested(reel.id), { method: "POST" }); } catch {} };
+  const notInterested = useCallback(async (reel) => {
+    setSheet(null); dispatch(removeFeedItem(reel.id));
+    try { await api(EP.reelNotInterested(reel.id), { method: "POST" }); } catch {}
+  }, [dispatch]);
 
-  const report = async (reel, reason) => { setSheet(null); try { await api(EP.reelReport(reel.id), { method: "POST", body: { reason } }); Alert.alert("Thanks", "Your report was submitted."); } catch (e) { Alert.alert("Could not report", e.message); } };
+  const report = useCallback(async (reel, reason) => {
+    setSheet(null);
+    try { await api(EP.reelReport(reel.id), { method: "POST", body: { reason } }); Alert.alert("Thanks", "Your report was submitted."); }
+    catch (e) { Alert.alert("Could not report", e.message); }
+  }, []);
 
-  const remove = (reel) => {
+  const remove = useCallback((reel) => {
     setSheet(null);
     Alert.alert("Delete reel", "This cannot be undone.", [
       { text: "Cancel", style: "cancel" },
       { text: "Delete", style: "destructive", onPress: async () => {
-          try { await api(EP.reelDelete(reel.id), { method: "DELETE" }); setReels((l) => l.filter((r) => r.id !== reel.id)); }
+          try { await api(EP.reelDelete(reel.id), { method: "DELETE" }); dispatch(removeFeedItem(reel.id)); }
           catch (e) { Alert.alert("Could not delete", e.message); }
         } },
     ]);
-  };
+  }, [dispatch]);
 
   return (
     <View className="flex-1 bg-black">
@@ -340,7 +344,7 @@ export default function ReelsScreen({ navigation }) {
         </View>
       </Animated.View>
 
-      {loading ? (
+      {loading && reels.length === 0 ? (
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator color="#fff" size="large" />
           <Text className="text-white/50 text-[12px] mt-3">Loading your feed…</Text>
@@ -352,6 +356,9 @@ export default function ReelsScreen({ navigation }) {
           getItemLayout={(_, i) => ({ length: h, offset: h * i, index: i })}
           onEndReachedThreshold={0.6} onEndReached={() => { if (more && !fetching.current) fetchPage(false); }}
           windowSize={3}
+          initialNumToRender={2}
+          maxToRenderPerBatch={3}
+          removeClippedSubviews
           onScrollToIndexFailed={(info) => { listRef.current?.scrollToOffset({ offset: info.averageItemLength * info.index, animated: true }); setTimeout(() => { listRef.current?.scrollToIndex({ index: info.index, animated: true }); }, 100); }}
           ListEmptyComponent={
             <View style={{ height: h }} className="justify-center items-center px-10">

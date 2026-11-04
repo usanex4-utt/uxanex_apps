@@ -1,45 +1,90 @@
-// src/components/moments/MomentStrip.js
-import React, { useEffect, useState, useCallback } from "react";
-import { View, Text, ScrollView, ActivityIndicator, Pressable } from "react-native";
+import React, { useCallback, useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  ScrollView,
+  ActivityIndicator,
+  Pressable,
+} from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
-import { MomentsAPI } from "../../api/moments";
+import { useDispatch, useSelector } from "react-redux";
+
 import { useAuth } from "../../context/AuthContext";
+
+import { fetchStoryRow } from "../../store/slices/momentsSlice";
+import { selectMomentGroups } from "../../store/selectors";
+
 import MomentRing from "./MomentRing";
 import MomentViewer from "./MomentViewer";
 
 export default function MomentStrip({ onCreate, refreshKey }) {
+  // =========================================
+  // REDUX
+  // =========================================
+  const dispatch = useDispatch();
+  const groups = useSelector(selectMomentGroups) || [];
+  const loading = useSelector((state) => state.moments.status === "loading");
+
+  // =========================================
+  // AUTH
+  // =========================================
   const { user } = useAuth();
-  const [groups, setGroups] = useState([]);
-  const [loading, setLoading] = useState(true);
+
+  // =========================================
+  // LOCAL STATE
+  // =========================================
   const [viewer, setViewer] = useState(null);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    try {
-      const d = await MomentsAPI.storyRow();
-      setGroups(d.groups || []);
-    } catch { setGroups([]); }
-    setLoading(false);
-  }, []);
+  // =========================================
+  // FETCH MOMENTS (🚀 FIX HERE)
+  // useFocusEffect har baar chalega jab aap Home screen par wapas aayenge
+  // =========================================
+  useFocusEffect(
+    useCallback(() => {
+      dispatch(fetchStoryRow());
+    }, [dispatch])
+  );
 
-  useEffect(() => { load(); }, [load, refreshKey]);
+  // Parent se refresh trigger (pull-to-refresh) ke liye
+  useEffect(() => {
+    if (refreshKey) {
+      dispatch(fetchStoryRow());
+    }
+  }, [dispatch, refreshKey]);
 
-  const openGroup = (g) => {
-    const firstUnviewed = g.moments.findIndex((m) => !m.viewed);
+  // =========================================
+  // OPEN MOMENT GROUP
+  // =========================================
+  const openGroup = (group) => {
+    if (!group?.moments?.length) return;
+
+    const firstUnviewed = group.moments.findIndex(
+      (moment) => !moment.viewed
+    );
+
     setViewer({
-      moments: g.moments,
+      moments: group.moments,
       index: Math.max(0, firstUnviewed),
       owner: {
-        user_id: g.user_id, name: g.name,
-        username: g.username, profile_photo: g.profile_photo,
+        user_id: group.user_id,
+        name: group.name,
+        username: group.username,
+        profile_photo: group.profile_photo,
       },
     });
   };
 
-  const myGroup = groups.find((g) => g.is_mine);
-  const others = groups.filter((g) => !g.is_mine);
+  // =========================================
+  // SEPARATE MY MOMENTS AND OTHERS
+  // =========================================
+  const myGroup = groups.find((group) => group.is_mine);
+  const others = groups.filter((group) => !group.is_mine);
 
-  if (loading && !groups.length) {
+  // =========================================
+  // LOADING
+  // =========================================
+  if (loading && groups.length === 0) {
     return (
       <View className="py-4 items-center">
         <ActivityIndicator color="#247cff" />
@@ -47,22 +92,32 @@ export default function MomentStrip({ onCreate, refreshKey }) {
     );
   }
 
+  // =========================================
+  // UI
+  // =========================================
   return (
     <View className="py-2">
+      {/* HEADER */}
       <View className="flex-row items-center justify-between px-4 mb-2">
         <View className="flex-row items-center">
           <Ionicons name="sparkles" size={13} color="#247cff" />
-          <Text className="text-white text-[13px] font-bold ml-1.5">Moments</Text>
+          <Text className="text-white text-[13px] font-bold ml-1.5">
+            Moments
+          </Text>
         </View>
         <Text className="text-[#71809a] text-[11px]">24h</Text>
       </View>
 
+      {/* MOMENTS LIST */}
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ paddingHorizontal: 16, gap: 16 }}
+        contentContainerStyle={{
+          paddingHorizontal: 16,
+          gap: 16,
+        }}
       >
-        {/* ── MY TILE — ALWAYS A PRESSABLE ─────────────────── */}
+        {/* MY MOMENTS */}
         {myGroup ? (
           <MomentRing
             group={myGroup}
@@ -99,22 +154,24 @@ export default function MomentStrip({ onCreate, refreshKey }) {
           </Pressable>
         )}
 
-        {/* ── OTHER PEOPLE'S TILES ─────────────────────────── */}
-        {others.map((g) => (
+        {/* OTHER USERS' MOMENTS */}
+        {others.map((group) => (
           <MomentRing
-            key={g.user_id}
-            group={g}
-            onPress={() => openGroup(g)}
+            key={group.user_id}
+            group={group}
+            onPress={() => openGroup(group)}
           />
         ))}
 
-        {!myGroup && !others.length && (
+        {/* EMPTY STATE */}
+        {!myGroup && others.length === 0 && (
           <Text className="text-[#71809a] text-[12px] py-6 pr-4">
             No moments yet from your network.
           </Text>
         )}
       </ScrollView>
 
+      {/* MOMENT VIEWER */}
       {viewer && (
         <MomentViewer
           visible={!!viewer}
@@ -122,8 +179,13 @@ export default function MomentStrip({ onCreate, refreshKey }) {
           startIndex={viewer.index}
           owner={viewer.owner}
           viewerId={user?.user_id}
-          onClose={() => { setViewer(null); load(); }}
-          onMutated={load}
+          onClose={() => {
+            setViewer(null);
+            dispatch(fetchStoryRow());
+          }}
+          onMutated={() => {
+            dispatch(fetchStoryRow());
+          }}
         />
       )}
     </View>
