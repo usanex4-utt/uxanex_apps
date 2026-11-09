@@ -12,19 +12,21 @@ const LinkChip = ({ icon, text }) => (
   </View>
 );
 
-const Stat = ({ n, l, last }) => (
-  <View className={`flex-1 items-center py-1 ${last ? "" : "border-r border-white/8"}`}>
+// 🚀 UPDATED: Stat component ko Pressable banaya gaya hai
+const Stat = ({ n, l, last, onPress }) => (
+  <Pressable onPress={onPress} className={`flex-1 items-center py-2 active:opacity-60 ${last ? "" : "border-r border-white/8"}`}>
     <Text className="text-white text-[19px] font-extrabold tracking-tight">{fmt(n)}</Text>
     <Text className="text-[#71809a] text-[11px] mt-0.5">{l}</Text>
-  </View>
+  </Pressable>
 );
 
-export const ProfileStats = ({ stats }) => (
-  <View className="flex-row mx-4 py-4 rounded-3xl bg-[#0a1424] border border-white/10">
-    <Stat n={stats.followers} l="Followers" />
-    <Stat n={stats.connected} l="Connected" />
-    <Stat n={stats.following} l="Following" />
-    <Stat n={stats.posts} l="Posts" last />
+// 🚀 UPDATED: ProfileStats mein onPress props add kiye gaye
+export const ProfileStats = ({ stats, onPressFollowers, onPressConnected, onPressFollowing, onPressPosts }) => (
+  <View className="flex-row mx-4 py-2 rounded-3xl bg-[#0a1424] border border-white/10">
+    <Stat n={stats.followers} l="Followers" onPress={onPressFollowers} />
+    <Stat n={stats.connected} l="Connected" onPress={onPressConnected} />
+    <Stat n={stats.following} l="Following" onPress={onPressFollowing} />
+    <Stat n={stats.posts} l="Posts" last onPress={onPressPosts} />
   </View>
 );
 
@@ -34,6 +36,7 @@ export const ProfileHero = ({ u, isMe, following, onEdit, onShare, onFollow, onC
     <View className="items-center px-5 pt-2 pb-6 overflow-hidden">
       <View pointerEvents="none" className="absolute -top-24 -left-16 w-64 h-64 rounded-full bg-[#1685ff]/15" />
       <View pointerEvents="none" className="absolute -top-16 -right-20 w-56 h-56 rounded-full bg-[#7a5cff]/12" />
+      
       <Pressable onPress={isMe ? onChangePhoto : undefined} className="items-center justify-center active:opacity-90">
         <View className="rounded-full p-[3px] bg-brand" style={{ width: size, height: size }}>
           {u?.profile_photo ? (
@@ -50,12 +53,16 @@ export const ProfileHero = ({ u, isMe, following, onEdit, onShare, onFollow, onC
           </View>
         )}
       </Pressable>
+      
       <Text className="text-white text-[24px] font-extrabold tracking-tight mt-4" numberOfLines={1}>{u?.name}</Text>
+      
       <View className="flex-row items-center mt-1.5 px-3 py-1 rounded-full bg-white/6 border border-white/10">
         <Text className="text-[#9aa7bb] text-[12px]" numberOfLines={1}>@{u?.username}</Text>
         {u?.user_id ? <Text className="text-[#5d6a80] text-[12px] ml-2" numberOfLines={1}>ID {u.user_id}</Text> : null}
       </View>
+      
       <Text className="text-[#b4c0d3] text-[14px] leading-[21px] text-center mt-4 px-2">{u?.bio || "No bio available."}</Text>
+      
       {(u?.website || u?.instagram || u?.social_link) ? (
         <View className="flex-row flex-wrap justify-center gap-2 mt-4">
           {u?.website ? <LinkChip icon="globe-outline" text={u.website} /> : null}
@@ -63,6 +70,7 @@ export const ProfileHero = ({ u, isMe, following, onEdit, onShare, onFollow, onC
           {u?.social_link ? <LinkChip icon="link-outline" text={u.social_link} /> : null}
         </View>
       ) : null}
+      
       {isMe ? (
         <View className="flex-row gap-2.5 mt-5 w-full">
           <Pressable onPress={onEdit} className="flex-1 h-11 rounded-full bg-[#1685ff] flex-row items-center justify-center active:opacity-80">

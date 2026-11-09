@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { View, Text, Pressable, ScrollView, ActivityIndicator, Modal, Share, Alert, Platform } from "react-native";
+import { View, Text, Pressable, ScrollView, ActivityIndicator, Modal, Share, Alert, Platform, FlatList } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
@@ -12,6 +12,38 @@ import ProfileGrid from "../../components/profile/ProfileGrid";
 import EditProfileModal from "../../components/profile/EditProfileModal";
 import ReelPlayerModal from "../../components/profile/ReelPlayerModal";
 import { MenuItem } from "../../components/profile/ProfileMenu";
+import { Avatar } from "../../components/ui";
+// 🚀 IMPORT CONFIRM DIALOG (Jo Moments ke liye banaya tha)
+import ConfirmDialog from "../../components/moments/ConfirmDialog";
+
+const UserListModal = ({ visible, title, users, loading, onClose, navigation }) => (
+  <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+    <Pressable className="flex-1 bg-black/60 justify-end" onPress={onClose}>
+      <Pressable className="bg-[#0b1220] rounded-t-[28px] border-t border-white/10 pt-2 pb-8 h-[70%]" onPress={() => {}}>
+        <View className="self-center w-9 h-1 rounded-full bg-white/20 my-3" />
+        <View className="flex-row items-center justify-between px-5 mb-4">
+          <Text className="text-white text-[18px] font-bold">{title}</Text>
+          <Pressable onPress={onClose} hitSlop={10}><Ionicons name="close" size={24} color="#fff" /></Pressable>
+        </View>
+        {loading ? <ActivityIndicator color="#247cff" className="mt-10" /> : (
+          <FlatList data={users} keyExtractor={(u) => u.user_id} contentContainerClassName="px-5 pb-10"
+            ListEmptyComponent={<Text className="text-[#71809a] text-center mt-10">No users found.</Text>}
+            renderItem={({ item: u }) => (
+              <Pressable onPress={() => { onClose(); navigation.navigate("UserProfile", { userId: u.user_id }); }} 
+                className="flex-row items-center py-3 border-b border-white/5 active:opacity-70">
+                <Avatar uri={u.profile_photo} name={u.name || u.username} size={44} />
+                <View className="ml-3 flex-1">
+                  <Text className="text-white text-[15px] font-bold">{u.name}</Text>
+                  <Text className="text-[#8493ab] text-[12px]">@{u.username}</Text>
+                </View>
+                <Ionicons name="chevron-forward" size={16} color="#5d6a80" />
+              </Pressable>
+            )} />
+        )}
+      </Pressable>
+    </Pressable>
+  </Modal>
+);
 
 export default function ProfileScreen({ navigation, route }) {
   const { user: me, signOut, patchUser } = useAuth();
@@ -32,9 +64,13 @@ export default function ProfileScreen({ navigation, route }) {
   const [form, setForm] = useState({ name: "", bio: "", website: "", instagram: "", social_link: "" });
   const [saving, setSaving] = useState(false);
   const [videoFocused, setVideoFocused] = useState(true);
-  
-  // ── Toast State ──
   const [toast, setToast] = useState(null);
+
+  // 🚀 NAYA STATE: Delete Confirmation Modal ke liye
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+
+  const [listModal, setListModal] = useState({ visible: false, title: "", users: [], loading: false });
 
   const load = useCallback(async () => {
     if (!uid) { setLoading(false); return; }
@@ -85,11 +121,8 @@ export default function ProfileScreen({ navigation, route }) {
       const d = await api(EP.myProfile, { method: "PUT", body: { ...form, name: form.name.trim() } });
       patchUser({ name: d.user.name });
       setEditing(false);
-      
-      // Success Toast
       setToast({ type: "success", msg: "Profile updated!" });
       setTimeout(() => setToast(null), 1500);
-      
       load();
     } catch (e) {
       const msg = e.message || "Could not save";
@@ -118,11 +151,8 @@ export default function ProfileScreen({ navigation, route }) {
       const d = await api(EP.myPhoto, { method: "POST", form: fd });
       patchUser({ profile_photo: d.profile_photo }); 
       load();
-      
-      // Success Toast
       setToast({ type: "success", msg: "Photo updated!" });
       setTimeout(() => setToast(null), 1500);
-      
     } catch (e) { Alert.alert("Upload failed", e.message || "Please try again."); }
   };
 
@@ -133,6 +163,45 @@ export default function ProfileScreen({ navigation, route }) {
   };
 
   const sharePro = () => Share.share({ message: `Connect with ${u?.username || "me"} on UtaNexa (${u?.user_id})` });
+
+  const openList = async (type) => {
+    setListModal({ visible: true, title: type, users: [], loading: true });
+    try {
+      let endpoint = "";
+      if (type === "Followers") endpoint = EP.userFollowers(uid);
+      else if (type === "Following") endpoint = EP.userFollowing(uid);
+      else if (type === "Connected") endpoint = EP.connections;
+
+      const d = await api(endpoint);
+      setListModal((prev) => ({ ...prev, users: d.users || d.connections || [], loading: false }));
+    } catch {
+      setListModal((prev) => ({ ...prev, loading: false }));
+    }
+  };
+
+  // 🚀 FIXED: Delete function ab Confirm Dialog kholta hai
+  const askDeleteReel = (reel) => setDeleteTarget(reel);
+
+  // 🚀 FIXED: Ye function tab chalega jab user Confirm Dialog mein 'Delete' dabayega
+  const executeDeleteReel = async () => {
+    if (!deleteTarget || deleting) return;
+    setDeleting(true);
+    try {
+      await api(EP.reelDelete(deleteTarget.id), { method: "DELETE" });
+      setReels((l) => l.filter((r) => r.id !== deleteTarget.id));
+      setSaved((l) => l.filter((r) => r.id !== deleteTarget.id));
+      setPlayer(null); // Video modal band karo
+      setDeleteTarget(null); // Confirm dialog band karo
+      setToast({ type: "success", msg: "Reel deleted!" });
+      setTimeout(() => setToast(null), 1500);
+      load(); // Stats update karo
+    } catch (e) {
+      setToast({ type: "error", msg: e.message || "Delete failed" });
+      setTimeout(() => setToast(null), 3000);
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   const tabs = isMe ? ["reels", "saved", "posts"] : ["reels", "posts"];
   const grid = tab === "reels" ? reels : tab === "saved" ? saved : posts;
@@ -168,9 +237,26 @@ export default function ProfileScreen({ navigation, route }) {
         <ScrollView contentContainerClassName="pb-24" showsVerticalScrollIndicator={false}>
           <ProfileHero u={u} isMe={isMe} following={following} onEdit={openEdit} onShare={sharePro}
             onFollow={toggleFollow} onChangePhoto={changePhoto} onMessage={() => navigation.navigate("Chat", { user: u })} />
-          <ProfileStats stats={stats} />
+          
+          <ProfileStats 
+            stats={stats} 
+            onPressFollowers={() => openList("Followers")}
+            onPressFollowing={() => openList("Following")}
+            onPressConnected={() => openList("Connected")}
+            onPressPosts={() => setTab("posts")}
+          />
+          
           <ProfileGrid tabs={tabs} tab={tab} setTab={setTab} grid={grid} setPlayer={setPlayer} />
         </ScrollView>
+      )}
+
+      {isMe && (
+        <Pressable 
+          onPress={() => navigation.navigate("ReelUpload")}
+          className="absolute right-5 bottom-6 w-14 h-14 rounded-full bg-[#1685ff] items-center justify-center shadow-lg shadow-blue-500/50 active:opacity-80"
+        >
+          <Ionicons name="add" size={30} color="#fff" />
+        </Pressable>
       )}
 
       <Modal visible={menu} transparent animationType="fade" onRequestClose={() => setMenu(false)}>
@@ -191,17 +277,41 @@ export default function ProfileScreen({ navigation, route }) {
       <EditProfileModal visible={editing} onClose={() => setEditing(false)} form={form} setForm={setForm}
         saving={saving} onSave={saveProfile} onChangePhoto={changePhoto} u={u} />
 
-      <ReelPlayerModal player={player} onClose={() => setPlayer(null)} videoFocused={videoFocused} insets={insets} />
+      {/* 🚀 ReelPlayerModal (isOwner & onDelete passes) */}
+      <ReelPlayerModal 
+        player={player} 
+        onClose={() => setPlayer(null)} 
+        videoFocused={videoFocused} 
+        insets={insets} 
+        isOwner={isMe}
+        onDelete={askDeleteReel}
+      />
 
-      {/* ── SUCCESS TOAST ── */}
+      <UserListModal 
+        visible={listModal.visible} 
+        title={listModal.title} 
+        users={listModal.users} 
+        loading={listModal.loading} 
+        onClose={() => setListModal((p) => ({ ...p, visible: false }))}
+        navigation={navigation}
+      />
+
+      {/* 🚀 NAYA: CUSTOM DELETE CONFIRM MODAL (Web + Mobile dono par chalega) */}
+      <ConfirmDialog
+        visible={!!deleteTarget}
+        title={deleting ? "Deleting…" : "Delete Reel?"}
+        message="This reel will be permanently removed. This cannot be undone."
+        confirmText={deleting ? "…" : "Delete"}
+        cancelText="Cancel"
+        danger
+        onCancel={() => { if (!deleting) setDeleteTarget(null); }}
+        onConfirm={executeDeleteReel}
+      />
+
       {toast && (
         <View className="absolute top-1/2 left-0 right-0 items-center justify-center z-50 pointer-events-none">
           <View className="bg-black/90 px-6 py-4 rounded-2xl items-center border border-white/20 shadow-xl">
-            <Ionicons 
-              name="checkmark-circle" 
-              size={44} 
-              color="#43d9a3" 
-            />
+            <Ionicons name={toast.type === "success" ? "checkmark-circle" : "alert-circle"} size={44} color={toast.type === "success" ? "#43d9a3" : "#ff6b6b"} />
             <Text className="text-white font-bold mt-2 text-[14px]">{toast.msg}</Text>
           </View>
         </View>

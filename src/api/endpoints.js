@@ -63,4 +63,7 @@ export const EP = {
   // ── NEXA AI (routes/ai_assistant.py) ───────────────────────
   nexaChat:           "/api/ai-assistant/chat",
   nexaStatus:         "/api/ai-assistant/status",
+
+  userFollowers:      (id) => `/api/users/${id}/followers`,
+  userFollowing:      (id) => `/api/users/${id}/following`,
 };
