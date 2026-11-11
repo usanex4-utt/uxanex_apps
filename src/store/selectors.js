@@ -13,6 +13,11 @@ export const selectConnectionCounts = createSelector([selectAllConnections], (li
   return c;
 });
 
+// ── NEW: pagination selectors ──────────────────────────
+export const selectConnectionsHasMore      = (s) => s.connections.hasMore;
+export const selectConnectionsLoadingMore  = (s) => s.connections.loadingMore;
+export const selectConnectionsCursor       = (s) => s.connections.cursor;
+
 export const selectRequests = (s) => s.notifications.requests;
 export const selectActivity = notificationsActivityAdapter.getSelectors(
   (s) => s.notifications.activity

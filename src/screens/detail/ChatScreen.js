@@ -1,4 +1,3 @@
-
 import React, {
   useCallback,
   useEffect,
@@ -24,7 +23,6 @@ import * as ImagePicker from "expo-image-picker";
 import * as DocumentPicker from "expo-document-picker";
 import { Audio } from "expo-av";
 
-// FIX: Added missing useFocusEffect import
 import { useFocusEffect } from "@react-navigation/native";
 
 import { api, openSocket } from "../../api/client";
@@ -41,6 +39,7 @@ import {
 import ChatHeader from "../../components/chat/ChatHeader";
 import ChatMessage from "../../components/chat/ChatMessage";
 import ChatComposer from "../../components/chat/ChatComposer";
+import ChatSkeleton from "../../components/chat/ChatSkeleton"; // <-- Import Added
 
 import {
   CallSheet,
@@ -54,6 +53,7 @@ export default function ChatScreen({ navigation, route }) {
   const { user } = useAuth();
 
   const [messages, setMessages] = useState([]);
+  const [loading, setLoading] = useState(true); // <-- State Added
   const [text, setText] = useState("");
   const [error, setError] = useState("");
   const [online, setOnline] = useState(false);
@@ -119,6 +119,8 @@ export default function ChatScreen({ navigation, route }) {
       setError("");
     } catch (e) {
       setError(e.message || "Unable to load messages.");
+    } finally {
+      setLoading(false); // <-- Set false on success or fail
     }
   }, [peer.user_id]);
 
@@ -621,43 +623,48 @@ export default function ChatScreen({ navigation, route }) {
         behavior={Platform.OS === "ios" ? "padding" : undefined}
         className="flex-1"
       >
-        <FlatList
-          ref={listRef}
-          data={displayMessages}
-          keyExtractor={(m, i) => String(m.id ?? i)}
-          initialNumToRender={15}
-          maxToRenderPerBatch={10}
-          windowSize={7}
-          removeClippedSubviews
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
-          onScrollBeginDrag={() => {
-            closeAll();
-            Keyboard.dismiss();
-          }}
-          contentContainerClassName="px-3.5 pb-3 gap-1.5"
-          ListHeaderComponent={
-            <ChatMessage.Header peer={peer} name={name} />
-          }
-          ListEmptyComponent={
-            query ? (
-              <Text className="text-[#8493ab] text-center mt-10 text-[13px]">
-                No messages match "{query}"
-              </Text>
-            ) : null
-          }
-          renderItem={({ item: m }) =>
-            m._dateSeparator ? (
-              <ChatMessage.DateSeparator label={m.label} />
-            ) : (
-              <ChatMessage
-                message={m}
-                me={user}
-                onDelete={del}
-              />
-            )
-          }
-        />
+        {/* SKELETON LOGIC */}
+        {loading && messages.length === 0 ? (
+          <ChatSkeleton isCouple={false} />
+        ) : (
+          <FlatList
+            ref={listRef}
+            data={displayMessages}
+            keyExtractor={(m, i) => String(m.id ?? i)}
+            initialNumToRender={15}
+            maxToRenderPerBatch={10}
+            windowSize={7}
+            removeClippedSubviews
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+            onScrollBeginDrag={() => {
+              closeAll();
+              Keyboard.dismiss();
+            }}
+            contentContainerClassName="px-3.5 pb-3 gap-1.5"
+            ListHeaderComponent={
+              <ChatMessage.Header peer={peer} name={name} />
+            }
+            ListEmptyComponent={
+              query ? (
+                <Text className="text-[#8493ab] text-center mt-10 text-[13px]">
+                  No messages match "{query}"
+                </Text>
+              ) : null
+            }
+            renderItem={({ item: m }) =>
+              m._dateSeparator ? (
+                <ChatMessage.DateSeparator label={m.label} />
+              ) : (
+                <ChatMessage
+                  message={m}
+                  me={user}
+                  onDelete={del}
+                />
+              )
+            }
+          />
+        )}
 
         {typing && !error ? (
           <ChatMessage.TypingIndicator />

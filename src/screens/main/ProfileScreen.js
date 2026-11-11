@@ -1,7 +1,14 @@
 import React, { useCallback, useEffect, useState } from "react";
 import {
-  View, Text, Pressable, ScrollView, ActivityIndicator, Modal,
-  Share, Alert, Platform, FlatList,
+  View,
+  Text,
+  Pressable,
+  ScrollView,
+  ActivityIndicator,
+  Modal,
+  Share,
+  Alert,
+  Platform,
 } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -15,118 +22,9 @@ import ProfileGrid from "../../components/profile/ProfileGrid";
 import EditProfileModal from "../../components/profile/EditProfileModal";
 import ReelPlayerModal from "../../components/profile/ReelPlayerModal";
 import { MenuItem } from "../../components/profile/ProfileMenu";
-import { Avatar } from "../../components/ui";
+import UserListModal from "../../components/profile/UserListModal";
 import ConfirmDialog from "../../components/moments/ConfirmDialog";
 
-/* ──────────────────────────────────────────────────────────
-   User List Modal — Followers / Following / Connected
-   ────────────────────────────────────────────────────────── */
-const UserListModal = ({
-  visible, title, users, loading, onClose, navigation, onFollow, onUnfollow,
-}) => {
-  const [menuFor, setMenuFor] = useState(null); // user_id for ⋯ menu
-
-  const isFollowers = title === "Followers";
-  const isFollowing = title === "Following";
-
-  return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-      <Pressable className="flex-1 bg-black/60 justify-end" onPress={onClose}>
-        <Pressable
-          className="bg-[#0b1220] rounded-t-[28px] border-t border-white/10 pt-2 pb-8 h-[70%]"
-          onPress={() => setMenuFor(null)}
-        >
-          <View className="self-center w-9 h-1 rounded-full bg-white/20 my-3" />
-          <View className="flex-row items-center justify-between px-5 mb-4">
-            <Text className="text-white text-[18px] font-bold">{title}</Text>
-            <Pressable onPress={onClose} hitSlop={10}>
-              <Ionicons name="close" size={24} color="#fff" />
-            </Pressable>
-          </View>
-
-          {loading ? (
-            <ActivityIndicator color="#247cff" className="mt-10" />
-          ) : (
-            <FlatList
-              data={users}
-              keyExtractor={(u) => String(u.user_id)}
-              contentContainerClassName="px-5 pb-10"
-              ListEmptyComponent={
-                <Text className="text-[#71809a] text-center mt-10">No users found.</Text>
-              }
-              renderItem={({ item: u }) => (
-                <View className="flex-row items-center py-3 border-b border-white/5">
-                  {/* Avatar + name → open profile */}
-                  <Pressable
-                    onPress={() => {
-                      onClose();
-                      navigation.navigate("UserProfile", { userId: u.user_id });
-                    }}
-                    className="flex-row items-center flex-1 active:opacity-70"
-                  >
-                    <Avatar uri={u.profile_photo} name={u.name || u.username} size={44} />
-                    <View className="ml-3 flex-1">
-                      <Text className="text-white text-[15px] font-bold" numberOfLines={1}>
-                        {u.name}
-                      </Text>
-                      <Text className="text-[#8493ab] text-[12px]" numberOfLines={1}>
-                        @{u.username}
-                      </Text>
-                    </View>
-                  </Pressable>
-
-                  {/* ── Followers: Follow back button ── */}
-                  {isFollowers && !u.is_following && (
-                    <Pressable
-                      onPress={() => onFollow?.(u)}
-                      className="ml-2 h-8 px-3.5 rounded-full bg-[#1685ff] items-center justify-center active:opacity-80"
-                    >
-                      <Text className="text-white text-[12px] font-bold">Follow back</Text>
-                    </Pressable>
-                  )}
-
-                  {/* ── Following: three-dot → Unfollow ── */}
-                  {isFollowing && (
-                    <View className="ml-2 relative">
-                      <Pressable
-                        onPress={() => setMenuFor(menuFor === u.user_id ? null : u.user_id)}
-                        hitSlop={8}
-                        className="w-9 h-9 rounded-full bg-white/6 border border-white/10 items-center justify-center active:opacity-70"
-                      >
-                        <Ionicons name="ellipsis-horizontal" size={16} color="#9aa7bb" />
-                      </Pressable>
-
-                      {menuFor === u.user_id && (
-                        <View className="absolute right-0 top-10 z-50 w-[140px] p-1.5 rounded-2xl bg-[#0f1a2e] border border-white/12 shadow-lg">
-                          <Pressable
-                            onPress={() => {
-                              setMenuFor(null);
-                              onUnfollow?.(u);
-                            }}
-                            className="flex-row items-center px-3 py-2.5 rounded-xl active:bg-white/5"
-                          >
-                            <Ionicons name="person-remove-outline" size={16} color="#ff6b6b" />
-                            <Text className="text-[#ff6b6b] text-[13px] font-semibold ml-2">
-                              Unfollow
-                            </Text>
-                          </Pressable>
-                        </View>
-                      )}
-                    </View>
-                  )}
-                </View>
-              )}
-            />
-          )}
-        </Pressable>
-      </Pressable>
-    </Modal>
-  );
-};
-
-/* ──────────────────────────────────────────────────────────
-   Profile Screen
-   ────────────────────────────────────────────────────────── */
 export default function ProfileScreen({ navigation, route }) {
   const { user: me, signOut, patchUser } = useAuth();
   const insets = useSafeAreaInsets();
@@ -144,7 +42,11 @@ export default function ProfileScreen({ navigation, route }) {
   const [player, setPlayer] = useState(null);
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({
-    name: "", bio: "", website: "", instagram: "", social_link: "",
+    name: "",
+    bio: "",
+    website: "",
+    instagram: "",
+    social_link: "",
   });
   const [saving, setSaving] = useState(false);
   const [videoFocused, setVideoFocused] = useState(true);
@@ -152,14 +54,21 @@ export default function ProfileScreen({ navigation, route }) {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
   const [listModal, setListModal] = useState({
-    visible: false, title: "", users: [], loading: false,
+    visible: false,
+    title: "",
+    users: [],
+    loading: false,
   });
 
   const load = useCallback(async () => {
-    if (!uid) { setLoading(false); return; }
+    if (!uid) {
+      setLoading(false);
+      return;
+    }
     try {
       const d = await api(isMe ? EP.myProfile : EP.profile(uid));
-      setP(d); setErr("");
+      setP(d);
+      setErr("");
       if (!isMe) {
         try {
           const f = await api(EP.followStatus(uid));
@@ -193,7 +102,10 @@ export default function ProfileScreen({ navigation, route }) {
       setVideoFocused(true);
       load();
       loadTab();
-      return () => { setVideoFocused(false); setPlayer(null); };
+      return () => {
+        setVideoFocused(false);
+        setPlayer(null);
+      };
     }, [load, loadTab])
   );
 
@@ -246,7 +158,9 @@ export default function ProfileScreen({ navigation, route }) {
   const changePhoto = async () => {
     try {
       const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (!perm.granted) return Alert.alert("Permission needed", "Allow photo library access.");
+      if (!perm.granted) {
+        return Alert.alert("Permission needed", "Allow photo library access.");
+      }
       const r = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
@@ -257,7 +171,9 @@ export default function ProfileScreen({ navigation, route }) {
       const a = r.assets[0];
       const ext = ((a.uri.split("?")[0].split(".").pop()) || "jpg").toLowerCase();
       const filename =
-        a.fileName && /\.\w+$/.test(a.fileName) ? a.fileName : `photo_${Date.now()}.${ext}`;
+        a.fileName && /\.\w+$/.test(a.fileName)
+          ? a.fileName
+          : `photo_${Date.now()}.${ext}`;
       const mimeType =
         a.mimeType && a.mimeType.startsWith("image/")
           ? a.mimeType
@@ -326,7 +242,6 @@ export default function ProfileScreen({ navigation, route }) {
     }
   };
 
-  /* Follow back from Followers list */
   const handleFollowBack = async (user) => {
     try {
       await api(EP.follow, { method: "POST", body: { user_id: user.user_id } });
@@ -336,13 +251,12 @@ export default function ProfileScreen({ navigation, route }) {
           x.user_id === user.user_id ? { ...x, is_following: true } : x
         ),
       }));
-      load(); // stats update
+      load();
     } catch (e) {
       Alert.alert("Failed", e.message || "Could not follow");
     }
   };
 
-  /* Unfollow from Following list */
   const handleUnfollow = async (user) => {
     try {
       await api(EP.unfollow, { method: "POST", body: { user_id: user.user_id } });
@@ -383,9 +297,8 @@ export default function ProfileScreen({ navigation, route }) {
 
   return (
     <SafeAreaView className="flex-1 bg-[#050b18]" edges={["top"]}>
-      {/* ── Header ── */}
+      {/* Header */}
       <View className="h-16 flex-row items-center justify-between px-4">
-        {/* LEFT: + (own profile) OR back (other profile) */}
         {isMe ? (
           <Pressable
             onPress={() => navigation.navigate("ReelUpload")}
@@ -424,8 +337,12 @@ export default function ProfileScreen({ navigation, route }) {
           <View className="w-16 h-16 rounded-full bg-danger/10 items-center justify-center mb-4">
             <Ionicons name="lock-closed-outline" size={28} color="#ff6b6b" />
           </View>
-          <Text className="text-white text-lg font-extrabold mb-2">Unable to open profile</Text>
-          <Text className="text-[#71809a] text-[13px] mb-5 text-center leading-5">{err}</Text>
+          <Text className="text-white text-lg font-extrabold mb-2">
+            Unable to open profile
+          </Text>
+          <Text className="text-[#71809a] text-[13px] mb-5 text-center leading-5">
+            {err}
+          </Text>
           <Pressable
             onPress={() => (isMe ? load() : navigation.goBack())}
             className="h-11 px-6 rounded-full bg-[#1685ff] items-center justify-center active:opacity-80"
@@ -436,7 +353,10 @@ export default function ProfileScreen({ navigation, route }) {
           </Pressable>
         </View>
       ) : (
-        <ScrollView contentContainerClassName="pb-24" showsVerticalScrollIndicator={false}>
+        <ScrollView
+          contentContainerClassName="pb-24"
+          showsVerticalScrollIndicator={false}
+        >
           <ProfileHero
             u={u}
             isMe={isMe}
@@ -466,9 +386,12 @@ export default function ProfileScreen({ navigation, route }) {
         </ScrollView>
       )}
 
-      {/* Bottom FAB removed — + is now top-left */}
-
-      <Modal visible={menu} transparent animationType="fade" onRequestClose={() => setMenu(false)}>
+      <Modal
+        visible={menu}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setMenu(false)}
+      >
         <Pressable className="flex-1" onPress={() => setMenu(false)}>
           <View
             style={{ top: insets.top + 60 }}

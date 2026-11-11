@@ -13,6 +13,7 @@ import CoupleHeader from "../../components/couple/CoupleHeader";
 import CoupleMessage from "../../components/couple/CoupleMessage";
 import CoupleComposer from "../../components/couple/CoupleComposer";
 import { SuggestionsStrip, CoupleAssistantModal } from "../../components/couple/CoupleSuggestions";
+import ChatSkeleton from "../../components/chat/ChatSkeleton"; // <-- Import Added
 import { MOODS, BY_MOOD, GENERIC, QUESTIONS, GAMES, pick3, rank } from "../../components/couple/coupleUtils";
 
 export default function CoupleChatScreen({ navigation, route }) {
@@ -20,6 +21,7 @@ export default function CoupleChatScreen({ navigation, route }) {
   const [partner, setPartner] = useState(route.params?.user || null);
   const [connections, setConnections] = useState([]);
   const [messages, setMessages] = useState([]);
+  const [initialLoad, setInitialLoad] = useState(true); // <-- New State
   const [text, setText] = useState("");
   const [mood, setMood] = useState("calm");
   const [aiModal, setAiModal] = useState(false);
@@ -52,7 +54,7 @@ export default function CoupleChatScreen({ navigation, route }) {
   useEffect(() => {
     if (!partner?.user_id) return;
     let closed = false, retry, ping, attempts = 0, hide;
-    setMessages([]); setConn("connecting");
+    setMessages([]); setConn("connecting"); setInitialLoad(true);
 
     const wsSend = (obj) => {
       const ws = wsRef.current;
@@ -64,7 +66,7 @@ export default function CoupleChatScreen({ navigation, route }) {
 
     const connect = () => {
       let ws;
-      try { ws = openSocket(EP.coupleWs(partner.user_id)); } catch { setConn("closed"); return; }
+      try { ws = openSocket(EP.coupleWs(partner.user_id)); } catch { setConn("closed"); setInitialLoad(false); return; }
       wsRef.current = ws;
       ws.onopen = () => {
         attempts = 0; setConn("open"); clearInterval(ping);
@@ -81,6 +83,7 @@ export default function CoupleChatScreen({ navigation, route }) {
             const list = ev.messages || [];
             setMessages(list.map((x) => ({ ...x, content: x.content, status: "seen" })));
             ackRead(list);
+            setInitialLoad(false); // <-- Hide Skeleton after history loaded
             break;
           }
           case "message": {
@@ -138,14 +141,25 @@ export default function CoupleChatScreen({ navigation, route }) {
       ws.onclose = (e) => {
         clearInterval(ping);
         if (closed) return;
-        if (e.code === 1008) { setConn("denied"); setNotice(e.reason || "Not allowed to open this chat"); return; }
+        if (e.code === 1008) { setConn("denied"); setNotice(e.reason || "Not allowed to open this chat"); setInitialLoad(false); return; }
         setConn("closed");
         attempts += 1;
         retry = setTimeout(() => { setConn("connecting"); connect(); }, Math.min(1000 * 2 ** attempts, 15000));
       };
     };
     connect();
-    return () => { closed = true; clearTimeout(retry); clearTimeout(hide); clearInterval(ping); try { wsRef.current?.close(); } catch {} };
+
+    // Safety timeout to remove skeleton if connection fails entirely
+    const safetyTimeout = setTimeout(() => setInitialLoad(false), 5000);
+
+    return () => { 
+      closed = true; 
+      clearTimeout(retry); 
+      clearTimeout(hide); 
+      clearInterval(ping); 
+      clearTimeout(safetyTimeout);
+      try { wsRef.current?.close(); } catch {} 
+    };
   }, [partner?.user_id, user.id]);
 
   useEffect(() => { setTimeout(() => listRef.current?.scrollToEnd({ animated: true }), 80); }, [messages.length]);
@@ -275,34 +289,47 @@ export default function CoupleChatScreen({ navigation, route }) {
     <SafeAreaView style={{ backgroundColor: bg }} className="flex-1">
       <CoupleHeader partner={partner} onBack={() => navigation.goBack()} conn={conn} typing={typing}
         online={online} lastSeen={lastSeen} mood={m} accent={accent} />
+      
       {notice ? (
         <View className="flex-row items-center px-4 py-2.5 bg-[#ffe3e3]">
           <Ionicons name="alert-circle-outline" size={16} color="#c92a2a" />
           <Text className="text-[#c92a2a] text-xs ml-2 flex-1">{notice}</Text>
         </View>
       ) : null}
+
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} className="flex-1">
-        {conn === "connecting" && messages.length === 0 ? <ActivityIndicator color={accent} className="mt-6" /> : null}
-        <FlatList ref={listRef} data={messages} keyExtractor={(x, i) => String(x.client_message_id || x.id || i)}
-          contentContainerClassName="px-3.5 pt-4 pb-3 gap-2" showsVerticalScrollIndicator={false}
-          ListHeaderComponent={messages.length > 0 ? (
-            <View className="items-center pb-3">
-              <View className="flex-row items-center px-3.5 py-1.5 rounded-full bg-white/80 border border-black/5">
-                <Ionicons name="heart" size={12} color={accent} />
-                <Text className="text-[#968b98] text-[11px] ml-1.5">Your private space, just for two</Text>
+        
+        {/* SKELETON LOGIC for Couple Chat */}
+        {initialLoad && messages.length === 0 ? (
+          <ChatSkeleton isCouple={true} />
+        ) : (
+          <FlatList 
+            ref={listRef} 
+            data={messages} 
+            keyExtractor={(x, i) => String(x.client_message_id || x.id || i)}
+            contentContainerClassName="px-3.5 pt-4 pb-3 gap-2" 
+            showsVerticalScrollIndicator={false}
+            ListHeaderComponent={messages.length > 0 ? (
+              <View className="items-center pb-3">
+                <View className="flex-row items-center px-3.5 py-1.5 rounded-full bg-white/80 border border-black/5">
+                  <Ionicons name="heart" size={12} color={accent} />
+                  <Text className="text-[#968b98] text-[11px] ml-1.5">Your private space, just for two</Text>
+                </View>
               </View>
-            </View>
-          ) : null}
-          ListEmptyComponent={conn === "connecting" ? null : (
-            <View className="items-center pt-10 px-8">
-              <View className="w-16 h-16 rounded-full bg-white items-center justify-center mb-3" style={{ borderWidth: 1, borderColor: `${accent}33` }}>
-                <Ionicons name="heart" size={28} color={accent} />
+            ) : null}
+            ListEmptyComponent={conn === "connecting" ? null : (
+              <View className="items-center pt-10 px-8">
+                <View className="w-16 h-16 rounded-full bg-white items-center justify-center mb-3" style={{ borderWidth: 1, borderColor: `${accent}33` }}>
+                  <Ionicons name="heart" size={28} color={accent} />
+                </View>
+                <Text className="text-[#382b3b] text-[16px] font-bold">Say something sweet</Text>
+                <Text className="text-[#968b98] text-[12px] text-center mt-1">Send the first message, or tap a quick action above.</Text>
               </View>
-              <Text className="text-[#382b3b] text-[16px] font-bold">Say something sweet</Text>
-              <Text className="text-[#968b98] text-[12px] text-center mt-1">Send the first message, or tap a quick action above.</Text>
-            </View>
-          )}
-          renderItem={({ item }) => <CoupleMessage item={item} user={user} accent={accent} />} />
+            )}
+            renderItem={({ item }) => <CoupleMessage item={item} user={user} accent={accent} />} 
+          />
+        )}
+
         {typing && conn === "open" ? (
           <View className="px-4 pb-2">
             <View className="self-start flex-row items-center px-3 py-1.5 rounded-full bg-white border border-black/5">

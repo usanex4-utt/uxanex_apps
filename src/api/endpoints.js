@@ -18,6 +18,7 @@ export const EP = {
   connections:              "/api/connections",
   connectionRequest:        "/api/connections/request",
   connectionRequests:       "/api/connections/requests",
+  connectionCancel:         "/api/connections/request/cancel",  
   connectionAccept:         (requestId) => `/api/connections/request/${requestId}/accept`,
   connectionReject:         (requestId) => `/api/connections/request/${requestId}/reject`,
   connectionNotifications:  "/api/connections/notifications",
