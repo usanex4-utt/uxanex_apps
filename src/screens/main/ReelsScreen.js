@@ -13,6 +13,7 @@ import { ReelCommentsSheet, ReelMenuSheet } from "../../components/reels/ReelShe
 import {
   fetchReelsFeed, fetchSavedReels, toggleReelLike, toggleReelSave,
   setLiked, setSaved, setFollowState, patchReel, removeFeedItem,
+  prependReelToFeed, // ← NEW
 } from "../../store/slices/reelsSlice";
 import {
   selectFeedReels, selectLikedById, selectSavedById, selectFollowStates,
@@ -66,6 +67,9 @@ export default function ReelsScreen({ navigation }) {
   const lastAutoAdvanceId = useRef(null);
   const focusedRef = useRef(true);
 
+  // ── Incoming reel (from Search explore grid) ──
+  const pendingReelRef = useRef(null);
+
   const progressAnim = useRef(new Animated.Value(0)).current;
   const flashAnim = useRef(new Animated.Value(0)).current;
   const pauseAnim = useRef(new Animated.Value(0)).current;
@@ -101,6 +105,40 @@ export default function ReelsScreen({ navigation }) {
     }).catch(() => {});
     progress.current[id] = { pos: 0, dur: p.dur };
   }, []);
+
+  // ── STEP 1: capture incoming reel param ──
+  useEffect(() => {
+    const incoming = route.params?.reel;
+    if (!incoming) return;
+    pendingReelRef.current = incoming;
+  }, [route.params?.reel]);
+
+  // ── STEP 2: once feed is ready, prepend and scroll to that reel ──
+  useEffect(() => {
+    const pending = pendingReelRef.current;
+    if (!pending) return;
+    if (reels.length === 0) return; // wait for feed to load
+
+    // Feed has data — prepend the incoming reel to top
+    dispatch(prependReelToFeed(pending));
+    pendingReelRef.current = null;
+    navigation.setParams({ reel: undefined, reelId: undefined });
+
+    // Scroll to index 0 after the state settles
+    const t = setTimeout(() => {
+      try {
+        listRef.current?.scrollToIndex({ index: 0, animated: false });
+      } catch {
+        listRef.current?.scrollToOffset({ offset: 0, animated: false });
+      }
+      activeRef.current = { id: pending.id, index: 0 };
+      setActive(0);
+      pausedRef.current = false;
+      setPaused(false);
+    }, 220);
+
+    return () => clearTimeout(t);
+  }, [reels.length, dispatch, navigation]);
 
   useFocusEffect(useCallback(() => {
     setFocused(true); focusedRef.current = true;

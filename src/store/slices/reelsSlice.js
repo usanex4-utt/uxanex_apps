@@ -72,6 +72,14 @@ const slice = createSlice({
       delete state.entities[a.payload];
     },
     invalidateFeed(state) { state.feed.lastFetchedAt = 0; },
+
+    // ── NEW: insert / move a reel to the top of the feed ──
+    prependReelToFeed(state, a) {
+      const reel = a.payload;
+      if (!reel?.id) return;
+      adapter.upsertOne(state, reel);
+      state.feed.ids = [reel.id, ...state.feed.ids.filter((id) => id !== reel.id)];
+    },
   },
   extraReducers: (b) => {
     b.addCase(fetchReelsFeed.pending, (s) => { s.feed.status = "loading"; });
@@ -101,6 +109,7 @@ const slice = createSlice({
 
 export const {
   setLiked, setSaved, setFollowState, patchReel, removeFeedItem, invalidateFeed,
+  prependReelToFeed, // ← NEW export
 } = slice.actions;
 export const reelsAdapter = adapter;
 export default slice.reducer;
