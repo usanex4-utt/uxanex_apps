@@ -12,6 +12,7 @@ import {
   Share,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import ReelSkeleton from "../../components/reels/ReelSkeleton";
 import { useFocusEffect, useRoute } from "@react-navigation/native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
@@ -97,8 +98,8 @@ export default function ReelsScreen({ navigation }) {
   const silenceAllVideos = useCallback(() => {
     Object.values(videoRefs.current).forEach((ref) => {
       if (ref) {
-        ref.pauseAsync().catch(() => {});
-        ref.setIsMutedAsync(true).catch(() => {});
+        ref.pauseAsync().catch(() => { });
+        ref.setIsMutedAsync(true).catch(() => { });
       }
     });
   }, []);
@@ -109,7 +110,7 @@ export default function ReelsScreen({ navigation }) {
       fetching.current = true;
       try {
         await dispatch(fetchReelsFeed({ reset })).unwrap();
-      } catch {}
+      } catch { }
       fetching.current = false;
     },
     [dispatch]
@@ -137,7 +138,7 @@ export default function ReelsScreen({ navigation }) {
         source: "feed",
       },
       silent401: true,
-    }).catch(() => {});
+    }).catch(() => { });
     progress.current[id] = { pos: 0, dur: p.dur };
   }, []);
 
@@ -189,8 +190,8 @@ export default function ReelsScreen({ navigation }) {
 
       const activeVideo = videoRefs.current[activeRef.current.id];
       if (activeVideo && !pausedRef.current) {
-        activeVideo.setIsMutedAsync(mutedRef.current).catch(() => {});
-        activeVideo.playAsync().catch(() => {});
+        activeVideo.setIsMutedAsync(mutedRef.current).catch(() => { });
+        activeVideo.playAsync().catch(() => { });
       }
 
       const hasPending =
@@ -236,8 +237,8 @@ export default function ReelsScreen({ navigation }) {
       } else {
         const ref = videoRefs.current[activeRef.current.id];
         if (ref && focusedRef.current && !pausedRef.current) {
-          ref.setIsMutedAsync(mutedRef.current).catch(() => {});
-          ref.playAsync().catch(() => {});
+          ref.setIsMutedAsync(mutedRef.current).catch(() => { });
+          ref.playAsync().catch(() => { });
         }
       }
     });
@@ -257,7 +258,7 @@ export default function ReelsScreen({ navigation }) {
         const ref = videoRefs.current[reels[0].id];
         if (ref) {
           lastAutoAdvanceId.current = null;
-          ref.setPositionAsync(0).then(() => ref.playAsync()).catch(() => {});
+          ref.setPositionAsync(0).then(() => ref.playAsync()).catch(() => { });
         }
       }
     },
@@ -273,9 +274,9 @@ export default function ReelsScreen({ navigation }) {
       if (oldId) {
         const oldRef = videoRefs.current[oldId];
         if (oldRef) {
-          oldRef.pauseAsync().catch(() => {});
-          oldRef.setIsMutedAsync(true).catch(() => {});
-          oldRef.setPositionAsync(0).catch(() => {});
+          oldRef.pauseAsync().catch(() => { });
+          oldRef.setIsMutedAsync(true).catch(() => { });
+          oldRef.setPositionAsync(0).catch(() => { });
         }
       }
       flushWatch();
@@ -285,9 +286,9 @@ export default function ReelsScreen({ navigation }) {
       lastAutoAdvanceId.current = null;
       const newRef = videoRefs.current[newId];
       if (newRef) {
-        newRef.setPositionAsync(0).catch(() => {});
-        newRef.setIsMutedAsync(mutedRef.current).catch(() => {});
-        newRef.playAsync().catch(() => {});
+        newRef.setPositionAsync(0).catch(() => { });
+        newRef.setIsMutedAsync(mutedRef.current).catch(() => { });
+        newRef.playAsync().catch(() => { });
       }
     }
     activeRef.current = { id: newId, index: v.index ?? 0 };
@@ -307,7 +308,7 @@ export default function ReelsScreen({ navigation }) {
           const st = d?.status || (d?.is_following ? "following" : "not_following");
           dispatch(setFollowState({ userId: c.user_id, state: st }));
         })
-        .catch(() => {});
+        .catch(() => { });
     }
     if (!fetchedStatus.current[r.id]) {
       fetchedStatus.current[r.id] = true;
@@ -316,7 +317,7 @@ export default function ReelsScreen({ navigation }) {
           if (typeof d?.rating === "number") dispatch(setLiked({ id: r.id, on: d.rating >= 2 }));
           if (d?.saved) dispatch(setSaved({ id: r.id, save: true }));
         })
-        .catch(() => {});
+        .catch(() => { });
     }
   }, [active, reels, dispatch]);
 
@@ -334,7 +335,7 @@ export default function ReelsScreen({ navigation }) {
       const next = !m;
       mutedRef.current = next;
       const ref = videoRefs.current[activeRef.current.id];
-      if (ref) ref.setIsMutedAsync(next).catch(() => {});
+      if (ref) ref.setIsMutedAsync(next).catch(() => { });
       return next;
     });
     flashAnim.stopAnimation();
@@ -368,8 +369,8 @@ export default function ReelsScreen({ navigation }) {
     flashPause(next ? "play" : "pause");
     const ref = videoRefs.current[activeRef.current.id];
     if (ref) {
-      if (next) ref.pauseAsync().catch(() => {});
-      else ref.playAsync().catch(() => {});
+      if (next) ref.pauseAsync().catch(() => { });
+      else ref.playAsync().catch(() => { });
     }
   }, []);
 
@@ -486,7 +487,7 @@ export default function ReelsScreen({ navigation }) {
             dispatch(patchReel({ id: reel.id, fields: { share_count: d.share_count } }));
           }
         }
-      } catch {}
+      } catch { }
     },
     [dispatch]
   );
@@ -499,7 +500,7 @@ export default function ReelsScreen({ navigation }) {
     try {
       const d = await api(EP.reelComments(reel.id) + "?limit=100");
       setComments(d.comments || []);
-    } catch {}
+    } catch { }
     setCLoading(false);
   }, []);
 
@@ -554,7 +555,7 @@ export default function ReelsScreen({ navigation }) {
       dispatch(removeFeedItem(reel.id));
       try {
         await api(EP.reelNotInterested(reel.id), { method: "POST" });
-      } catch {}
+      } catch { }
     },
     [dispatch]
   );
@@ -596,6 +597,32 @@ export default function ReelsScreen({ navigation }) {
 
   return (
     <View className="flex-1 bg-black">
+      {/* Top bar: + left · mute right — NO views */}
+<View
+  pointerEvents="box-none"
+  style={{ top: insets.top + 8 }}
+  className="absolute left-0 right-0 z-10 px-4 flex-row items-center justify-between"
+>
+  <Pressable
+    onPress={() => navigation.navigate("ReelUpload")}
+    className="w-10 h-10 items-center justify-center "
+    hitSlop={8}
+  >
+    <Ionicons name="add" size={24} color="#fff" />
+  </Pressable>
+
+  <Pressable
+    onPress={toggleMute}
+    className="w-10 h-10  items-center justify-center "
+    hitSlop={8}
+  >
+    <Ionicons
+      name={muted ? "volume-mute" : "volume-high"}
+      size={20}
+      color="#fff"
+    />
+  </Pressable>
+</View>
       {/* <View
         pointerEvents="box-none"
         style={{ top: insets.top + 8 }}
@@ -629,10 +656,7 @@ export default function ReelsScreen({ navigation }) {
       </Animated.View> */}
 
       {loading && reels.length === 0 ? (
-        <View className="flex-1 items-center justify-center">
-          <ActivityIndicator color="#fff" size="large" />
-          <Text className="text-white/50 text-[12px] mt-3">Loading your feed…</Text>
-        </View>
+        <ReelSkeleton height={h} />
       ) : (
         <FlatList
           ref={listRef}

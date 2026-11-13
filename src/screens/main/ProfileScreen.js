@@ -39,6 +39,7 @@ export default function ProfileScreen({ navigation, route }) {
   const [menu, setMenu] = useState(false);
   const [loading, setLoading] = useState(true);
   const [following, setFollowing] = useState(false);
+  const [isConnected, setIsConnected] = useState(false);
   const [player, setPlayer] = useState(null);
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({
@@ -69,11 +70,20 @@ export default function ProfileScreen({ navigation, route }) {
       const d = await api(isMe ? EP.myProfile : EP.profile(uid));
       setP(d);
       setErr("");
+      // Connection status from profile payload (if backend sends it)
+      const connectedFlag =
+        !!(d?.is_connected ||
+          d?.user?.is_connected ||
+          d?.connection_status === "connected" ||
+          d?.user?.connection_status === "connected");
+      setIsConnected(isMe ? true : connectedFlag);
       if (!isMe) {
         try {
           const f = await api(EP.followStatus(uid));
           setFollowing(!!f.is_following);
         } catch {}
+      } else {
+        setIsConnected(true);
       }
     } catch (e) {
       setErr(e.message || "Failed to load profile");
@@ -365,7 +375,16 @@ export default function ProfileScreen({ navigation, route }) {
             onShare={sharePro}
             onFollow={toggleFollow}
             onChangePhoto={changePhoto}
-            onMessage={() => navigation.navigate("Chat", { user: u })}
+            onMessage={() => {
+              if (isMe) return;
+              if (!isConnected) {
+                const msg = "Connect with this person first to send a message.";
+                if (Platform.OS === "web") window.alert(msg);
+                else Alert.alert("Not connected", msg);
+                return;
+              }
+              navigation.navigate("Chat", { user: u });
+            }}
           />
 
           <ProfileStats

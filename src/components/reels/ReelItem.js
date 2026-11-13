@@ -1,17 +1,18 @@
-import React, { memo } from "react";
+import React, { memo, useState } from "react";
 import {
   View,
   Text,
   Pressable,
   Animated,
   useWindowDimensions,
+  Image,
 } from "react-native";
 import { Video, ResizeMode } from "expo-av";
 import { Ionicons } from "@expo/vector-icons";
 import { absUrl } from "../../api/client";
 import { Avatar } from "../ui";
+import Logo from "../../../assets/logo.jpeg";
 
-// Format numbers
 const fmt = (value) => {
   const n = Number(value) || 0;
   if (n >= 1e6) return `${(n / 1e6).toFixed(n >= 1e7 ? 0 : 1).replace(/\.0$/, "")}M`;
@@ -20,16 +21,18 @@ const fmt = (value) => {
 };
 
 const likeCount = (reel) =>
-  (Number(reel.two_star_count) || 0) + (Number(reel.three_star_count) || 0);
+  (Number(reel.two_star_count) || 0) +
+  (Number(reel.three_star_count) || 0) +
+  (Number(reel.like_count) || 0) +
+  (Number(reel.likes_count) || 0);
 
-const tags = (value) =>
+const parseTags = (value) =>
   (value || "")
     .split(/[\s,]+/)
     .filter(Boolean)
-    .slice(0, 3)
     .map((tag) => (tag.startsWith("#") ? tag : `#${tag}`));
 
-// ── Action Button ───────────────────────────────────────
+// Icons without circle / shadow background
 const RailBtn = memo(function RailBtn({
   icon,
   color = "#fff",
@@ -45,52 +48,107 @@ const RailBtn = memo(function RailBtn({
       hitSlop={8}
       style={{ transform: [{ scale }] }}
     >
-      <View
-        className={`w-11 h-11 rounded-full items-center justify-center border ${
-          active ? "bg-white/20 border-white/40" : "bg-black/40 border-white/20"
-        }`}
-      >
-        <Ionicons name={icon} size={22} color={color} />
-      </View>
-
-      {label !== undefined && (
-        <Text className="text-white text-[11px] font-semibold mt-1">
+      <Ionicons name={icon} size={28} color={color} />
+      {label !== undefined && label !== null ? (
+        <Text
+          className="text-white text-[12px] font-semibold mt-0.5"
+          style={{
+            textShadowColor: "rgba(0,0,0,0.65)",
+            textShadowOffset: { width: 0, height: 1 },
+            textShadowRadius: 3,
+          }}
+        >
           {fmt(label)}
         </Text>
-      )}
+      ) : null}
     </Pressable>
   );
 });
 
-// ── Expandable Caption ──────────────────────────────────
-const ExpandableCaption = memo(function ExpandableCaption({
-  text,
+const CaptionBlock = memo(function CaptionBlock({
+  caption,
+  hashtags,
+  category,
   expanded,
-  onToggle,
+  onToggleMore,
+  onInterested,
+  onNotInterested,
 }) {
-  if (!text) return null;
-  const isLong = text.length > 70;
+  if (!caption && !hashtags && !category) return null;
+
+  const chips = parseTags(hashtags);
+  const isLong = (caption || "").length > 80;
 
   return (
     <View>
-      <Text
-        numberOfLines={expanded ? undefined : 2}
-        className="text-white/95 text-[13px] leading-5"
-      >
-        {text}
-      </Text>
-      {isLong && (
-        <Pressable onPress={onToggle} hitSlop={12} className="mt-1 self-start">
-          <Text className="text-white/60 text-[12px] font-semibold">
-            {expanded ? "see less" : "... see more"}
+      {caption ? (
+        <Text
+          numberOfLines={expanded ? undefined : 2}
+          className="text-white/95 text-[13px] leading-5"
+        >
+          {caption}
+        </Text>
+      ) : null}
+
+      {(isLong || chips.length > 0 || category) && (
+        <Pressable onPress={onToggleMore} hitSlop={10} className="mt-1 self-start">
+          <Text className="text-white/55 text-[12px] font-semibold">
+            {expanded ? "see less" : "more"}
           </Text>
         </Pressable>
       )}
+
+      {expanded ? (
+        <View className="mt-2">
+          {category ? (
+            <View className="self-start px-2.5 py-1 rounded-full bg-white/12 border border-white/15 mb-2">
+              <Text className="text-white/85 text-[11px] font-semibold capitalize">
+                {String(category).replace(/_/g, " ")}
+              </Text>
+            </View>
+          ) : null}
+
+          {chips.length > 0 ? (
+            <View className="flex-row flex-wrap gap-1.5 mb-2.5">
+              {chips.map((tag, i) => (
+                <View
+                  key={`${tag}-${i}`}
+                  className="px-2 py-0.5 rounded-full bg-white/12 border border-white/12"
+                >
+                  <Text className="text-[#9ec4ff] text-[11px] font-semibold">
+                    {tag}
+                  </Text>
+                </View>
+              ))}
+            </View>
+          ) : null}
+
+          <View className="flex-row gap-2 mt-0.5">
+            <Pressable
+              onPress={onInterested}
+              className="flex-row items-center h-8 px-3 rounded-full bg-white/12 border border-white/18 active:opacity-75"
+            >
+              <Ionicons name="thumbs-up-outline" size={14} color="#fff" />
+              <Text className="text-white text-[12px] font-semibold ml-1.5">
+                Interested
+              </Text>
+            </Pressable>
+            <Pressable
+              onPress={onNotInterested}
+              className="flex-row items-center h-8 px-3 rounded-full bg-white/10 border border-white/15 active:opacity-75"
+            >
+              <Ionicons name="thumbs-down-outline" size={14} color="#fff" />
+              <Text className="text-white text-[12px] font-semibold ml-1.5">
+                Not interested
+              </Text>
+            </Pressable>
+          </View>
+        </View>
+      ) : null}
     </View>
   );
 });
 
-// ── Main Component ──────────────────────────────────────
 function ReelItem(props) {
   const {
     item,
@@ -124,13 +182,13 @@ function ReelItem(props) {
     openUser,
     toggleFollow,
     setSheet,
+    notInterested,
     railButtonScale = 1,
   } = props;
 
-  const c = item.creator || {};          // ✅ Fixed here
+  const c = item.creator || {};
   const isLiked = !!liked[item.id];
   const isSaved = !!saved[item.id];
-  const chips = tags(item.hashtags);
   const isSelf = c.user_id && c.user_id === user?.user_id;
   const fState = followStates?.[c.user_id];
 
@@ -138,8 +196,8 @@ function ReelItem(props) {
     fState === "following"
       ? "Following"
       : fState === "pending"
-      ? "Requested"
-      : "Follow";
+        ? "Requested"
+        : "Follow";
 
   const videoUrl = item.video_url ? absUrl(item.video_url) : null;
   const thumbnailUrl = item.thumbnail_url ? absUrl(item.thumbnail_url) : null;
@@ -147,9 +205,17 @@ function ReelItem(props) {
   const { width } = useWindowDimensions();
   const isSmall = width < 380;
 
+  const expanded = !!expandedCaptions[item.id];
+  const toggleMore = () =>
+    setExpandedCaptions((prev) => ({
+      ...prev,
+      [item.id]: !prev[item.id],
+    }));
+
+  const username = c.username || "user";
+
   return (
     <View style={{ height: h }} className="bg-black">
-      {/* VIDEO */}
       <View style={{ flex: 1 }}>
         {videoUrl ? (
           <Video
@@ -208,8 +274,7 @@ function ReelItem(props) {
         />
       </View>
 
-      {/* Pause / Play icon */}
-      {pauseIcon && (
+      {pauseIcon ? (
         <Animated.View
           pointerEvents="none"
           style={{
@@ -232,9 +297,8 @@ function ReelItem(props) {
             />
           </View>
         </Animated.View>
-      )}
+      ) : null}
 
-      {/* Double tap heart */}
       <Animated.View
         pointerEvents="none"
         style={{
@@ -250,9 +314,56 @@ function ReelItem(props) {
         <Ionicons name="heart" size={90} color="#ff2d55" />
       </Animated.View>
 
-      {/* LEFT BOTTOM */}
+      {/* Watermark — logo + @username */}
       <View
-        className="absolute left-3 right-20"
+        pointerEvents="none"
+        className="absolute right-3"
+        style={{ top: isSmall ? 52 : 58 }}
+      >
+        {/* Instagram Style Watermark */}
+        <View
+          pointerEvents="none"
+          className="absolute right-3"
+          style={{ top: isSmall ? 52 : 58 }}
+        >
+          <View className="flex-row items-center">
+
+            {/* Profile Logo */}
+            <View className="w-9 h-9 items-center justify-center mr-2">
+              <Image
+                source={Logo}
+                style={{
+                  width: 36,
+                  height: 36,
+                  resizeMode: "contain",
+                  borderRadius: 8,
+                }}
+              />
+            </View>
+
+            {/* Username */}
+            <Text
+              style={{
+                color: "#FFFFFF",
+                fontSize: 12,
+                fontWeight: "800",
+                letterSpacing: 0.4,
+                textTransform: "uppercase",
+                textShadowColor: "rgba(0,0,0,0.8)",
+                textShadowOffset: { width: 0, height: 1 },
+                textShadowRadius: 3,
+              }}
+            >
+              {username}
+            </Text>
+
+          </View>
+        </View>
+      </View>
+
+      {/* Left bottom — no views, no inline hashtags */}
+      <View
+        className="absolute left-3 right-[72px]"
         style={{ bottom: isSmall ? 18 : 24 }}
       >
         <View className="flex-row items-center mb-2">
@@ -269,77 +380,63 @@ function ReelItem(props) {
             </View>
 
             <View className="ml-2 flex-1">
-              <Text className="text-white font-bold text-[14px]" numberOfLines={1}>
-                @{c.username || "user"}
-              </Text>
-              {c.name && c.name !== c.username && (
+              <Pressable onPress={() => openUser(c.user_id)}>
+                <Text
+                  className="text-white font-bold text-[14px]"
+                  numberOfLines={1}
+                >
+                  @{username}
+                </Text>
+              </Pressable>
+              {c.user_id ? (
+                <Pressable onPress={() => openUser(c.user_id)}>
+                  <Text className="text-white/55 text-[11px]" numberOfLines={1}>
+                    ID {c.user_id}
+                  </Text>
+                </Pressable>
+              ) : c.name && c.name !== c.username ? (
                 <Text className="text-white/60 text-[11px]" numberOfLines={1}>
                   {c.name}
                 </Text>
-              )}
+              ) : null}
             </View>
           </Pressable>
 
-          {!isSelf && c.user_id && (
+          {!isSelf && c.user_id ? (
             <Pressable
               onPress={() => toggleFollow(c.user_id)}
-              className={`ml-2 px-3 h-7 rounded-full items-center justify-center border ${
-                fState === "following"
-                  ? "bg-white/15 border-white/40"
-                  : "bg-brand border-brand"
-              }`}
+              className={`ml-2 px-3 h-7 rounded-full items-center justify-center border ${fState === "following"
+                ? "bg-white/15 border-white/40"
+                : "bg-brand border-brand"
+                }`}
             >
               <Text className="text-white text-[12px] font-semibold">
                 {followLabel}
               </Text>
             </Pressable>
-          )}
+          ) : null}
         </View>
 
-        <View className="flex-row items-center mb-1.5">
-          <Ionicons
-            name="play-circle-outline"
-            size={13}
-            color="rgba(255,255,255,0.75)"
-          />
-          <Text className="text-white/75 text-[11px] ml-1 font-medium">
-            {fmt(item.views_count || 0)} views
-          </Text>
-        </View>
-
-        {item.caption ? (
-          <ExpandableCaption
-            text={item.caption}
-            expanded={!!expandedCaptions[item.id]}
-            onToggle={() =>
-              setExpandedCaptions((prev) => ({
-                ...prev,
-                [item.id]: !prev[item.id],
-              }))
-            }
-          />
-        ) : null}
-
-        {chips.length > 0 && (
-          <View className="flex-row flex-wrap gap-1.5 mt-2">
-            {chips.map((tag, i) => (
-              <View
-                key={`${tag}-${i}`}
-                className="px-2 py-0.5 rounded-full bg-white/15 border border-white/15"
-              >
-                <Text className="text-brandLight text-[11px] font-semibold">
-                  {tag}
-                </Text>
-              </View>
-            ))}
-          </View>
-        )}
+        <CaptionBlock
+          caption={item.caption}
+          hashtags={item.hashtags}
+          category={item.category}
+          expanded={expanded}
+          onToggleMore={toggleMore}
+          onInterested={() => {
+            setExpandedCaptions((prev) => ({ ...prev, [item.id]: false }));
+          }}
+          onNotInterested={() => {
+            if (typeof notInterested === "function") notInterested(item);
+            else setSheet({ type: "menu", reel: item });
+          }}
+        />
       </View>
 
-      {/* RIGHT ACTION RAIL */}
+      {/* Right action rail — no circle behind icons */}
       <View
-        className="absolute right-3 items-center"
-        style={{ bottom: isSmall ? 20 : 28, gap: isSmall ? 12 : 16 }}
+        className="absolute right-2.5 items-center"
+        style={{ bottom: isSmall ? 20 : 28, gap: isSmall ? 14 : 18 }}
       >
         <RailBtn
           icon={isLiked ? "heart" : "heart-outline"}
@@ -349,14 +446,23 @@ function ReelItem(props) {
           onPress={() => toggleLike(item)}
           scale={railButtonScale}
         />
-
         <RailBtn
           icon="chatbubble-outline"
           label={item.comment_count || 0}
           onPress={() => openComments(item)}
           scale={railButtonScale}
         />
-
+        <RailBtn
+          icon="repeat-outline"
+          label={item.share_count || 0}
+          onPress={() => share(item)}
+          scale={railButtonScale}
+        />
+        <RailBtn
+          icon="paper-plane-outline"
+          onPress={() => share(item)}
+          scale={railButtonScale}
+        />
         <RailBtn
           icon={isSaved ? "bookmark" : "bookmark-outline"}
           color={isSaved ? "#72b0ff" : "#fff"}
@@ -365,14 +471,6 @@ function ReelItem(props) {
           onPress={() => toggleSave(item)}
           scale={railButtonScale}
         />
-
-        <RailBtn
-          icon="paper-plane-outline"
-          label={item.share_count || 0}
-          onPress={() => share(item)}
-          scale={railButtonScale}
-        />
-
         <RailBtn
           icon="ellipsis-horizontal"
           onPress={() => setSheet({ type: "menu", reel: item })}
@@ -380,12 +478,11 @@ function ReelItem(props) {
         />
       </View>
 
-      {/* PROGRESS BAR */}
       <View
         pointerEvents="none"
         className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-white/15"
       >
-        {index === active && (
+        {index === active ? (
           <Animated.View
             className="h-full bg-white rounded-r-full"
             style={{
@@ -395,7 +492,7 @@ function ReelItem(props) {
               }),
             }}
           />
-        )}
+        ) : null}
       </View>
     </View>
   );

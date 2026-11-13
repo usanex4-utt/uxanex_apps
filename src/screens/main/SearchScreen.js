@@ -107,17 +107,15 @@ const Action = ({ u, onConnect, onAccept, onCancel }) => {
 
   return (
     <View
-      className={`rounded-2xl pb-[3px] ${
-        accept ? "bg-[#1f8a5b]" : "bg-[#1b4fb8]"
-      }`}
+      className={`rounded-2xl pb-[3px] ${accept ? "bg-[#1f8a5b]" : "bg-[#1b4fb8]"
+        }`}
     >
       <Pressable
         onPress={() =>
           accept ? onAccept(u) : onConnect(u)
         }
-        className={`min-w-[96px] h-9 px-3.5 rounded-2xl border-t border-white/30 flex-row items-center justify-center active:translate-y-[3px] ${
-          accept ? "bg-[#3bb273]" : "bg-[#2f7cff]"
-        }`}
+        className={`min-w-[96px] h-9 px-3.5 rounded-2xl border-t border-white/30 flex-row items-center justify-center active:translate-y-[3px] ${accept ? "bg-[#3bb273]" : "bg-[#2f7cff]"
+          }`}
       >
         <Ionicons
           name={accept ? "checkmark" : "person-add"}
@@ -163,10 +161,10 @@ const ReelCell = React.memo(function ReelCell({
     if (!ref) return;
 
     if (shouldPlay) {
-      ref.setIsMutedAsync(true).catch(() => {});
-      ref.playAsync().catch(() => {});
+      ref.setIsMutedAsync(true).catch(() => { });
+      ref.playAsync().catch(() => { });
     } else {
-      ref.pauseAsync().catch(() => {});
+      ref.pauseAsync().catch(() => { });
     }
   }, [shouldPlay, ready]);
 
@@ -510,6 +508,10 @@ export default function SearchScreen({ navigation }) {
         "Profiles are visible only to connected users. Send a request first."
       );
     }
+    if (!u?.user_id) return;
+    navigation.navigate("UserProfile", {
+      userId: u.user_id,
+    });
   };
 
   /* ── Open Reel ── */
@@ -748,11 +750,10 @@ export default function SearchScreen({ navigation }) {
 
         <View className="items-center pt-12 px-10">
           <View
-            className={`w-20 h-20 rounded-full bg-[#0a0f17] border items-center justify-center ${
-              isError
+            className={`w-20 h-20 rounded-full bg-[#0a0f17] border items-center justify-center ${isError
                 ? "border-[#ff6b6b]/40"
                 : "border-white/10"
-            }`}
+              }`}
           >
             <Ionicons
               name={
@@ -770,11 +771,10 @@ export default function SearchScreen({ navigation }) {
           </Text>
 
           <Text
-            className={`text-[13px] text-center mt-1.5 ${
-              isError
+            className={`text-[13px] text-center mt-1.5 ${isError
                 ? "text-[#ff8a8a]"
                 : "text-[#71809a]"
-            }`}
+              }`}
           >
             {isError
               ? info
