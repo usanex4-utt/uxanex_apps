@@ -1,5 +1,5 @@
-import React from "react";
-import { View, Text, Pressable, Image, ScrollView } from "react-native";
+import React, { useEffect, useRef } from "react";
+import { View, Text, Pressable, Image, ScrollView, Animated, Easing} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { absUrl } from "../../api/client";
 
@@ -85,8 +85,58 @@ export const ProfileStats = ({ stats, onPressFollowers, onPressConnected, onPres
   </View>
 );
 
-export const ProfileHero = ({ u, isMe, following, onEdit, onShare, onFollow, onChangePhoto, onMessage }) => {
+export const ProfileHero = ({
+  u,
+  isMe,
+  following,
+  onEdit,
+  onShare,
+  onFollow,
+  onChangePhoto,
+  onMessage,
+  animationKey,
+}) => {
   const size = 104;
+
+  const glow = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (!animationKey) return;
+
+    glow.stopAnimation();
+    glow.setValue(0);
+
+    const animation = Animated.sequence([
+      Animated.timing(glow, {
+        toValue: 1,
+        duration: 300,
+        easing: Easing.out(Easing.ease),
+        useNativeDriver: true,
+      }),
+      Animated.delay(100),
+      Animated.timing(glow, {
+        toValue: 0,
+        duration: 550,
+        easing: Easing.in(Easing.ease),
+        useNativeDriver: true,
+      }),
+    ]);
+
+    animation.start();
+    const streakStyle = {
+  opacity: glow,
+  transform: [
+    {
+      scaleX: glow.interpolate({
+        inputRange: [0, 1],
+        outputRange: [0.5, 1.5],
+      }),
+    },
+  ],
+};
+
+    return () => animation.stop();
+  }, [animationKey, glow]);
 
   return (
     <View className="items-center px-5 pt-2 pb-6 overflow-hidden">
