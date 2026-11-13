@@ -108,6 +108,91 @@ export const ProfileStats = ({
   </View>
 );
 
+/* Electric lightning on one side of DP */
+const ElectricSide = ({ side, glow }) => {
+  const isLeft = side === "left";
+
+  const segments = [
+    { top: 25, offset: 3, width: 24, rotate: isLeft ? "-24deg" : "24deg" },
+    { top: 36, offset: 9, width: 17, rotate: isLeft ? "32deg" : "-32deg" },
+    { top: 48, offset: 2, width: 25, rotate: isLeft ? "-30deg" : "30deg" },
+    { top: 61, offset: 9, width: 17, rotate: isLeft ? "28deg" : "-28deg" },
+    { top: 73, offset: 2, width: 24, rotate: isLeft ? "-22deg" : "22deg" },
+    { top: 84, offset: 10, width: 15, rotate: isLeft ? "30deg" : "-30deg" },
+  ];
+
+  return (
+    <View
+      pointerEvents="none"
+      style={{
+        position: "absolute",
+        top: 0,
+        bottom: 0,
+        width: 34,
+        [isLeft ? "left" : "right"]: 0,
+      }}
+    >
+      {segments.map((s, i) => (
+        <Animated.View
+          key={i}
+          style={{
+            position: "absolute",
+            top: s.top,
+            [isLeft ? "left" : "right"]: s.offset,
+            width: s.width,
+            height: i % 2 === 0 ? 3 : 2,
+            borderRadius: 5,
+            backgroundColor: i % 2 === 0 ? "#38bdf8" : "#bfdbfe",
+            shadowColor: "#1685ff",
+            shadowOpacity: 1,
+            shadowRadius: 9,
+            elevation: 8,
+            opacity: glow,
+            transform: [
+              { rotate: s.rotate },
+              {
+                scaleX: glow.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [0.25, 1.35],
+                }),
+              },
+            ],
+          }}
+        />
+      ))}
+
+      {/* Bright electric sparks */}
+      {[0, 1, 2, 3].map((i) => (
+        <Animated.View
+          key={`spark-${i}`}
+          style={{
+            position: "absolute",
+            top: 30 + i * 16,
+            [isLeft ? "left" : "right"]: i % 2 === 0 ? 0 : 20,
+            width: i % 2 === 0 ? 5 : 3,
+            height: i % 2 === 0 ? 5 : 3,
+            borderRadius: 10,
+            backgroundColor: "#e0f2fe",
+            shadowColor: "#1685ff",
+            shadowOpacity: 1,
+            shadowRadius: 10,
+            elevation: 10,
+            opacity: glow,
+            transform: [
+              {
+                scale: glow.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [0.2, 1.8],
+                }),
+              },
+            ],
+          }}
+        />
+      ))}
+    </View>
+  );
+};
+
 export const ProfileHero = ({
   u,
   isMe,
@@ -131,15 +216,28 @@ export const ProfileHero = ({
     const animation = Animated.sequence([
       Animated.timing(glow, {
         toValue: 1,
-        duration: 300,
+        duration: 250,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }),
+      Animated.delay(90),
+      Animated.timing(glow, {
+        toValue: 0.65,
+        duration: 180,
+        easing: Easing.inOut(Easing.ease),
+        useNativeDriver: true,
+      }),
+      Animated.timing(glow, {
+        toValue: 1,
+        duration: 130,
         easing: Easing.out(Easing.ease),
         useNativeDriver: true,
       }),
       Animated.delay(100),
       Animated.timing(glow, {
         toValue: 0,
-        duration: 550,
-        easing: Easing.in(Easing.ease),
+        duration: 650,
+        easing: Easing.out(Easing.ease),
         useNativeDriver: true,
       }),
     ]);
@@ -148,18 +246,6 @@ export const ProfileHero = ({
 
     return () => animation.stop();
   }, [animationKey, glow]);
-
-  const streakStyle = {
-    opacity: glow,
-    transform: [
-      {
-        scaleX: glow.interpolate({
-          inputRange: [0, 1],
-          outputRange: [0.5, 1.5],
-        }),
-      },
-    ],
-  };
 
   return (
     <View className="items-center px-5 pt-2 pb-6 overflow-hidden">
@@ -173,131 +259,16 @@ export const ProfileHero = ({
         className="absolute -top-16 -right-20 w-56 h-56 rounded-full bg-[#7a5cff]/12"
       />
 
-      {/* DP with left-right electric blue animation */}
+      {/* DP with left and right electric lightning */}
       <Pressable
         onPress={isMe ? onChangePhoto : undefined}
         className="items-center justify-center active:opacity-90"
-        style={{ width: 124, height: 104 }}
+        style={{ width: 164, height: 112 }}
       >
-        {/* Left electric streaks */}
-        <Animated.View
-          pointerEvents="none"
-          style={[
-            {
-              position: "absolute",
-              left: 0,
-              top: 30,
-              width: 13,
-              height: 3,
-              borderRadius: 5,
-              backgroundColor: "#38bdf8",
-              shadowColor: "#1685ff",
-              shadowOpacity: 1,
-              shadowRadius: 8,
-              elevation: 5,
-            },
-            streakStyle,
-          ]}
-        />
-        <Animated.View
-          pointerEvents="none"
-          style={[
-            {
-              position: "absolute",
-              left: 1,
-              top: 50,
-              width: 10,
-              height: 3,
-              borderRadius: 5,
-              backgroundColor: "#60a5fa",
-              shadowColor: "#1685ff",
-              shadowOpacity: 1,
-              shadowRadius: 8,
-              elevation: 5,
-            },
-            streakStyle,
-          ]}
-        />
-        <Animated.View
-          pointerEvents="none"
-          style={[
-            {
-              position: "absolute",
-              left: 0,
-              top: 70,
-              width: 13,
-              height: 3,
-              borderRadius: 5,
-              backgroundColor: "#38bdf8",
-              shadowColor: "#1685ff",
-              shadowOpacity: 1,
-              shadowRadius: 8,
-              elevation: 5,
-            },
-            streakStyle,
-          ]}
-        />
+        <ElectricSide side="left" glow={glow} />
+        <ElectricSide side="right" glow={glow} />
 
-        {/* Right electric streaks */}
-        <Animated.View
-          pointerEvents="none"
-          style={[
-            {
-              position: "absolute",
-              right: 0,
-              top: 30,
-              width: 13,
-              height: 3,
-              borderRadius: 5,
-              backgroundColor: "#38bdf8",
-              shadowColor: "#1685ff",
-              shadowOpacity: 1,
-              shadowRadius: 8,
-              elevation: 5,
-            },
-            streakStyle,
-          ]}
-        />
-        <Animated.View
-          pointerEvents="none"
-          style={[
-            {
-              position: "absolute",
-              right: 1,
-              top: 50,
-              width: 10,
-              height: 3,
-              borderRadius: 5,
-              backgroundColor: "#60a5fa",
-              shadowColor: "#1685ff",
-              shadowOpacity: 1,
-              shadowRadius: 8,
-              elevation: 5,
-            },
-            streakStyle,
-          ]}
-        />
-        <Animated.View
-          pointerEvents="none"
-          style={[
-            {
-              position: "absolute",
-              right: 0,
-              top: 70,
-              width: 13,
-              height: 3,
-              borderRadius: 5,
-              backgroundColor: "#38bdf8",
-              shadowColor: "#1685ff",
-              shadowOpacity: 1,
-              shadowRadius: 8,
-              elevation: 5,
-            },
-            streakStyle,
-          ]}
-        />
-
-        {/* Original avatar */}
+        {/* Original avatar - no circular lightning */}
         <View
           className="rounded-full p-[3px] bg-brand"
           style={{ width: size, height: size }}
@@ -319,7 +290,7 @@ export const ProfileHero = ({
         {isMe && (
           <View
             className="absolute bottom-1 w-8 h-8 rounded-full bg-brand items-center justify-center border-[3px] border-[#050b18]"
-            style={{ right: 10 }}
+            style={{ right: 22 }}
           >
             <Ionicons name="camera" size={14} color="#fff" />
           </View>
