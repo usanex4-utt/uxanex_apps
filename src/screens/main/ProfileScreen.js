@@ -374,8 +374,9 @@ export default function ProfileScreen({ navigation, route }) {
           showsVerticalScrollIndicator={false}
         >
           <ProfileHero
-            u={u}
-            isMe={isMe}
+           u={u}
+           animationKey={profileOpenKey}
+           isMe={isMe}
             following={following}
             onEdit={openEdit}
             onShare={sharePro}
