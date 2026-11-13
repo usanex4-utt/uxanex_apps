@@ -51,6 +51,7 @@ export default function ProfileScreen({ navigation, route }) {
   });
   const [saving, setSaving] = useState(false);
   const [videoFocused, setVideoFocused] = useState(true);
+  const [profileOpenKey, setProfileOpenKey] = useState(0);
   const [toast, setToast] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
@@ -118,6 +119,11 @@ export default function ProfileScreen({ navigation, route }) {
       };
     }, [load, loadTab])
   );
+  useFocusEffect(
+  useCallback(() => {
+    setProfileOpenKey((prev) => prev + 1);
+  }, [])
+);
 
   const openEdit = useCallback(() => {
     const x = p?.user || me || {};
