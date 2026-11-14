@@ -3,7 +3,7 @@ import { View, Text, Pressable, ScrollView, KeyboardAvoidingView, Platform, Imag
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "../../context/AuthContext";
 import { Brand, Field, Banner, PrimaryButton } from "../../components/ui";
-import Logo from "../../../assets/logo.jpeg";
+import Logo from "../../../assets/IMG-20261113-WA4533.jpg";
 
 export default function LoginScreen({ navigation }) {
   const { signIn } = useAuth();
