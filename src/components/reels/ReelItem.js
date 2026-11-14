@@ -11,7 +11,7 @@ import { Video, ResizeMode } from "expo-av";
 import { Ionicons } from "@expo/vector-icons";
 import { absUrl } from "../../api/client";
 import { Avatar } from "../ui";
-import Logo from "../../../assets/logo.jpeg";
+import Logo from "../../../assets/IMG-20261113-WA4533.jpg";
 
 const fmt = (value) => {
   const n = Number(value) || 0;
