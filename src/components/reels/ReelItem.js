@@ -99,7 +99,7 @@ const CaptionBlock = memo(function CaptionBlock({
       )}
 
       {expanded ? (
-        <View className="mt-2">
+        <View className="mt-1">
           {category ? (
             <View className="self-start px-2.5 py-1 rounded-full bg-white/12 border border-white/15 mb-2">
               <Text className="text-white/85 text-[11px] font-semibold capitalize">
