@@ -346,9 +346,8 @@ function ReelItem(props) {
               style={{
                 color: "#FFFFFF",
                 fontSize: 12,
-                fontWeight: "800",
-                letterSpacing: 0.4,
-                textTransform: "uppercase",
+                fontWeight: "600",
+                letterSpacing: 0.1,
                 textShadowColor: "rgba(0,0,0,0.8)",
                 textShadowOffset: { width: 0, height: 1 },
                 textShadowRadius: 3,
