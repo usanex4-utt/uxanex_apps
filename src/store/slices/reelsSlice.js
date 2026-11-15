@@ -161,15 +161,12 @@ export const toggleReelLike = createAsyncThunk(
 
     try {
       const d = on
-        ? await api(EP.reelRating(id), {
-            method: "POST",
-            body: {
-              rating: 3,
-            },
-          })
-        : await api(EP.reelRating(id), {
-            method: "DELETE",
-          });
+       ? await api(`/api/reels/${id}/like`, {
+          method: "POST",
+        })
+  : await api(`/api/reels/${id}/like`, {
+      method: "DELETE",
+    });
 
       return {
         id,
