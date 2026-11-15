@@ -6,7 +6,7 @@ import { api } from "../../api/client";
 import { EP } from "../../api/endpoints";
 import useOtpTimer from "../../components/useOtpTimer";
 import { Brand, Field, Banner, PrimaryButton, SecondaryButton } from "../../components/ui";
-import Logo from "../../../assets/IMG-20261113-WA4533.jpg";
+import Logo from "../../../assets/utanexa_u_logo_bold_transparent.png";
 
 export default function ForgotPasswordScreen({ navigation }) {
   const [step, setStep] = useState(1);
