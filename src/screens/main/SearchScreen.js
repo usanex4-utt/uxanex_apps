@@ -1,4 +1,3 @@
-
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   View,
@@ -69,22 +68,26 @@ const fmt = (n) => {
 
 /* ── Action Button ── */
 
-const Action = ({ u, onConnect, onAccept, onCancel }) => {
+const Action = ({ u, onConnect, onAccept, onCancel, onMessage }) => {
   const s = status(u);
 
   if (s === "self") return null;
 
+  // 👇 FIX #1: "Connected" ko Pressable banaya taaki tap pe Chat khule
   if (s === "connected") {
     return (
-      <View className="flex-row items-center h-9 pl-2.5 pr-3.5 rounded-full bg-[#3bb273]/12 border border-[#3bb273]/35">
+      <Pressable
+        onPress={() => onMessage(u)}
+        className="flex-row items-center h-9 pl-2.5 pr-3.5 rounded-full bg-[#3bb273]/12 border border-[#3bb273]/35 active:opacity-80"
+      >
         <View className="w-5 h-5 rounded-full bg-[#3bb273] items-center justify-center">
-          <Ionicons name="checkmark" size={13} color="#fff" />
+          <Ionicons name="chatbubble-ellipses" size={12} color="#fff" />
         </View>
 
         <Text className="text-[#5fdc9d] text-[12px] font-bold ml-1.5">
-          Connected
+          Message
         </Text>
-      </View>
+      </Pressable>
     );
   }
 
@@ -257,40 +260,26 @@ export default function SearchScreen({ navigation }) {
 
   const measuredGridWidth = gridWidth || width;
 
-  // Exactly 3 columns
-  const tileSize = Math.floor(
-    measuredGridWidth / GRID_COLS
-  );
-
-  const tileHeight = Math.floor(
-    tileSize * TILE_RATIO
-  );
+  const tileSize = Math.floor(measuredGridWidth / GRID_COLS);
+  const tileHeight = Math.floor(tileSize * TILE_RATIO);
 
   const handleGridLayout = useCallback((event) => {
-    const nextWidth = Math.floor(
-      event.nativeEvent.layout.width
-    );
+    const nextWidth = Math.floor(event.nativeEvent.layout.width);
 
     setGridWidth((currentWidth) =>
-      currentWidth === nextWidth
-        ? currentWidth
-        : nextWidth
+      currentWidth === nextWidth ? currentWidth : nextWidth
     );
   }, []);
 
   /* ── Reel Visibility Tracking ── */
 
-  const onViewableItemsChanged = useRef(
-    ({ viewableItems }) => {
-      const ids = new Set(
-        (viewableItems || [])
-          .map((v) => v.item?.id)
-          .filter(Boolean)
-      );
+  const onViewableItemsChanged = useRef(({ viewableItems }) => {
+    const ids = new Set(
+      (viewableItems || []).map((v) => v.item?.id).filter(Boolean)
+    );
 
-      setVisibleIds(ids);
-    }
-  ).current;
+    setVisibleIds(ids);
+  }).current;
 
   const viewabilityConfig = useRef({
     itemVisiblePercentThreshold: 40,
@@ -304,14 +293,11 @@ export default function SearchScreen({ navigation }) {
   );
 
   useEffect(() => {
-    const sub = AppState.addEventListener(
-      "change",
-      (state) => {
-        if (state !== "active") {
-          setVisibleIds(new Set());
-        }
+    const sub = AppState.addEventListener("change", (state) => {
+      if (state !== "active") {
+        setVisibleIds(new Set());
       }
-    );
+    });
 
     return () => sub.remove();
   }, []);
@@ -373,10 +359,7 @@ export default function SearchScreen({ navigation }) {
 
       if (searchIdRef.current !== currentSearchId) return;
 
-      const list =
-        d?.users ||
-        d?.results ||
-        (Array.isArray(d) ? d : []);
+      const list = d?.users || d?.results || (Array.isArray(d) ? d : []);
 
       setUsers(list);
 
@@ -442,7 +425,7 @@ export default function SearchScreen({ navigation }) {
       );
     } catch (e) {
       patch(u.user_id, prev);
-      setInfo(e.message);
+      setInfo(e.message || "Could not send request");
     }
   };
 
@@ -473,33 +456,29 @@ export default function SearchScreen({ navigation }) {
       const r = await api(EP.connectionRequests);
 
       const req = (r.requests || []).find(
-        (x) => x.sender_user_id === u.user_id
+        (x) => x.sender_user_id === u.user_id || x.sender_id === u.user_id
       );
 
       if (!req) {
-        return setInfo(
-          "Request not found. Pull to refresh in Alerts."
-        );
+        return setInfo("Request not found. Pull to refresh in Alerts.");
       }
 
-      await api(
-        EP.connectionAccept(req.request_id),
-        { method: "POST" }
-      );
+      await api(EP.connectionAccept(req.request_id || req.id), {
+        method: "POST",
+      });
 
       patch(u.user_id, "connected");
     } catch (e) {
-      setInfo(e.message);
+      setInfo(e.message || "Could not accept request");
     }
   };
 
   /* ── Open Profile ── */
 
   const openProfile = (u) => {
-    if (
-      status(u) === "connected" ||
-      status(u) === "self"
-    ) {
+    // 👇 FIX #2: Trailing navigate hata diya — ab sirf connected/self pe khulega
+    if (status(u) === "connected" || status(u) === "self") {
+      if (!u?.user_id) return;
       navigation.navigate("UserProfile", {
         userId: u.user_id,
       });
@@ -508,10 +487,13 @@ export default function SearchScreen({ navigation }) {
         "Profiles are visible only to connected users. Send a request first."
       );
     }
+  };
+
+  /* ── Open Chat (for connected users) ── */
+
+  const openChat = (u) => {
     if (!u?.user_id) return;
-    navigation.navigate("UserProfile", {
-      userId: u.user_id,
-    });
+    navigation.navigate("Chat", { user: u });
   };
 
   /* ── Open Reel ── */
@@ -534,20 +516,17 @@ export default function SearchScreen({ navigation }) {
 
   const showExplore = !q.trim();
 
-  const showSkeletons =
-    (searching || loading) && users.length === 0;
+  const showSkeletons = (searching || loading) && users.length === 0;
 
   const noResults =
     !searching && !loading && !!q.trim() && users.length === 0;
 
-  const isError =
-    !!info && info !== "No users found";
+  const isError = !!info && info !== "No users found";
 
   /* ── UI ── */
 
   return (
     <SafeAreaView className="flex-1 bg-bg" edges={["top"]}>
-
       {/* Search Header */}
 
       <View className="px-4 pt-2 pb-3">
@@ -556,11 +535,7 @@ export default function SearchScreen({ navigation }) {
         </Text>
 
         <View className="flex-row items-center h-12 px-3.5 rounded-2xl bg-[#0f1621] border border-white/10">
-          <Ionicons
-            name="search"
-            size={18}
-            color="#7e8795"
-          />
+          <Ionicons name="search" size={18} color="#7e8795" />
 
           <TextInput
             value={q}
@@ -578,18 +553,9 @@ export default function SearchScreen({ navigation }) {
                 Keyboard.dismiss();
                 setQ("");
               }}
-              hitSlop={{
-                top: 15,
-                bottom: 15,
-                left: 15,
-                right: 15,
-              }}
+              hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
             >
-              <Ionicons
-                name="close-circle"
-                size={18}
-                color="#5d6a80"
-              />
+              <Ionicons name="close-circle" size={18} color="#5d6a80" />
             </Pressable>
           )}
         </View>
@@ -599,41 +565,26 @@ export default function SearchScreen({ navigation }) {
 
       {showExplore ? (
         reelsLoading ? (
-
           /* ── Reel Skeleton Loading ── */
-
           <ScrollView
             style={{ flex: 1 }}
             onLayout={handleGridLayout}
             showsVerticalScrollIndicator={false}
-            contentContainerStyle={{
-              paddingBottom: 40,
-            }}
+            contentContainerStyle={{ paddingBottom: 40 }}
           >
             <View className="flex-row items-center justify-between px-4 mb-2 mt-1">
               <View className="flex-row items-center">
-                <Ionicons
-                  name="compass-outline"
-                  size={16}
-                  color="#247cff"
-                />
-
+                <Ionicons name="compass-outline" size={16} color="#247cff" />
                 <Text className="text-white text-[15px] font-extrabold ml-2">
                   Explore
                 </Text>
               </View>
             </View>
 
-            <ReelGridSkeleton
-              tileWidth={tileSize}
-              tileHeight={tileHeight}
-            />
+            <ReelGridSkeleton tileWidth={tileSize} tileHeight={tileHeight} />
           </ScrollView>
-
         ) : (
-
           /* ── Actual Reel Grid ── */
-
           <FlatList
             key="explore-grid"
             style={{ flex: 1 }}
@@ -641,9 +592,7 @@ export default function SearchScreen({ navigation }) {
             data={reels}
             numColumns={GRID_COLS}
             keyExtractor={(r) => String(r.id)}
-            contentContainerStyle={{
-              paddingBottom: 40,
-            }}
+            contentContainerStyle={{ paddingBottom: 40 }}
             showsVerticalScrollIndicator={false}
             onViewableItemsChanged={onViewableItemsChanged}
             viewabilityConfig={viewabilityConfig}
@@ -664,12 +613,7 @@ export default function SearchScreen({ navigation }) {
             ListHeaderComponent={
               <View className="flex-row items-center justify-between px-4 mb-2 mt-1">
                 <View className="flex-row items-center">
-                  <Ionicons
-                    name="compass-outline"
-                    size={16}
-                    color="#247cff"
-                  />
-
+                  <Ionicons name="compass-outline" size={16} color="#247cff" />
                   <Text className="text-white text-[15px] font-extrabold ml-2">
                     Explore
                   </Text>
@@ -685,11 +629,7 @@ export default function SearchScreen({ navigation }) {
             ListEmptyComponent={
               <View className="items-center pt-16 px-10">
                 <View className="w-20 h-20 rounded-full bg-[#0a0f17] border border-white/10 items-center justify-center mb-4">
-                  <Ionicons
-                    name="film-outline"
-                    size={32}
-                    color="#5d6a80"
-                  />
+                  <Ionicons name="film-outline" size={32} color="#5d6a80" />
                 </View>
 
                 <Text className="text-white text-[17px] font-bold">
@@ -701,17 +641,10 @@ export default function SearchScreen({ navigation }) {
                 </Text>
 
                 <Pressable
-                  onPress={() =>
-                    navigation.navigate("ReelUpload")
-                  }
+                  onPress={() => navigation.navigate("ReelUpload")}
                   className="mt-5 h-11 px-6 rounded-full bg-brand flex-row items-center active:opacity-80"
                 >
-                  <Ionicons
-                    name="add"
-                    size={18}
-                    color="#fff"
-                  />
-
+                  <Ionicons name="add" size={18} color="#fff" />
                   <Text className="text-white font-bold ml-1.5 text-[13px]">
                     Create a reel
                   </Text>
@@ -728,13 +661,9 @@ export default function SearchScreen({ navigation }) {
               />
             )}
           />
-
         )
-
       ) : showSkeletons ? (
-
         /* ── Search User Skeleton ── */
-
         <ScrollView
           contentContainerClassName="px-4 pt-1 pb-10"
           showsVerticalScrollIndicator={false}
@@ -743,11 +672,8 @@ export default function SearchScreen({ navigation }) {
             <SearchSkeleton key={i} />
           ))}
         </ScrollView>
-
       ) : noResults ? (
-
         /* ── No Results ── */
-
         <View className="items-center pt-12 px-10">
           <View
             className={`w-20 h-20 rounded-full bg-[#0a0f17] border items-center justify-center ${isError
@@ -756,11 +682,7 @@ export default function SearchScreen({ navigation }) {
               }`}
           >
             <Ionicons
-              name={
-                isError
-                  ? "alert-circle-outline"
-                  : "person-outline"
-              }
+              name={isError ? "alert-circle-outline" : "person-outline"}
               size={30}
               color={isError ? "#ff6b6b" : "#5d6a80"}
             />
@@ -771,9 +693,7 @@ export default function SearchScreen({ navigation }) {
           </Text>
 
           <Text
-            className={`text-[13px] text-center mt-1.5 ${isError
-                ? "text-[#ff8a8a]"
-                : "text-[#71809a]"
+            className={`text-[13px] text-center mt-1.5 ${isError ? "text-[#ff8a8a]" : "text-[#71809a]"
               }`}
           >
             {isError
@@ -781,24 +701,18 @@ export default function SearchScreen({ navigation }) {
               : "Check the spelling or try their username or ID."}
           </Text>
         </View>
-
       ) : (
-
         /* ── Search User List ── */
-
         <FlatList
           key="search-list"
           data={users}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
-          keyExtractor={(u, i) =>
-            String(u.user_id || i)
-          }
+          keyExtractor={(u, i) => String(u.user_id || i)}
           contentContainerClassName="px-4 pt-1 pb-10"
           renderItem={({ item: u }) => (
             <View className="mb-3.5 rounded-[26px] bg-[#04070b] pb-1.5 shadow-xl shadow-black/80">
               <View className="flex-row items-center p-3.5 rounded-[26px] bg-[#0f1621] border border-white/6 border-t-white/15">
-
                 <Pressable
                   onPress={() => setViewer(u)}
                   className="active:opacity-80"
@@ -838,8 +752,8 @@ export default function SearchScreen({ navigation }) {
                   onConnect={connect}
                   onAccept={accept}
                   onCancel={cancel}
+                  onMessage={openChat} // 👈 FIX #3: Chat open karne ke liye prop pass kiya
                 />
-
               </View>
             </View>
           )}
@@ -860,28 +774,21 @@ export default function SearchScreen({ navigation }) {
         >
           <View className="w-[86%] aspect-square items-center justify-center">
             <View className="absolute w-full h-full rounded-full bg-[#2f7cff]/8" />
-
             <View className="absolute w-[92%] h-[92%] rounded-full bg-[#2f7cff]/10" />
 
             <View className="w-[80%] aspect-square rounded-full p-1.5 bg-[#2f7cff]/60">
               <View className="flex-1 rounded-full overflow-hidden bg-[#11161e] border-[5px] border-[#070b12] items-center justify-center">
-
                 {viewer?.profile_photo ? (
                   <Image
-                    source={{
-                      uri: absUrl(viewer.profile_photo),
-                    }}
+                    source={{ uri: absUrl(viewer.profile_photo) }}
                     className="w-full h-full"
                     resizeMode="cover"
                   />
                 ) : (
                   <Text className="text-white text-7xl font-extrabold">
-                    {(viewer?.name || "U")
-                      .charAt(0)
-                      .toUpperCase()}
+                    {(viewer?.name || "U").charAt(0).toUpperCase()}
                   </Text>
                 )}
-
               </View>
             </View>
           </View>
@@ -905,7 +812,6 @@ export default function SearchScreen({ navigation }) {
           </Text>
         </Pressable>
       </Modal>
-
     </SafeAreaView>
   );
 }

@@ -10,18 +10,28 @@ import {
   AppState,
   Alert,
   Share,
+  Platform,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import ReelSkeleton from "../../components/reels/ReelSkeleton";
+import * as Clipboard from "expo-clipboard";
 import { useFocusEffect, useRoute } from "@react-navigation/native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useDispatch, useSelector } from "react-redux";
-import { api } from "../../api/client";
+import * as FileSystem from "expo-file-system";
+import * as MediaLibrary from "expo-media-library";
+
+import { api, absUrl } from "../../api/client";
 import { EP } from "../../api/endpoints";
 import { useAuth } from "../../context/AuthContext";
+
+import ReelSkeleton from "../../components/reels/ReelSkeleton";
 import ReelItem from "../../components/reels/ReelItem";
-import { ReelCommentsSheet, ReelMenuSheet } from "../../components/reels/ReelSheets";
+import {
+  ReelCommentsSheet,
+  ReelMenuSheet,
+} from "../../components/reels/ReelSheets";
+
 import {
   fetchReelsFeed,
   fetchSavedReels,
@@ -41,7 +51,9 @@ import {
   selectFollowStates,
 } from "../../store/selectors";
 
-const SESSION_ID = `s${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
+const SESSION_ID = `s${Date.now().toString(36)}${Math.random()
+  .toString(36)
+  .slice(2, 8)}`;
 
 export default function ReelsScreen({ navigation }) {
   const dispatch = useDispatch();
@@ -72,6 +84,7 @@ export default function ReelsScreen({ navigation }) {
   const [cLoading, setCLoading] = useState(false);
   const [draft, setDraft] = useState("");
   const [expandedCaptions, setExpandedCaptions] = useState({});
+  const [downloadingId, setDownloadingId] = useState(null);
 
   const progress = useRef({});
   const fetching = useRef(false);
@@ -98,8 +111,8 @@ export default function ReelsScreen({ navigation }) {
   const silenceAllVideos = useCallback(() => {
     Object.values(videoRefs.current).forEach((ref) => {
       if (ref) {
-        ref.pauseAsync().catch(() => { });
-        ref.setIsMutedAsync(true).catch(() => { });
+        ref.pauseAsync().catch(() => {});
+        ref.setIsMutedAsync(true).catch(() => {});
       }
     });
   }, []);
@@ -110,7 +123,7 @@ export default function ReelsScreen({ navigation }) {
       fetching.current = true;
       try {
         await dispatch(fetchReelsFeed({ reset })).unwrap();
-      } catch { }
+      } catch {}
       fetching.current = false;
     },
     [dispatch]
@@ -138,7 +151,7 @@ export default function ReelsScreen({ navigation }) {
         source: "feed",
       },
       silent401: true,
-    }).catch(() => { });
+    }).catch(() => {});
     progress.current[id] = { pos: 0, dur: p.dur };
   }, []);
 
@@ -176,10 +189,9 @@ export default function ReelsScreen({ navigation }) {
       return;
     }
 
-    // Not in feed yet → prepend it
     if (pending.reel) {
       dispatch(prependReelToFeed(pending.reel));
-      pendingReelRef.current = { id: pending.id }; // keep id so next render finds it
+      pendingReelRef.current = { id: pending.id };
     }
   }, [reels, h, dispatch]);
 
@@ -190,8 +202,8 @@ export default function ReelsScreen({ navigation }) {
 
       const activeVideo = videoRefs.current[activeRef.current.id];
       if (activeVideo && !pausedRef.current) {
-        activeVideo.setIsMutedAsync(mutedRef.current).catch(() => { });
-        activeVideo.playAsync().catch(() => { });
+        activeVideo.setIsMutedAsync(mutedRef.current).catch(() => {});
+        activeVideo.playAsync().catch(() => {});
       }
 
       const hasPending =
@@ -237,8 +249,8 @@ export default function ReelsScreen({ navigation }) {
       } else {
         const ref = videoRefs.current[activeRef.current.id];
         if (ref && focusedRef.current && !pausedRef.current) {
-          ref.setIsMutedAsync(mutedRef.current).catch(() => { });
-          ref.playAsync().catch(() => { });
+          ref.setIsMutedAsync(mutedRef.current).catch(() => {});
+          ref.playAsync().catch(() => {});
         }
       }
     });
@@ -258,7 +270,10 @@ export default function ReelsScreen({ navigation }) {
         const ref = videoRefs.current[reels[0].id];
         if (ref) {
           lastAutoAdvanceId.current = null;
-          ref.setPositionAsync(0).then(() => ref.playAsync()).catch(() => { });
+          ref
+            .setPositionAsync(0)
+            .then(() => ref.playAsync())
+            .catch(() => {});
         }
       }
     },
@@ -274,9 +289,9 @@ export default function ReelsScreen({ navigation }) {
       if (oldId) {
         const oldRef = videoRefs.current[oldId];
         if (oldRef) {
-          oldRef.pauseAsync().catch(() => { });
-          oldRef.setIsMutedAsync(true).catch(() => { });
-          oldRef.setPositionAsync(0).catch(() => { });
+          oldRef.pauseAsync().catch(() => {});
+          oldRef.setIsMutedAsync(true).catch(() => {});
+          oldRef.setPositionAsync(0).catch(() => {});
         }
       }
       flushWatch();
@@ -286,9 +301,9 @@ export default function ReelsScreen({ navigation }) {
       lastAutoAdvanceId.current = null;
       const newRef = videoRefs.current[newId];
       if (newRef) {
-        newRef.setPositionAsync(0).catch(() => { });
-        newRef.setIsMutedAsync(mutedRef.current).catch(() => { });
-        newRef.playAsync().catch(() => { });
+        newRef.setPositionAsync(0).catch(() => {});
+        newRef.setIsMutedAsync(mutedRef.current).catch(() => {});
+        newRef.playAsync().catch(() => {});
       }
     }
     activeRef.current = { id: newId, index: v.index ?? 0 };
@@ -305,37 +320,40 @@ export default function ReelsScreen({ navigation }) {
       fetchedFollow.current[c.user_id] = true;
       api(EP.followStatus(c.user_id), { silent401: true })
         .then((d) => {
-          const st = d?.status || (d?.is_following ? "following" : "not_following");
+          const st =
+            d?.status || (d?.is_following ? "following" : "not_following");
           dispatch(setFollowState({ userId: c.user_id, state: st }));
         })
-        .catch(() => { });
+        .catch(() => {});
     }
     if (!fetchedStatus.current[r.id]) {
       fetchedStatus.current[r.id] = true;
       api(EP.reelStatus(r.id), { silent401: true })
         .then((d) => {
-          if (typeof d?.rating === "number") dispatch(setLiked({ id: r.id, on: d.rating >= 2 }));
+          if (typeof d?.rating === "number")
+            dispatch(setLiked({ id: r.id, on: d.rating >= 2 }));
           if (d?.saved) dispatch(setSaved({ id: r.id, save: true }));
         })
-        .catch(() => { });
+        .catch(() => {});
     }
   }, [active, reels, dispatch]);
 
   const openUser = useCallback(
     (publicId) => {
       if (!publicId) return;
-      if (publicId === user?.user_id) navigation.navigate("Tabs", { screen: "Profile" });
+      if (publicId === user?.user_id)
+        navigation.navigate("Tabs", { screen: "Profile" });
       else navigation.navigate("UserProfile", { userId: publicId });
     },
     [navigation, user?.user_id]
   );
 
-  const toggleMute = () => {
+  const toggleMute = useCallback(() => {
     setMuted((m) => {
       const next = !m;
       mutedRef.current = next;
       const ref = videoRefs.current[activeRef.current.id];
-      if (ref) ref.setIsMutedAsync(next).catch(() => { });
+      if (ref) ref.setIsMutedAsync(next).catch(() => {});
       return next;
     });
     flashAnim.stopAnimation();
@@ -346,21 +364,24 @@ export default function ReelsScreen({ navigation }) {
       delay: 350,
       useNativeDriver: true,
     }).start();
-  };
+  }, [flashAnim]);
 
-  const flashPause = (icon) => {
-    setPauseIcon(icon);
-    pauseAnim.stopAnimation();
-    pauseAnim.setValue(1);
-    Animated.timing(pauseAnim, {
-      toValue: 0,
-      duration: 300,
-      delay: 500,
-      useNativeDriver: true,
-    }).start(({ finished }) => {
-      if (finished) setPauseIcon(null);
-    });
-  };
+  const flashPause = useCallback(
+    (icon) => {
+      setPauseIcon(icon);
+      pauseAnim.stopAnimation();
+      pauseAnim.setValue(1);
+      Animated.timing(pauseAnim, {
+        toValue: 0,
+        duration: 300,
+        delay: 500,
+        useNativeDriver: true,
+      }).start(({ finished }) => {
+        if (finished) setPauseIcon(null);
+      });
+    },
+    [pauseAnim]
+  );
 
   const togglePause = useCallback(() => {
     const next = !pausedRef.current;
@@ -369,15 +390,15 @@ export default function ReelsScreen({ navigation }) {
     flashPause(next ? "play" : "pause");
     const ref = videoRefs.current[activeRef.current.id];
     if (ref) {
-      if (next) ref.pauseAsync().catch(() => { });
-      else ref.playAsync().catch(() => { });
+      if (next) ref.pauseAsync().catch(() => {});
+      else ref.playAsync().catch(() => {});
     }
-  }, []);
+  }, [flashPause]);
 
   const togglePauseRef = useRef(togglePause);
   togglePauseRef.current = togglePause;
 
-  const playHeartAnim = () => {
+  const playHeartAnim = useCallback(() => {
     heartScale.setValue(0);
     heartOpacity.setValue(1);
     Animated.parallel([
@@ -404,13 +425,15 @@ export default function ReelsScreen({ navigation }) {
         }),
       ]),
     ]).start();
-  };
+  }, [heartScale, heartOpacity]);
 
   const setLike = useCallback(
     (reel, on) => {
-      dispatch(toggleReelLike({ reel, on })).unwrap().catch((e) => {
-        Alert.alert("Could not update like", e?.message || "Try again");
-      });
+      dispatch(toggleReelLike({ reel, on }))
+        .unwrap()
+        .catch((e) => {
+          Alert.alert("Could not update like", e?.message || "Try again");
+        });
     },
     [dispatch]
   );
@@ -436,7 +459,7 @@ export default function ReelsScreen({ navigation }) {
         }, 280);
       }
     },
-    [liked, setLike]
+    [liked, playHeartAnim, setLike]
   );
 
   const toggleFollow = useCallback(
@@ -465,32 +488,233 @@ export default function ReelsScreen({ navigation }) {
 
   const toggleSave = useCallback(
     (reel) => {
-      dispatch(toggleReelSave({ reel, save: !saved[reel.id] })).unwrap().catch((e) => {
-        Alert.alert("Failed", e?.message || "Try again");
-      });
+      dispatch(toggleReelSave({ reel, save: !saved[reel.id] }))
+        .unwrap()
+        .catch((e) => {
+          Alert.alert("Failed", e?.message || "Try again");
+        });
     },
     [saved, dispatch]
   );
 
-  const share = useCallback(
-    async (reel) => {
+  // ── Share (direct / repeat) ────────────────────
+  const handleShare = useCallback(
+    async (reel, type = "direct") => {
+      if (!reel?.id) return;
       try {
-        const r = await Share.share({
-          message: `${reel.caption ? reel.caption + "\n" : ""}${reel.video_url}`,
+        // Optimistic count bump
+        dispatch(
+          patchReel({
+            id: reel.id,
+            fields: { share_count: (reel.share_count || 0) + 1 },
+          })
+        );
+
+        const d = await api(EP.reelShare(reel.id), {
+          method: "POST",
+          body: { share_type: type },
         });
-        if (r.action === Share.sharedAction) {
-          const d = await api(EP.reelShare(reel.id), {
-            method: "POST",
-            body: { share_type: "native" },
-          });
-          if (typeof d.share_count === "number") {
-            dispatch(patchReel({ id: reel.id, fields: { share_count: d.share_count } }));
-          }
+
+        if (typeof d?.share_count === "number") {
+          dispatch(
+            patchReel({
+              id: reel.id,
+              fields: { share_count: d.share_count },
+            })
+          );
         }
-      } catch { }
+
+        if (type === "direct") {
+          const url = absUrl(reel.video_url);
+          const msg = `Check out this reel on UtaNexa: ${url}`;
+          if (Platform.OS === "web") {
+            if (typeof navigator !== "undefined" && navigator.share) {
+              try {
+                await navigator.share({ title: "UtaNexa", text: msg });
+              } catch {}
+            } else {
+              await Clipboard.setStringAsync(msg);
+              Alert.alert("Link copied", "Reel link copied to clipboard.");
+            }
+          } else {
+            await Share.share({ message: msg });
+          }
+        } else {
+          Alert.alert("Reshared", "This reel has been reshared to your feed.");
+        }
+      } catch (e) {
+        dispatch(
+          patchReel({
+            id: reel.id,
+            fields: { share_count: Math.max(0, (reel.share_count || 0) - 1) },
+          })
+        );
+        Alert.alert("Share failed", e?.message || "Please try again.");
+      }
     },
     [dispatch]
   );
+
+  // ── Download ───────────────────────────────────
+ 
+  // ── Download Reel ──────────────────────────────
+  const handleDownload = useCallback(
+    async (reel) => {
+      if (!reel?.id || downloadingId !== null) return;
+
+      setDownloadingId(reel.id);
+
+      try {
+        // 1. Backend se download URL fetch karo
+        const d = await api(EP.reelDownload(reel.id), {
+          method: "POST",
+        });
+
+        if (!d?.success || !d?.download_url) {
+          throw new Error("Download URL not received from server.");
+        }
+
+        const url = d.download_url;
+        const filename =
+          d.filename || `utanexa-reel-${reel.id}.mp4`;
+
+        // 2. Redux download count update
+        dispatch(
+          patchReel({
+            id: reel.id,
+            fields: {
+              download_count:
+                d.download_count ??
+                (reel.download_count || 0) + 1,
+            },
+          })
+        );
+
+        // 3. WEB DOWNLOAD
+        if (Platform.OS === "web") {
+          try {
+            const response = await fetch(url, {
+              method: "GET",
+              mode: "cors",
+            });
+
+            if (!response.ok) {
+              throw new Error(
+                `Cloudinary error: HTTP ${response.status}`
+              );
+            }
+
+            const blob = await response.blob();
+
+            if (!blob.size) {
+              throw new Error("Downloaded video is empty.");
+            }
+
+            const blobUrl = window.URL.createObjectURL(blob);
+
+            const link = document.createElement("a");
+            link.href = blobUrl;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            setTimeout(() => {
+              window.URL.revokeObjectURL(blobUrl);
+            }, 3000);
+
+            Alert.alert("Success", "Reel downloaded successfully!");
+          } catch (error) {
+            console.error("Web download error:", error);
+
+            // CORS fallback: open Cloudinary URL
+            window.open(url, "_blank", "noopener,noreferrer");
+
+            Alert.alert(
+              "Opening video",
+              "Video opened in a new tab. Use the browser download option to save it."
+            );
+          }
+
+          return;
+        }
+
+        // 4. ANDROID / IOS DOWNLOAD
+        const permission =
+          await MediaLibrary.requestPermissionsAsync();
+
+        if (!permission.granted) {
+          Alert.alert(
+            "Permission required",
+            "Please allow media library access to save the reel."
+          );
+          return;
+        }
+
+        const directory =
+          FileSystem.cacheDirectory || FileSystem.documentDirectory;
+
+        const fileUri = `${directory}${filename}`;
+
+        // Download actual video file
+        const result = await FileSystem.downloadAsync(
+          url,
+          fileUri
+        );
+
+        if (result.status !== 200) {
+          throw new Error(
+            `Video download failed: HTTP ${result.status}`
+          );
+        }
+
+        // Save video to device gallery
+        const asset = await MediaLibrary.createAssetAsync(
+          result.uri
+        );
+
+        // Add to album if possible
+        try {
+          let album = await MediaLibrary.getAlbumAsync("UtaNexa");
+
+          if (!album) {
+            await MediaLibrary.createAlbumAsync(
+              "UtaNexa",
+              asset,
+              false
+            );
+          } else {
+            await MediaLibrary.addAssetsToAlbumAsync(
+              [asset],
+              album,
+              false
+            );
+          }
+        } catch (albumError) {
+          console.log("Album error:", albumError);
+        }
+
+        Alert.alert(
+          "Download successful",
+          "Your reel has been saved to your gallery."
+        );
+      } catch (error) {
+        console.error(
+          "Reel download failed:",
+          error?.response?.data || error
+        );
+
+        Alert.alert(
+          "Download failed",
+          error?.message || "Unable to download reel. Please try again."
+        );
+      } finally {
+        setDownloadingId(null);
+      }
+    },
+    [dispatch, downloadingId]
+  );
+
 
   const openComments = useCallback(async (reel) => {
     setSheet({ type: "comments", reel });
@@ -500,11 +724,11 @@ export default function ReelsScreen({ navigation }) {
     try {
       const d = await api(EP.reelComments(reel.id) + "?limit=100");
       setComments(d.comments || []);
-    } catch { }
+    } catch {}
     setCLoading(false);
   }, []);
 
-  const sendComment = async () => {
+  const sendComment = useCallback(async () => {
     const reel = sheet?.reel;
     const content = draft.trim();
     if (!reel || !content) return;
@@ -531,23 +755,29 @@ export default function ReelsScreen({ navigation }) {
       Alert.alert("Could not comment", e.message);
       setDraft(content);
     }
-  };
+  }, [sheet, draft, dispatch]);
 
-  const deleteComment = async (c) => {
-    const reel = sheet.reel;
-    try {
-      await api(EP.reelComment(reel.id, c.id), { method: "DELETE" });
-      setComments((l) => l.filter((x) => x.id !== c.id));
-      dispatch(
-        patchReel({
-          id: reel.id,
-          fields: { comment_count: Math.max(0, (reel.comment_count || 1) - 1) },
-        })
-      );
-    } catch (e) {
-      Alert.alert("Could not delete", e.message);
-    }
-  };
+  const deleteComment = useCallback(
+    async (c) => {
+      const reel = sheet?.reel;
+      if (!reel?.id || !c?.id) return;
+      try {
+        await api(EP.reelCommentDelete(reel.id, c.id), { method: "DELETE" });
+        setComments((l) => l.filter((x) => x.id !== c.id));
+        dispatch(
+          patchReel({
+            id: reel.id,
+            fields: {
+              comment_count: Math.max(0, (reel.comment_count || 1) - 1),
+            },
+          })
+        );
+      } catch (e) {
+        Alert.alert("Could not delete", e.message);
+      }
+    },
+    [sheet, dispatch]
+  );
 
   const notInterested = useCallback(
     async (reel) => {
@@ -555,7 +785,7 @@ export default function ReelsScreen({ navigation }) {
       dispatch(removeFeedItem(reel.id));
       try {
         await api(EP.reelNotInterested(reel.id), { method: "POST" });
-      } catch { }
+      } catch {}
     },
     [dispatch]
   );
@@ -565,7 +795,7 @@ export default function ReelsScreen({ navigation }) {
     try {
       await api(EP.reelReport(reel.id), {
         method: "POST",
-        body: { reason },
+        body: { reason: reason || "inappropriate", description: "" },
       });
       Alert.alert("Thanks", "Your report was submitted.");
     } catch (e) {
@@ -595,65 +825,35 @@ export default function ReelsScreen({ navigation }) {
     [dispatch]
   );
 
+  // ── Render ─────────────────────────────────────
   return (
     <View className="flex-1 bg-black">
-      {/* Top bar: + left · mute right — NO views */}
-<View
-  pointerEvents="box-none"
-  style={{ top: insets.top + 8 }}
-  className="absolute left-0 right-0 z-10 px-4 flex-row items-center justify-between"
->
-  <Pressable
-    onPress={() => navigation.navigate("ReelUpload")}
-    className="w-10 h-10 items-center justify-center "
-    hitSlop={8}
-  >
-    <Ionicons name="add" size={24} color="#fff" />
-  </Pressable>
-
-  <Pressable
-    onPress={toggleMute}
-    className="w-10 h-10  items-center justify-center "
-    hitSlop={8}
-  >
-    <Ionicons
-      name={muted ? "volume-mute" : "volume-high"}
-      size={20}
-      color="#fff"
-    />
-  </Pressable>
-</View>
-      {/* <View
+      {/* Top bar: + left · mute right */}
+      <View
         pointerEvents="box-none"
         style={{ top: insets.top + 8 }}
         className="absolute left-0 right-0 z-10 px-4 flex-row items-center justify-between"
       >
-        <Text className="text-white text-[24px] font-extrabold tracking-tight">Reels</Text>
-        <View className="flex-row items-center gap-2.5">
-          <Pressable
-            onPress={toggleMute}
-            className="w-10 h-10 rounded-full bg-black/35 border border-white/20 items-center justify-center active:opacity-70"
-          >
-            <Ionicons name={muted ? "volume-mute" : "volume-high"} size={20} color="#fff" />
-          </Pressable>
-          <Pressable
-            onPress={() => navigation.navigate("ReelUpload")}
-            className="w-10 h-10 rounded-full bg-black/35 border border-white/20 items-center justify-center active:opacity-70"
-          >
-            <Ionicons name="add" size={20} color="#fff" />
-          </Pressable>
-        </View>
-      </View>
+        <Pressable
+          onPress={() => navigation.navigate("ReelUpload")}
+          className="w-10 h-10 items-center justify-center"
+          hitSlop={8}
+        >
+          <Ionicons name="add" size={24} color="#fff" />
+        </Pressable>
 
-      <Animated.View
-        pointerEvents="none"
-        style={{ opacity: flashAnim }}
-        className="absolute inset-0 z-10 items-center justify-center"
-      >
-        <View className="w-20 h-20 rounded-full bg-black/55 border border-white/20 items-center justify-center">
-          <Ionicons name={muted ? "volume-mute" : "volume-high"} size={34} color="#fff" />
-        </View>
-      </Animated.View> */}
+        <Pressable
+          onPress={toggleMute}
+          className="w-10 h-10 items-center justify-center"
+          hitSlop={8}
+        >
+          <Ionicons
+            name={muted ? "volume-mute" : "volume-high"}
+            size={20}
+            color="#fff"
+          />
+        </Pressable>
+      </View>
 
       {loading && reels.length === 0 ? (
         <ReelSkeleton height={h} />
@@ -683,15 +883,23 @@ export default function ReelsScreen({ navigation }) {
               animated: true,
             });
             setTimeout(() => {
-              listRef.current?.scrollToIndex({ index: info.index, animated: true });
+              listRef.current?.scrollToIndex({
+                index: info.index,
+                animated: true,
+              });
             }, 100);
           }}
           ListEmptyComponent={
-            <View style={{ height: h }} className="justify-center items-center px-10">
+            <View
+              style={{ height: h }}
+              className="justify-center items-center px-10"
+            >
               <View className="w-20 h-20 rounded-full bg-white/8 border border-white/10 items-center justify-center mb-5">
                 <Ionicons name="film-outline" size={34} color="#9aa7bb" />
               </View>
-              <Text className="text-white text-lg font-bold mb-1">No reels yet</Text>
+              <Text className="text-white text-lg font-bold mb-1">
+                No reels yet
+              </Text>
               <Text className="text-[#9aa7bb] text-[13px] text-center mb-6">
                 Be the first to share a moment with everyone.
               </Text>
@@ -700,9 +908,21 @@ export default function ReelsScreen({ navigation }) {
                 className="h-12 px-7 rounded-full bg-brand flex-row items-center justify-center active:opacity-80"
               >
                 <Ionicons name="add" size={20} color="#fff" />
-                <Text className="text-white font-bold ml-1.5">Create a reel</Text>
+                <Text className="text-white font-bold ml-1.5">
+                  Create a reel
+                </Text>
               </Pressable>
             </View>
+          }
+          ListFooterComponent={
+            more && reels.length > 0 ? (
+              <View
+                style={{ height: h * 0.3 }}
+                className="items-center justify-center"
+              >
+                <ActivityIndicator color="#fff" />
+              </View>
+            ) : null
           }
           renderItem={({ item, index }) => (
             <ReelItem
@@ -733,10 +953,12 @@ export default function ReelsScreen({ navigation }) {
               toggleLike={(r) => setLike(r, !liked[r.id])}
               openComments={openComments}
               toggleSave={toggleSave}
-              share={share}
+              onRepeat={(r) => handleShare(r, "repeat")}
+              onShare={(r) => handleShare(r, "direct")}
               openUser={openUser}
               toggleFollow={toggleFollow}
               setSheet={setSheet}
+              downloadingId={downloadingId}
             />
           )}
         />
@@ -762,6 +984,7 @@ export default function ReelsScreen({ navigation }) {
         notInterested={notInterested}
         report={report}
         remove={remove}
+        download={handleDownload}
         user={user}
       />
     </View>

@@ -14,10 +14,13 @@ import { absUrl } from "../../api/client";
 
 const fmt = (n) => {
   n = Number(n) || 0;
+
   if (n >= 1e6)
     return `${(n / 1e6).toFixed(n >= 1e7 ? 0 : 1).replace(/\.0$/, "")}M`;
+
   if (n >= 1e3)
     return `${(n / 1e3).toFixed(n >= 1e4 ? 0 : 1).replace(/\.0$/, "")}K`;
+
   return String(n);
 };
 
@@ -30,11 +33,13 @@ const cleanUrl = (t) =>
 
 const LinkChip = ({ icon, text }) => {
   const display = cleanUrl(text);
+
   if (!display) return null;
 
   return (
     <View className="flex-row items-center px-2.5 h-7 rounded-full bg-brand/10 border border-brand/25">
       <Ionicons name={icon} size={11} color="#6aa8ff" />
+
       <Text
         className="text-brandLight text-[11px] font-semibold ml-1.5"
         numberOfLines={1}
@@ -51,8 +56,10 @@ const LinksRow = ({ website, instagram, social }) => {
 
   if (website && cleanUrl(website))
     items.push({ icon: "globe-outline", text: website });
+
   if (instagram && cleanUrl(instagram))
     items.push({ icon: "logo-instagram", text: instagram });
+
   if (social && cleanUrl(social))
     items.push({ icon: "link-outline", text: social });
 
@@ -72,7 +79,11 @@ const LinksRow = ({ website, instagram, social }) => {
         }}
       >
         {items.map((it, i) => (
-          <LinkChip key={`${it.icon}-${i}`} icon={it.icon} text={it.text} />
+          <LinkChip
+            key={`${it.icon}-${i}`}
+            icon={it.icon}
+            text={it.text}
+          />
         ))}
       </ScrollView>
     </View>
@@ -89,7 +100,10 @@ const Stat = ({ n, l, last, onPress }) => (
     <Text className="text-white text-[19px] font-extrabold tracking-tight">
       {fmt(n)}
     </Text>
-    <Text className="text-[#71809a] text-[11px] mt-0.5">{l}</Text>
+
+    <Text className="text-[#71809a] text-[11px] mt-0.5">
+      {l}
+    </Text>
   </Pressable>
 );
 
@@ -101,10 +115,30 @@ export const ProfileStats = ({
   onPressPosts,
 }) => (
   <View className="flex-row mx-4 py-2 rounded-3xl bg-[#0a1424] border border-white/10">
-    <Stat n={stats.followers} l="Followers" onPress={onPressFollowers} />
-    <Stat n={stats.connected} l="Connected" onPress={onPressConnected} />
-    <Stat n={stats.following} l="Following" onPress={onPressFollowing} />
-    <Stat n={stats.posts} l="Posts" last onPress={onPressPosts} />
+    <Stat
+      n={stats.followers}
+      l="Followers"
+      onPress={onPressFollowers}
+    />
+
+    <Stat
+      n={stats.connected}
+      l="Connected"
+      onPress={onPressConnected}
+    />
+
+    <Stat
+      n={stats.following}
+      l="Following"
+      onPress={onPressFollowing}
+    />
+
+    <Stat
+      n={stats.posts}
+      l="Posts"
+      last
+      onPress={onPressPosts}
+    />
   </View>
 );
 
@@ -197,6 +231,7 @@ export const ProfileHero = ({
   u,
   isMe,
   following,
+  isFollowedBy,
   onEdit,
   onShare,
   onFollow,
@@ -205,7 +240,22 @@ export const ProfileHero = ({
   animationKey,
 }) => {
   const size = 104;
+
   const glow = useRef(new Animated.Value(0)).current;
+
+  // Follow button label
+  const followLabel = following
+    ? "Following"
+    : isFollowedBy
+    ? "Follow back"
+    : "Follow";
+
+  // Follow button icon
+  const followIcon = following
+    ? "checkmark"
+    : isFollowedBy
+    ? "person-add"
+    : "person-add-outline";
 
   useEffect(() => {
     if (!animationKey) return;
@@ -220,20 +270,25 @@ export const ProfileHero = ({
         easing: Easing.out(Easing.cubic),
         useNativeDriver: true,
       }),
+
       Animated.delay(90),
+
       Animated.timing(glow, {
         toValue: 0.65,
         duration: 180,
         easing: Easing.inOut(Easing.ease),
         useNativeDriver: true,
       }),
+
       Animated.timing(glow, {
         toValue: 1,
         duration: 130,
         easing: Easing.out(Easing.ease),
         useNativeDriver: true,
       }),
+
       Animated.delay(100),
+
       Animated.timing(glow, {
         toValue: 0,
         duration: 650,
@@ -249,11 +304,13 @@ export const ProfileHero = ({
 
   return (
     <View className="items-center px-5 pt-2 pb-6 overflow-hidden">
+
       {/* Background blobs */}
       <View
         pointerEvents="none"
         className="absolute -top-24 -left-16 w-64 h-64 rounded-full bg-[#1685ff]/15"
       />
+
       <View
         pointerEvents="none"
         className="absolute -top-16 -right-20 w-56 h-56 rounded-full bg-[#7a5cff]/12"
@@ -268,7 +325,7 @@ export const ProfileHero = ({
         <ElectricSide side="left" glow={glow} />
         <ElectricSide side="right" glow={glow} />
 
-        {/* Original avatar - no circular lightning */}
+        {/* Avatar */}
         <View
           className="rounded-full p-[3px] bg-brand"
           style={{ width: size, height: size }}
@@ -287,6 +344,7 @@ export const ProfileHero = ({
           )}
         </View>
 
+        {/* Camera button */}
         {isMe && (
           <View
             className="absolute bottom-1 w-8 h-8 rounded-full bg-brand items-center justify-center border-[3px] border-[#050b18]"
@@ -310,6 +368,7 @@ export const ProfileHero = ({
         <Text className="text-[#9aa7bb] text-[12px]" numberOfLines={1}>
           @{u?.username}
         </Text>
+
         {u?.user_id ? (
           <Text className="text-[#5d6a80] text-[12px] ml-2" numberOfLines={1}>
             ID {u.user_id}
@@ -332,20 +391,26 @@ export const ProfileHero = ({
       {/* Actions */}
       {isMe ? (
         <View className="flex-row gap-2.5 mt-5 w-full">
+
+          {/* Edit profile */}
           <Pressable
             onPress={onEdit}
             className="flex-1 h-11 rounded-full bg-[#1685ff] flex-row items-center justify-center active:opacity-80"
           >
             <Ionicons name="create-outline" size={17} color="#fff" />
+
             <Text className="text-white text-[14px] font-bold ml-2">
               Edit profile
             </Text>
           </Pressable>
+
+          {/* Share */}
           <Pressable
             onPress={onShare}
             className="flex-1 h-11 rounded-full bg-white/6 border border-white/12 flex-row items-center justify-center active:opacity-70"
           >
             <Ionicons name="share-outline" size={17} color="#fff" />
+
             <Text className="text-white text-[14px] font-bold ml-2">
               Share
             </Text>
@@ -353,21 +418,28 @@ export const ProfileHero = ({
         </View>
       ) : (
         <View className="flex-row gap-2.5 mt-5 w-full">
+
+          {/* Follow / Follow back / Following */}
           <Pressable
             onPress={onFollow}
             className={`flex-1 h-11 rounded-full flex-row items-center justify-center active:opacity-80 ${
-              following ? "bg-white/8 border border-white/15" : "bg-[#1685ff]"
+              following
+                ? "bg-white/8 border border-white/15"
+                : "bg-[#1685ff]"
             }`}
           >
             <Ionicons
-              name={following ? "checkmark" : "person-add-outline"}
+              name={followIcon}
               size={17}
               color="#fff"
             />
+
             <Text className="text-white text-[14px] font-bold ml-2">
-              {following ? "Following" : "Follow"}
+              {followLabel}
             </Text>
           </Pressable>
+
+          {/* Message */}
           <Pressable
             onPress={onMessage}
             className="flex-1 h-11 rounded-full bg-white/6 border border-white/12 flex-row items-center justify-center active:opacity-70"
@@ -377,6 +449,7 @@ export const ProfileHero = ({
               size={17}
               color="#fff"
             />
+
             <Text className="text-white text-[14px] font-bold ml-2">
               Message
             </Text>

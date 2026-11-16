@@ -47,7 +47,7 @@ export default function HomeDrawer({ visible, onClose, user, filter, setFilter, 
   onPress={() => { onClose(); navigation.navigate("MomentSettings"); }} />
 <DrawerRow icon="archive-outline" label="Moment archive"
   onPress={() => { onClose(); navigation.navigate("MomentArchive"); }} />
-          <DrawerRow icon="heart" label="Couple Chat" onPress={() => { onClose(); navigation.navigate("CoupleChat"); }} />
+        
           <DrawerRow icon="sparkles-outline" label="NEXA AI" onPress={() => { onClose(); navigation.navigate("Nexa"); }} />
           <View className="h-px bg-white/8 my-4" />
           <DrawerRow icon="log-out-outline" label="Log out" danger onPress={() => { onClose(); onSignOut?.(); }} />

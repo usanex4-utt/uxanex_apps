@@ -1,53 +1,33 @@
 import React, { memo, useEffect, useRef, useState, useCallback } from "react";
-import {
-  View,
-  Text,
-  Pressable,
-  Image,
-  useWindowDimensions,
-} from "react-native";
+import { View, Text, Pressable, Image, useWindowDimensions } from "react-native";
 import { Video, ResizeMode } from "expo-av";
 import { Ionicons } from "@expo/vector-icons";
 import { absUrl } from "../../api/client";
 import { Empty } from "../ui";
 
-const TAB_ICONS = {
-  reels: "film-outline",
-  saved: "bookmark-outline",
-  posts: "grid-outline",
-};
+const TAB_ICONS = { reels: "film-outline", saved: "bookmark-outline", posts: "grid-outline" };
 const LABEL = { reels: "Reels", saved: "Saved", posts: "Posts" };
 
-/** Same proportions as Search explore grid */
 const TILE_RATIO = 1.33;
 const GRID_COLS = 3;
 const TILE_GAP = 2;
 
 const fmt = (n) => {
   n = Number(n) || 0;
-  if (n >= 1e6)
-    return `${(n / 1e6).toFixed(n >= 1e7 ? 0 : 1).replace(/\.0$/, "")}M`;
-  if (n >= 1e3)
-    return `${(n / 1e3).toFixed(n >= 1e4 ? 0 : 1).replace(/\.0$/, "")}K`;
+  if (n >= 1e6) return `${(n / 1e6).toFixed(n >= 1e7 ? 0 : 1).replace(/\.0$/, "")}M`;
+  if (n >= 1e3) return `${(n / 1e3).toFixed(n >= 1e4 ? 0 : 1).replace(/\.0$/, "")}K`;
   return String(n);
 };
 
-/** Search-style cell: muted looping video + play/views badge */
 const ReelCell = memo(function ReelCell({
-  item,
-  width,
-  height,
-  shouldPlay,
-  onPress,
-  isPost,
+  item, width, height, shouldPlay, onPress, onLongPress, isPost,
 }) {
   const videoRef = useRef(null);
 
   const thumb =
     typeof item?.thumbnail_url === "string"
       ? absUrl(item.thumbnail_url)
-      : typeof item?.media_url === "string" &&
-        String(item.media_type || "").startsWith("image")
+      : typeof item?.media_url === "string" && String(item.media_type || "").startsWith("image")
       ? absUrl(item.media_url)
       : null;
 
@@ -73,6 +53,8 @@ const ReelCell = memo(function ReelCell({
   return (
     <Pressable
       onPress={onPress}
+      onLongPress={onLongPress}
+      delayLongPress={450}
       style={{ width, height, padding: TILE_GAP / 2 }}
       className="active:opacity-80"
     >
@@ -94,18 +76,11 @@ const ReelCell = memo(function ReelCell({
             onError={() => setVideoErr(true)}
           />
         ) : thumb ? (
-          <Image
-            source={{ uri: thumb }}
-            style={{ width: "100%", height: "100%" }}
-            resizeMode="cover"
-          />
+          <Image source={{ uri: thumb }} style={{ width: "100%", height: "100%" }} resizeMode="cover" />
         ) : (
           <View className="flex-1 items-center justify-center px-2">
             {isPost && (item.caption || item.content) ? (
-              <Text
-                className="text-[#dce5f2] text-[11px] text-center"
-                numberOfLines={6}
-              >
+              <Text className="text-[#dce5f2] text-[11px] text-center" numberOfLines={6}>
                 {item.caption || item.content}
               </Text>
             ) : (
@@ -128,26 +103,17 @@ const ReelCell = memo(function ReelCell({
 });
 
 export default function ProfileGrid({
-  tabs,
-  tab,
-  setTab,
-  grid,
-  setPlayer,
-  loading = false,
+  tabs, tab, setTab, grid, setPlayer, onLongPressItem, loading = false,
 }) {
   const { width } = useWindowDimensions();
   const tileW = Math.floor(width / GRID_COLS);
   const tileH = Math.floor(tileW * TILE_RATIO);
 
-  // Autoplay first 6 muted (Search-like)
   const [playingIds, setPlayingIds] = useState(() => new Set());
 
   useEffect(() => {
     const ids = new Set(
-      (grid || [])
-        .slice(0, 6)
-        .filter(() => tab !== "posts")
-        .map((x) => x.id)
+      (grid || []).slice(0, 6).filter(() => tab !== "posts").map((x) => x.id)
     );
     setPlayingIds(ids);
   }, [grid, tab]);
@@ -169,20 +135,10 @@ export default function ProfileGrid({
             <Pressable
               key={t}
               onPress={() => setTab(t)}
-              className={`flex-1 h-10 rounded-full flex-row items-center justify-center ${
-                on ? "bg-[#1685ff]" : ""
-              }`}
+              className={`flex-1 h-10 rounded-full flex-row items-center justify-center ${on ? "bg-[#1685ff]" : ""}`}
             >
-              <Ionicons
-                name={TAB_ICONS[t]}
-                size={16}
-                color={on ? "#fff" : "#64748a"}
-              />
-              <Text
-                className={`ml-1.5 text-[13px] font-bold ${
-                  on ? "text-white" : "text-[#64748a]"
-                }`}
-              >
+              <Ionicons name={TAB_ICONS[t]} size={16} color={on ? "#fff" : "#64748a"} />
+              <Text className={`ml-1.5 text-[13px] font-bold ${on ? "text-white" : "text-[#64748a]"}`}>
                 {LABEL[t]}
               </Text>
             </Pressable>
@@ -193,21 +149,8 @@ export default function ProfileGrid({
       {loading ? (
         <View style={{ flexDirection: "row", flexWrap: "wrap", marginTop: 8 }}>
           {Array.from({ length: 9 }, (_, i) => (
-            <View
-              key={i}
-              style={{
-                width: tileW,
-                height: tileH,
-                padding: TILE_GAP / 2,
-              }}
-            >
-              <View
-                style={{
-                  flex: 1,
-                  backgroundColor: "#151c28",
-                  borderRadius: 2,
-                }}
-              />
+            <View key={i} style={{ width: tileW, height: tileH, padding: TILE_GAP / 2 }}>
+              <View style={{ flex: 1, backgroundColor: "#151c28", borderRadius: 2 }} />
             </View>
           ))}
         </View>
@@ -219,13 +162,7 @@ export default function ProfileGrid({
           <Empty text={`No ${LABEL[tab].toLowerCase()} yet.`} />
         </View>
       ) : (
-        <View
-          style={{
-            flexDirection: "row",
-            flexWrap: "wrap",
-            marginTop: 8,
-          }}
-        >
+        <View style={{ flexDirection: "row", flexWrap: "wrap", marginTop: 8 }}>
           {grid.map((it) => (
             <ReelCell
               key={`${tab}-${it.id}`}
@@ -235,6 +172,7 @@ export default function ProfileGrid({
               isPost={tab === "posts"}
               shouldPlay={playingIds.has(it.id)}
               onPress={() => onPressItem(it)}
+              onLongPress={() => onLongPressItem?.(it)}
             />
           ))}
         </View>

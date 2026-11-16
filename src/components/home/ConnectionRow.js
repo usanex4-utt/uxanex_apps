@@ -21,10 +21,6 @@ const ConnectionRow = ({ item, user, navigation, onLongPress }) => {
     navigation.navigate("Chat", { user: item });
   };
 
-  const openCoupleChat = () => {
-    navigation.navigate("CoupleChat", { user: item });
-  };
-
   return (
     <Pressable
       onPress={openChat}
@@ -82,19 +78,6 @@ const ConnectionRow = ({ item, user, navigation, onLongPress }) => {
           ) : null}
         </View>
       </View>
-
-      {/* Couple Chat Button */}
-      <Pressable
-        onPress={openCoupleChat}
-        hitSlop={8}
-        className="w-10 h-10 rounded-full bg-[#ed80dc]/12 border border-[#ed80dc]/25 items-center justify-center mr-2 active:opacity-70"
-      >
-        <Ionicons
-          name="heart"
-          size={18}
-          color="#ed80dc"
-        />
-      </Pressable>
 
       {/* Chat Icon */}
       <View className="w-10 h-10 rounded-full bg-brand/15 border border-brand/30 items-center justify-center">
