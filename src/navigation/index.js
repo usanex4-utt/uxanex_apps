@@ -253,6 +253,11 @@ export default function Navigation() {
               name="ProfileReelsViewer"
               component={ProfileReelsViewerScreen}
             />
+            {/* My Reel Editor */}
+            <Stack.Screen
+              name="MyReelEditor"
+              component={MyReelEditorScreen}
+            />
 
             {/* Reels */}
             <Stack.Screen
