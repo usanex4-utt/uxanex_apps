@@ -43,6 +43,7 @@ import SearchScreen from "../screens/main/SearchScreen";
 import NotificationsScreen from "../screens/main/NotificationsScreen";
 import ProfileScreen from "../screens/main/ProfileScreen";
 import ProfileReelsViewerScreen from "../screens/main/ProfileReelsViewerScreen";
+import MyReelEditorScreen from "../screens/main/MyReelEditorScreen";
 
 // ── Detail Screens ─────────────────────────────────────────────
 import ChatScreen from "../screens/detail/ChatScreen";
