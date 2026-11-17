@@ -73,6 +73,7 @@ export const EP = {
   reelStatus:         (id)   => `/api/reels/${id}/status`,         // GET { liked, saved, interested, ... }
   reelAIStatus:       (id)   => `/api/reels/${id}/ai-status`,      // GET
   reelDelete:         (id)   => `/api/reels/${id}`,                // DELETE (owner only)
+  reelUpdate:         (id)   => `/api/reels/${id}`,
 
   // ⚠️ NOT implemented in backend yet — do not call until added
   // reelRating:      (id)   => `/api/reels/${id}/rating`,         // POST  (no backend handler)
