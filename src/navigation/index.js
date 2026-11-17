@@ -42,6 +42,7 @@ import ReelsScreen from "../screens/main/ReelsScreen";
 import SearchScreen from "../screens/main/SearchScreen";
 import NotificationsScreen from "../screens/main/NotificationsScreen";
 import ProfileScreen from "../screens/main/ProfileScreen";
+import ProfileReelsViewerScreen from "../screens/main/ProfileReelsViewerScreen";
 
 // ── Detail Screens ─────────────────────────────────────────────
 import ChatScreen from "../screens/detail/ChatScreen";
