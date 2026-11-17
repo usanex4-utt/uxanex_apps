@@ -122,6 +122,21 @@ export default function ProfileReelsViewerScreen({ navigation, route }) {
     return index >= 0 ? index : 0;
   });
   const [deleting, setDeleting] = useState(false);
+  useEffect(() => {
+  const updatedReel = route.params?.updatedReel;
+
+  if (!updatedReel?.id) return;
+
+  setReels((previous) =>
+    previous.map((item) =>
+      String(item.id) === String(updatedReel.id)
+        ? { ...item, ...updatedReel }
+        : item
+    )
+  );
+
+  navigation.setParams({ updatedReel: undefined });
+}, [route.params?.updatedReel, navigation]);
 
   const isOwner = !!route.params?.isOwner;
   const profileUser = route.params?.profileUser || {};
