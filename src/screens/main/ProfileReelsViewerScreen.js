@@ -231,15 +231,28 @@ export default function ProfileReelsViewerScreen({ navigation, route }) {
           </Text>
 
           {isOwner ? (
+           <View className="flex-row items-center gap-3">
             <Pressable
-              onPress={deleteCurrentReel}
-              disabled={deleting}
-              className="w-10 h-10 rounded-full bg-black/45 items-center justify-center"
+             onPress={() =>
+              navigation.navigate("MyReelEditor", {
+               reel: currentReel,
+              })
+             }
+             className="w-10 h-10 rounded-full bg-black/45 items-center justify-center"
             >
-              <Ionicons name="trash-outline" size={21} color="#ff5b65" />
+             <Ionicons name="create-outline" size={22} color="#1685ff" />
             </Pressable>
-          ) : (
-            <View className="w-10 h-10" />
+
+            <Pressable
+             onPress={deleteCurrentReel}
+             disabled={deleting}
+             className="w-10 h-10 rounded-full bg-black/45 items-center justify-center"
+            >
+             <Ionicons name="trash-outline" size={21} color="#ff5b65" />
+           </Pressable>
+          </View>
+         ) : (
+           <View className="w-10 h-10" />
           )}
         </View>
       </SafeAreaView>
