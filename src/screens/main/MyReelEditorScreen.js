@@ -91,8 +91,19 @@ export default function MyReelEditorScreen({ navigation, route }) {
         throw new Error(result.message || "Could not update Reel.");
       }
 
-      Alert.alert("Success", "Your Reel has been updated.");
-      navigation.goBack();
+      Alert.alert(
+       "Success",
+       "Your Reel has been updated.",
+       [
+        {
+         text: "OK",
+         onPress: () =>
+          navigation.navigate("ProfileReelsViewer", {
+           updatedReel: result.reel,
+          }),
+        },
+       ]
+      );
     } catch (error) {
       Alert.alert(
         "Update failed",
