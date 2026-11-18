@@ -1,4 +1,4 @@
-
+import CreatorComingSoonScreen from "../screens/main/CreatorComingSoonScreen";
 import React, { useEffect } from "react";
 
 import {
