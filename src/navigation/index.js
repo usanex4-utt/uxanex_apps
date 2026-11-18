@@ -44,6 +44,7 @@ import NotificationsScreen from "../screens/main/NotificationsScreen";
 import ProfileScreen from "../screens/main/ProfileScreen";
 import ProfileReelsViewerScreen from "../screens/main/ProfileReelsViewerScreen";
 import MyReelEditorScreen from "../screens/main/MyReelEditorScreen";
+import ReelAnalysisScreen from "../screens/main/ReelAnalysisScreen";
 
 // ── Detail Screens ─────────────────────────────────────────────
 import ChatScreen from "../screens/detail/ChatScreen";
@@ -258,7 +259,11 @@ export default function Navigation() {
               name="MyReelEditor"
               component={MyReelEditorScreen}
             />
-
+            {/* Reel Analysis */}
+            <Stack.Screen
+              name="ReelAnalysis"
+              component={ReelAnalysisScreen}
+            />
             {/* Reels */}
             <Stack.Screen
               name="ReelUpload"
