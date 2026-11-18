@@ -476,6 +476,17 @@ const openReelInFeed = useCallback((reel) => {
             />
 
             {isMe && (
+              <MenuItem
+                icon="stats-chart-outline"
+                label="Reel Analysis"
+                onPress={() => {
+                 setMenu(false);
+                 navigation.navigate("ReelAnalysis");
+                }}
+               />
+              )}
+
+            {isMe && (
               <>
                 <View className="h-px bg-white/8 mx-2 my-2" />
                 <MenuItem
