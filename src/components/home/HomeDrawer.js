@@ -49,6 +49,30 @@ export default function HomeDrawer({ visible, onClose, user, filter, setFilter, 
   onPress={() => { onClose(); navigation.navigate("MomentArchive"); }} />
         
           <DrawerRow icon="sparkles-outline" label="NEXA AI" onPress={() => { onClose(); navigation.navigate("Nexa"); }} />
+    
+          <Text className="text-[#5d6a80] text-[12px] font-semibold px-3 mt-5 mb-2">
+           Creator Hub
+          </Text>
+
+          <DrawerRow
+           icon="medal-outline"
+           label="Badges"
+           onPress={() => {
+            onClose();
+            navigation.navigate("BadgesComingSoon");
+           }}
+          />
+
+          <DrawerRow
+           icon="wallet-outline"
+           label="Monetization"
+           onPress={() => {
+            onClose();
+            navigation.navigate("MonetizationComingSoon");
+           }}
+          />
+    
+    
           <View className="h-px bg-white/8 my-4" />
           <DrawerRow icon="log-out-outline" label="Log out" danger onPress={() => { onClose(); onSignOut?.(); }} />
         </Pressable>
