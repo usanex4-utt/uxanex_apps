@@ -312,21 +312,21 @@ export default function Navigation() {
             <Stack.Screen
               name="MomentSettings"
               component={MomentSettingsScreen}
-            />
+             />
           </>
            {/* Creator Hub - Badges */}
            <Stack.Screen
              name="BadgesComingSoon"
              component={CreatorComingSoonScreen}
              initialParams={{ title: "Badges" }}
-           />
+            />
 
            {/* Creator Hub - Monetization */}
            <Stack.Screen
              name="MonetizationComingSoon"
              component={CreatorComingSoonScreen}
              initialParams={{ title: "Monetization" }}
-           />
+            />
         ) : (
           <>
             {/* Login */}
