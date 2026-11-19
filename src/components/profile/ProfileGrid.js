@@ -6,18 +6,18 @@ import { absUrl } from "../../api/client";
 import { Empty } from "../ui";
 const TAB_ICONS = {
   reels: "film-outline",
+  reposts: "repeat",
   saved: "bookmark-outline",
   posts: "grid-outline",
   video: "videocam-outline",
-  report: "repeat",
 };
 
 const LABEL = {
   reels: "Reels",
+  reposts: "Reposts",
   saved: "Saved",
   posts: "Posts",
   video: "Video",
-  report: "Report",
 };
 
 const TILE_RATIO = 1.33;
