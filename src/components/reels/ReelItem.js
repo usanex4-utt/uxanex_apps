@@ -606,7 +606,7 @@ function ReelItem(props) {
 
         <RailBtn
           icon="repeat-outline"
-          label={item.share_count || 0}
+          label={item.repost_count || 0}
           onPress={() => {
             if (typeof handleRepeat === "function") {
               handleRepeat(item);
