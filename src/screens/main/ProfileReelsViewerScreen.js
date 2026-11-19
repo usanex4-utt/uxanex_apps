@@ -43,9 +43,17 @@ function ProfileReelItem({ item, active, height, profileUser }) {
 
       <View className="absolute bottom-0 left-0 right-0 px-4 pb-8 pt-20"
         style={{ backgroundColor: "rgba(0,0,0,0.48)" }}>
-        <Text className="text-white font-bold text-[15px]">
-          @{profileUser?.username || profileUser?.name || "User"}
-        </Text>
+        <View>
+         <Text className="text-white font-bold text-[15px]">
+          @{item?.creator?.username || profileUser?.username || "User"}
+         </Text>
+
+        {item?.is_repost && item?.reposted_by?.username ? (
+         <Text className="text-white/60 text-[12px] mt-1">
+          Reposted by @{item.reposted_by.username}
+         </Text>
+       ) : null}
+      </View>
 
         {!!item?.caption && (
           <Text className="text-white text-[13px] mt-2" numberOfLines={4}>
