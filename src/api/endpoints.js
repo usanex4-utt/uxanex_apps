@@ -44,6 +44,8 @@ export const EP = {
   reelsMine:                 "/api/reels/me/list",                 // GET
   reelsSaved:                "/api/reels/me/saved",                // GET
   reelsOfUser:        (id)   => `/api/reels/user/${id}/list`,      // GET
+  reelsOfUser:        (id)   => `/api/reels/user/${id}/list`,
+  reelsReposts:       (id)   => `/api/reels/user/${id}/reposts`,
   reelUpload:                "/api/reels/upload",                  // POST multipart "video"
   reelWatch:          (id)   => `/api/reels/${id}/watch`,          // POST { watch_time, watch_percentage, completed, ... }
 
