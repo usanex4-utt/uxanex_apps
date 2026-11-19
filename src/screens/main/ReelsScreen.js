@@ -555,6 +555,40 @@ export default function ReelsScreen({ navigation }) {
     [dispatch]
   );
 
+
+
+
+
+    const handleRepost = useCallback(
+    async (reel) => {
+      if (!reel?.id) return;
+
+      try {
+        const d = await api(EP.reelRepost(reel.id), {
+          method: "POST",
+        });
+
+        dispatch(
+          patchReel({
+            id: reel.id,
+            fields: {
+              is_reposted: !!d.is_reposted,
+              repost_count: Number(d.repost_count || 0),
+            },
+          })
+        );
+
+        Alert.alert(
+          d.is_reposted ? "Reposted" : "Repost removed",
+          d.message || "Your Repost status has been updated."
+        );
+      } catch (e) {
+        Alert.alert("Repost failed", e?.message || "Please try again.");
+      }
+    },
+    [dispatch]
+  );
+
   // ── Download ───────────────────────────────────
  
   // ── Download Reel ──────────────────────────────
@@ -953,7 +987,7 @@ export default function ReelsScreen({ navigation }) {
               toggleLike={(r) => setLike(r, !liked[r.id])}
               openComments={openComments}
               toggleSave={toggleSave}
-              onRepeat={(r) => handleShare(r, "repeat")}
+              onRepeat={(r) => handleRepost(r)}
               onShare={(r) => handleShare(r, "direct")}
               openUser={openUser}
               toggleFollow={toggleFollow}
