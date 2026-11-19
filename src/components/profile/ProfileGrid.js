@@ -158,13 +158,7 @@ export default function ProfileGrid({
           </Pressable>
         );
        })}
-              <Ionicons name={TAB_ICONS[t]} size={16} color={on ? "#fff" : "#64748a"} />
-              <Text className={`ml-1.5 text-[13px] font-bold ${on ? "text-white" : "text-[#64748a]"}`}>
-                {LABEL[t]}
-              </Text>
-            </Pressable>
-          );
-        })}
+              
       </View>
 
       {loading ? (
