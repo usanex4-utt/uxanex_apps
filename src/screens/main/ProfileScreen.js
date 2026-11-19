@@ -339,7 +339,9 @@ const openReelInFeed = useCallback((reel) => {
     }
   };
 
-  const tabs = isMe ? ["reels", "saved", "posts"] : ["reels", "posts"];
+  const tabs = isMe
+   ? ["reels", "saved", "posts", "video", "report"]
+   : ["reels", "posts"];
   const grid = tab === "reels" ? reels : tab === "saved" ? saved : posts;
 
   return (
