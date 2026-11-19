@@ -361,7 +361,7 @@ function ReelItem(props) {
   return (
     <View style={{ height: h }} className="bg-black">
       <View style={{ flex: 1 }}>
-        {videoUrl ? (
+        {videoUrl && shouldLoadVideo ? (
           <Video
             ref={(ref) => {
               if (ref) videoRefs.current[item.id] = ref;
