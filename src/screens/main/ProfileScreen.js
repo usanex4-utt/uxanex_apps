@@ -94,14 +94,11 @@ export default function ProfileScreen({ navigation, route }) {
     try {
       if (tab === "reels") {
         const d = await api(isMe ? EP.reelsMine : EP.reelsOfUser(uid));
-        setReels(d.reels || []);
-      } else if (tab === "saved" && isMe) {
-        const d = await api(EP.reelsSaved);
-        setSaved(d.reels || []);
-      }
+      
     } catch {
       if (tab === "reels") setReels([]);
       else if (tab === "saved") setSaved([]);
+      else if (tab === "reposts") setReposts([]);
     }
   }, [uid, tab, isMe]);
 
