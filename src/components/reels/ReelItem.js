@@ -299,8 +299,7 @@ function ReelItem(props) {
       : fState === "pending"
       ? "Requested"
       : "Follow";
-
-  const thumbnailUrl = item.thumbnail_url? absUrl(item.thumbnail_url) : null;
+  const videoUrl = item.video_url ? absUrl(item.video_url) : null;
 
   const thumbnailUrl = item.thumbnail_url
     ? absUrl(item.thumbnail_url)
