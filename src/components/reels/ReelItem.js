@@ -324,6 +324,7 @@ function ReelItem(props) {
 
   const isActive = index === active;
   const isVisible = isActive && focused;
+  const shouldLoadVideo = index >= active && index <= active + 3;
 
   const lastLongPressAt = useRef(0);
 
