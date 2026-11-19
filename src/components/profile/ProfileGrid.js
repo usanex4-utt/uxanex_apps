@@ -4,9 +4,21 @@ import { Video, ResizeMode } from "expo-av";
 import { Ionicons } from "@expo/vector-icons";
 import { absUrl } from "../../api/client";
 import { Empty } from "../ui";
+const TAB_ICONS = {
+  reels: "film-outline",
+  saved: "bookmark-outline",
+  posts: "grid-outline",
+  video: "videocam-outline",
+  report: "repeat",
+};
 
-const TAB_ICONS = { reels: "film-outline", saved: "bookmark-outline", posts: "grid-outline" };
-const LABEL = { reels: "Reels", saved: "Saved", posts: "Posts" };
+const LABEL = {
+  reels: "Reels",
+  saved: "Saved",
+  posts: "Posts",
+  video: "Video",
+  report: "Report",
+};
 
 const TILE_RATIO = 1.33;
 const GRID_COLS = 3;
