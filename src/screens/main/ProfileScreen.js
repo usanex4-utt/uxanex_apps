@@ -320,7 +320,7 @@ const openReelInFeed = useCallback((reel) => {
     },
     merge: true,
   });
-}, [navigation, tab, uid, reels, reposts, isMe, u]
+}, [navigation, tab, uid, reels, reposts, isMe, u]);
 
   /* ── Long-press → delete own reel ── */
   const askDeleteReel = (reel) => {
