@@ -298,15 +298,17 @@ export default function ProfileScreen({ navigation, route }) {
 const openReelInFeed = useCallback((reel) => {
   if (!reel?.id) return;
 
-  if (tab === "reels") {
-    navigation.navigate("ProfileReelsViewer", {
-      userId: uid,
-      reels,
-      startReelId: reel.id,
-      isOwner: isMe,
-      profileUser: u || {},
-    });
-    return;
+  if (tab === "reels" || tab === "reposts") {
+  const activeList = tab === "reposts" ? reposts : reels;
+
+  navigation.navigate("ProfileReelsViewer", {
+    userId: uid,
+    reels: activeList,
+    startReelId: reel.id,
+    isOwner: isMe,
+    profileUser: u || {},
+  });
+  return;
   }
 
   navigation.navigate("Tabs", {
@@ -318,7 +320,7 @@ const openReelInFeed = useCallback((reel) => {
     },
     merge: true,
   });
-}, [navigation, tab, uid, reels, isMe, u]);
+}, [navigation, tab, uid, reels, reposts, isMe, u]
 
   /* ── Long-press → delete own reel ── */
   const askDeleteReel = (reel) => {
