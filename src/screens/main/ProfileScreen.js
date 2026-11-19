@@ -89,12 +89,20 @@ export default function ProfileScreen({ navigation, route }) {
     }
   }, [uid, isMe]);
 
-  const loadTab = useCallback(async () => {
+    const loadTab = useCallback(async () => {
     if (!uid) return;
+
     try {
       if (tab === "reels") {
         const d = await api(isMe ? EP.reelsMine : EP.reelsOfUser(uid));
-      
+        setReels(d.reels || []);
+      } else if (tab === "saved" && isMe) {
+        const d = await api(EP.reelsSaved);
+        setSaved(d.reels || []);
+      } else if (tab === "reposts") {
+        const d = await api(EP.reelsReposts(uid));
+        setReposts(d.reposts || []);
+      }
     } catch {
       if (tab === "reels") setReels([]);
       else if (tab === "saved") setSaved([]);
