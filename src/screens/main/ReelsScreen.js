@@ -907,9 +907,9 @@ export default function ReelsScreen({ navigation }) {
           onEndReached={() => {
             if (more && !fetching.current) fetchPage(false);
           }}
-          windowSize={3}
-          initialNumToRender={2}
-          maxToRenderPerBatch={3}
+          windowSize={7}
+          initialNumToRender={4}
+          maxToRenderPerBatch={4}
           removeClippedSubviews
           onScrollToIndexFailed={(info) => {
             listRef.current?.scrollToOffset({
