@@ -57,7 +57,8 @@ export const EP = {
   reelUnsave:         (id)   => `/api/reels/${id}/save`,           // DELETE → unsave
   reelSavedStatus:    (id)   => `/api/reels/${id}/saved`,          // GET    → { saved }
 
-  reelShare:          (id)   => `/api/reels/${id}/share`,          // POST { share_type? }
+  reelShare:          (id)   => `/api/reels/${id}/share`,  // POST { share_type? }
+  reelRepost:         (id)   => `/api/reels/${id}/repost`,
   reelDownload:       (id)   => `/api/reels/${id}/download`,       // POST → { download_url (watermarked), filename, download_count }
 
   // interested / not-interested (toggle — same URLs, POST only)
