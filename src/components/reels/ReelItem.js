@@ -300,7 +300,7 @@ function ReelItem(props) {
       ? "Requested"
       : "Follow";
 
-  const videoUrl = item.video_url ? absUrl(item.video_url) : null;
+  const thumbnailUrl = item.thumbnail_url? absUrl(item.thumbnail_url) : null;
 
   const thumbnailUrl = item.thumbnail_url
     ? absUrl(item.thumbnail_url)
