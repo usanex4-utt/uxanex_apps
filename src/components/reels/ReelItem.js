@@ -427,18 +427,34 @@ function ReelItem(props) {
               }
             }}
           />
-        ) : (
-          <View className="flex-1 bg-neutral-900 items-center justify-center">
+         ) :videoUrl && thumbnailUrl ? (
+           <Image
+            source={{ uri: thumbnailUrl }}
+            style={{
+             position: "absolute",
+             top: 0,
+             bottom: 0,
+             left: 0,
+             right: 0,
+             width: "100%",
+             height: "100%",
+            }}
+            resizeMode="cover"
+           />
+          ) :videoUrl ? (
+            <View className="flex-1 bg-black" />
+           ):(
+            <View className="flex-1 bg-neutral-900 items-center justify-center">
             <Ionicons
-              name="videocam-off-outline"
-              size={45}
-              color="#888"
+             name="videocam-off-outline"
+             size={45}
+             color="#888"
             />
             <Text className="text-white/60 mt-2">
-              Video unavailable
+             Video unavailable
             </Text>
-          </View>
-        )}
+           </View>
+          )}
 
         <Pressable
           style={{
