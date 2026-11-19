@@ -342,7 +342,10 @@ const openReelInFeed = useCallback((reel) => {
   const tabs = isMe
    ? ["reels", "saved", "posts", "video", "report"]
    : ["reels", "posts"];
-  const grid = tab === "reels" ? reels : tab === "saved" ? saved : posts;
+  const grid =
+   tab === "reels" ? reels :
+   tab === "saved" ? saved :
+   tab === "posts" ? posts : [];
 
   return (
     <SafeAreaView className="flex-1 bg-[#050b18]" edges={["top"]}>
