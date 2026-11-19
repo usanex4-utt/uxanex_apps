@@ -346,10 +346,11 @@ const openReelInFeed = useCallback((reel) => {
   };
 
   const tabs = isMe
-   ? ["reels", "saved", "posts", "video", "report"]
-   : ["reels", "posts"];
+   ? ["reels", "reposts", "saved", "posts", "video"]
+   : ["reels", "reposts", "posts"];
   const grid =
    tab === "reels" ? reels :
+   tab === "reposts" ? reposts :
    tab === "saved" ? saved :
    tab === "posts" ? posts : [];
 
