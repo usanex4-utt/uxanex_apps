@@ -504,6 +504,33 @@ function ReelItem(props) {
         className="absolute left-3 right-[72px]"
         style={{ bottom: isSmall ? 18 : 24 }}
       >
+                {item?.is_repost && item?.reposted_by ? (
+          <Pressable
+            onPress={() => openUser(item.reposted_by.user_id)}
+            className="flex-row items-center mb-3 self-start"
+          >
+            <View className="relative">
+              <Avatar
+                uri={item.reposted_by.profile_photo}
+                name={item.reposted_by.username || item.reposted_by.name}
+                size={38}
+              />
+              <View
+                className="absolute -right-1 -bottom-1 w-5 h-5 rounded-full items-center justify-center"
+                style={{
+                  backgroundColor: "#8B35F5",
+                  borderWidth: 1.5,
+                  borderColor: "#fff",
+                }}
+              >
+                <Ionicons name="repeat" size={12} color="#fff" />
+              </View>
+            </View>
+            <Text className="text-white text-[12px] ml-2 font-semibold">
+              Reposted by @{item.reposted_by.username || "User"}
+            </Text>
+          </Pressable>
+        ) : null}
         <View className="flex-row items-center mb-2">
           <Pressable
             onPress={() => openUser(c.user_id)}
