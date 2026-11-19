@@ -142,13 +142,22 @@ export default function ProfileGrid({
     <View className="mt-4">
       <View className="mx-4 flex-row p-1 rounded-full bg-[#0a1424] border border-white/10">
         {tabs.map((t) => {
-          const on = tab === t;
-          return (
-            <Pressable
-              key={t}
-              onPress={() => setTab(t)}
-              className={`flex-1 h-10 rounded-full flex-row items-center justify-center ${on ? "bg-[#1685ff]" : ""}`}
-            >
+         const on = tab === t;
+         return (
+          <Pressable
+           key={t}
+           onPress={() => setTab(t)}
+           accessibilityLabel={LABEL[t]}
+           className={`flex-1 h-12 rounded-full flex-row items-center justify-center ${on ? "bg-[#1685ff]" : ""}`}
+          >
+           <Ionicons
+            name={TAB_ICONS[t]}
+            size={24}
+            color={on ? "#fff" : "#647a96"}
+           />
+          </Pressable>
+        );
+       })}
               <Ionicons name={TAB_ICONS[t]} size={16} color={on ? "#fff" : "#64748a"} />
               <Text className={`ml-1.5 text-[13px] font-bold ${on ? "text-white" : "text-[#64748a]"}`}>
                 {LABEL[t]}
