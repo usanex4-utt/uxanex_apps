@@ -31,6 +31,7 @@ export default function ProfileScreen({ navigation, route }) {
   const [tab, setTab] = useState("reels");
   const [reels, setReels] = useState([]);
   const [saved, setSaved] = useState([]);
+  const [reposts, setReposts] = useState([]);
 
   const [err, setErr] = useState("");
   const [menu, setMenu] = useState(false);
