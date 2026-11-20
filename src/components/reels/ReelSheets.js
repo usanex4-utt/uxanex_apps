@@ -43,7 +43,7 @@ const MenuRow = ({ icon, label, onPress, danger, chevron }) => (
 );
 
 export const ReelCommentsSheet = ({
-  visible, sheet, onClose, comments, cLoading, draft, setDraft,
+  visible, sheet, openUser, onClose, comments, cLoading, draft, setDraft,
   sendComment, deleteComment, user,
 }) => (
   <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
@@ -80,7 +80,13 @@ export const ReelCommentsSheet = ({
               }
               renderItem={({ item: c }) => (
                 <View className="flex-row items-start">
-                  <Avatar uri={c.user?.profile_photo} name={c.user?.name || c.user?.username} size={36} />
+                  <Pressable onPress={() => openUser?.(c.user?.user_id)}>
+                   <Avatar
+                    uri={c.user?.profile_photo}
+                    name={c.user?.name || c.user?.username}
+                    size={36}
+                   />
+                  </Pressable>
                   <View className="flex-1 ml-3">
                     <View className="self-start max-w-full bg-[#121b2e] rounded-2xl rounded-tl-md px-3.5 py-2.5">
                       <Text className="text-[#8fb4ff] text-[12px] font-semibold mb-0.5">
