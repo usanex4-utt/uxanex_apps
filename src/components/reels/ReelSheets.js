@@ -116,7 +116,7 @@ export const ReelCommentsSheet = ({
           </View>
         </View>
 
-        {c.user_id === user?.id && (
+         {c.user_id === user?.id && (
           <Pressable
             onPress={() => deleteComment(c)}
             hitSlop={10}
