@@ -801,7 +801,15 @@ export default function ReelsScreen({ navigation }) {
   parent_comment_id: replyTo?.id || null,
 },
       });
-      setComments((l) => [d.comment, ...l]);
+      setComments((l) => [
+       {
+        ...d.comment,
+        parent_comment_id: replyTo?.id || null,
+        likes_count: 0,
+        liked: false,
+       },
+       ...l,
+      ]);
       setReplyTo(null);
       dispatch(
         patchReel({
