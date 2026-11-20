@@ -101,6 +101,11 @@ export const ReelCommentsSheet = ({
                          {c.liked ? "♥ Liked" : "♡ Like"} · {fmt(c.likes_count)}
                         </Text>
                        </Pressable>
+                       <Pressable onPress={() => setReplyTo?.(c)}>
+                       <Text className="text-[#8fb4ff] text-[12px] font-semibold">
+                        Reply
+                       </Text>
+                      </Pressable>
                       </View>
                     </View>
                   </View>
