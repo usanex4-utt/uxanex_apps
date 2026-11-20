@@ -763,6 +763,31 @@ export default function ReelsScreen({ navigation }) {
     setCLoading(false);
   }, []);
 
+
+  const likeComment = useCallback(async (c) => {
+  if (!c?.id) return;
+
+  try {
+    const d = await api(EP.commentLike(c.id), {
+      method: "POST",
+    });
+
+    setComments((list) =>
+      list.map((item) =>
+        item.id === c.id
+          ? {
+              ...item,
+              liked: !!d.liked,
+              likes_count: Number(d.likes_count || 0),
+            }
+          : item
+      )
+    );
+  } catch (e) {
+    Alert.alert("Could not update like", e?.message || "Try again");
+  }
+}, []);
+
   const sendComment = useCallback(async () => {
     const reel = sheet?.reel;
     const content = draft.trim();
