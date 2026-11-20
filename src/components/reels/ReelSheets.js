@@ -43,7 +43,7 @@ const MenuRow = ({ icon, label, onPress, danger, chevron }) => (
 );
 
 export const ReelCommentsSheet = ({
-  visible, sheet, openUser, likeComment, onClose, comments, cLoading, draft, setDraft,
+  visible, sheet, openUser, likeComment, setReplyTo, onClose, comments, cLoading, draft, setDraft,
   sendComment, deleteComment, user,
 }) => (
   <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
