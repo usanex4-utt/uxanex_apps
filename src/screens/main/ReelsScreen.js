@@ -474,28 +474,38 @@ export default function ReelsScreen({ navigation }) {
   );
 
   const toggleFollow = useCallback(
-    async (publicId) => {
-      if (!publicId) return;
-      const following = followStates[publicId] === "following";
-      const next = following ? "not_following" : "following";
-      dispatch(setFollowState({ userId: publicId, state: next }));
-      try {
-        await api(following ? EP.unfollow : EP.follow, {
-          method: "POST",
-          body: { user_id: publicId },
-        });
-      } catch (e) {
-        dispatch(
-          setFollowState({
-            userId: publicId,
-            state: following ? "following" : "not_following",
-          })
-        );
-        Alert.alert("Could not follow", e.message);
-      }
-    },
-    [followStates, dispatch]
-  );
+  async (publicId) => {
+    if (!publicId || followPending.current[publicId]) return;
+
+    followPending.current[publicId] = true;
+
+    followRequestVersion.current[publicId] =
+      (followRequestVersion.current[publicId] || 0) + 1;
+
+    const following = followStates[publicId] === "following";
+    const next = following ? "not_following" : "following";
+
+    dispatch(setFollowState({ userId: publicId, state: next }));
+
+    try {
+      await api(following ? EP.unfollow : EP.follow, {
+        method: "POST",
+        body: { user_id: publicId },
+      });
+    } catch (e) {
+      dispatch(
+        setFollowState({
+          userId: publicId,
+          state: following ? "following" : "not_following",
+        })
+      );
+      Alert.alert("Could not follow", e.message);
+    } finally {
+      followPending.current[publicId] = false;
+    }
+  },
+  [followStates, dispatch]
+);
 
   const toggleSave = useCallback(
     (reel) => {
