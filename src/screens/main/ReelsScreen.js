@@ -95,6 +95,8 @@ export default function ReelsScreen({ navigation }) {
   const lastTapRef = useRef(0);
   const singleTapTimer = useRef(null);
   const fetchedStatus = useRef({});
+  const followRequestVersion = useRef({});
+  const followPending = useRef({});
   const fetchedFollow = useRef({});
   const videoRefs = useRef({});
   const mutedRef = useRef(false);
