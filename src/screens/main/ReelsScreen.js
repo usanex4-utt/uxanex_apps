@@ -903,7 +903,7 @@ export default function ReelsScreen({ navigation }) {
           onViewableItemsChanged={onViewable}
           viewabilityConfig={{ itemVisiblePercentThreshold: 50 }}
           getItemLayout={(_, i) => ({ length: h, offset: h * i, index: i })}
-          onEndReachedThreshold={0.6}
+          onEndReachedThreshold={2}
           onEndReached={() => {
             if (more && !fetching.current) fetchPage(false);
           }}
