@@ -105,11 +105,17 @@ export const ReelCommentsSheet = ({
 
         <View className="flex-1 ml-3">
           <View className="self-start max-w-full bg-[#121b2e] rounded-2xl rounded-tl-md px-3.5 py-2.5">
-            <Pressable onPress={() => openUser?.(c.user?.user_id)}>
-              <Text className="text-[#8fb4ff] text-[12px] font-semibold mb-0.5">
-                @{c.user?.username}
-              </Text>
-            </Pressable>
+            <View className="flex-row items-center gap-2 mb-0.5">
+  <Pressable onPress={() => openUser?.(c.user?.user_id)}>
+    <Text className="text-[#8fb4ff] text-[12px] font-semibold">
+      @{c.user?.username}
+    </Text>
+  </Pressable>
+
+  <Text className="text-[#71809a] text-[11px]">
+    {timeAgo(c.created_at)}
+  </Text>
+</View>
 
             <Text className="text-white text-[14px] leading-5">
               {c.content}
