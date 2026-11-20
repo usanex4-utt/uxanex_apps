@@ -802,6 +802,7 @@ export default function ReelsScreen({ navigation }) {
 },
       });
       setComments((l) => [d.comment, ...l]);
+      setReplyTo(null);
       dispatch(
         patchReel({
           id: reel.id,
@@ -818,7 +819,7 @@ export default function ReelsScreen({ navigation }) {
       Alert.alert("Could not comment", e.message);
       setDraft(content);
     }
-  }, [sheet, draft, dispatch]);
+  }, [sheet, draft, dispatch,replyTo]);
 
   const deleteComment = useCallback(
     async (c) => {
