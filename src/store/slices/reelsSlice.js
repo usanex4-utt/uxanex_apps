@@ -55,8 +55,11 @@ const hydrateReelState = (state, reels) => {
     const uid = creator?.user_id ?? creator?.id;
     if (uid !== undefined && uid !== null) {
       const following = creator.is_following ?? creator.following;
-      if (typeof following !== "undefined") {
-        state.followStates[uid] = following ? "following" : "none";
+      if (
+       typeof following !== "undefined" &&
+       typeof state.followStates[uid] === "undefined"
+     ) {
+       state.followStates[uid] = following ? "following" : "none";
       }
     }
   });
