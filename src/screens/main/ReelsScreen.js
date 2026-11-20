@@ -796,7 +796,10 @@ export default function ReelsScreen({ navigation }) {
     try {
       const d = await api(EP.reelComments(reel.id), {
         method: "POST",
-        body: { content },
+        body: {
+  content,
+  parent_comment_id: replyTo?.id || null,
+},
       });
       setComments((l) => [d.comment, ...l]);
       dispatch(
