@@ -320,14 +320,22 @@ export default function ReelsScreen({ navigation }) {
     if (!r) return;
     const c = r.creator || {};
     if (c.user_id && !fetchedFollow.current[c.user_id]) {
-      fetchedFollow.current[c.user_id] = true;
-      api(EP.followStatus(c.user_id), { silent401: true })
-        .then((d) => {
-          const st =
-            d?.status || (d?.is_following ? "following" : "not_following");
-          dispatch(setFollowState({ userId: c.user_id, state: st }));
-        })
-        .catch(() => {});
+  const userId = c.user_id;
+  fetchedFollow.current[userId] = true;
+
+  const requestVersion = followRequestVersion.current[userId] || 0;
+
+  api(EP.followStatus(userId), { silent401: true })
+    .then((d) => {
+      if ((followRequestVersion.current[userId] || 0) !== requestVersion) return;
+      if (followPending.current[userId]) return;
+
+      const st =
+        d?.status || (d?.is_following ? "following" : "not_following");
+
+      dispatch(setFollowState({ userId, state: st }));
+    })
+    .catch(() => {});
     }
     if (!fetchedStatus.current[r.id]) {
       fetchedStatus.current[r.id] = true;
