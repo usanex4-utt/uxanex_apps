@@ -81,7 +81,7 @@ export const ReelCommentsSheet = ({
   <ActivityIndicator color="#247cff" className="mt-8" />
 ) : (
   <FlatList
-    data={comments}
+    data={comments.filter((c) => !c.parent_comment_id)}
     keyExtractor={(c) => String(c.id)}
     keyboardShouldPersistTaps="handled"
     contentContainerClassName="px-4 py-4 gap-4"
