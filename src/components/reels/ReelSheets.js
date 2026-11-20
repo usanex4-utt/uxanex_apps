@@ -95,6 +95,13 @@ export const ReelCommentsSheet = ({
                        </Text>
                       </Pressable>
                       <Text className="text-white text-[14px] leading-5">{c.content}</Text>
+                      <View className="flex-row items-center mt-2 gap-4">
+                       <Pressable onPress={() => likeComment?.(c)}>
+                        <Text className="text-[#9aa7bb] text-[12px] font-semibold">
+                         {c.liked ? "♥ Liked" : "♡ Like"} · {fmt(c.likes_count)}
+                        </Text>
+                       </Pressable>
+                      </View>
                     </View>
                   </View>
                   {c.user_id === user?.id && (
