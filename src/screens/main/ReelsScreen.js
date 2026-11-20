@@ -83,6 +83,7 @@ export default function ReelsScreen({ navigation }) {
   const [comments, setComments] = useState([]);
   const [cLoading, setCLoading] = useState(false);
   const [draft, setDraft] = useState("");
+  const [replyTo, setReplyTo] = useState(null);
   const [expandedCaptions, setExpandedCaptions] = useState({});
   const [downloadingId, setDownloadingId] = useState(null);
 
