@@ -99,21 +99,6 @@ export const ReelCommentsSheet = ({
                        <Pressable onPress={() => likeComment?.(c)}>
                         <Text className="text-[#9aa7bb] text-[12px] font-semibold">
                          {c.liked ? "♥ Liked" : "♡ Like"} · {fmt(c.likes_count)}
-                        </Text>
-                       </Pressable>
-                       <Pressable onPress={() => setReplyTo?.(c)}>
-                       <Text className="text-[#8fb4ff] text-[12px] font-semibold">
-                        Reply
-                       </Text>
-                      </Pressable>
-                      </View>
-                    </View>
-                  </View>
-                  {c.user_id === user?.id && (
-                    <Pressable onPress={() => deleteComment(c)} hitSlop={10} className="ml-2 mt-2 active:opacity-60">
-                      <Ionicons name="trash-outline" size={17} color="#7f8b9b" />
-                    </Pressable>
-                  )}
                     {replyTo && (
                     <View className="flex-row items-center justify-between px-4 py-2 bg-[#121b2e]">
                      <View className="flex-row items-center gap-2">
