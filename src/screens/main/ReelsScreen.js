@@ -1034,6 +1034,7 @@ export default function ReelsScreen({ navigation }) {
         openUser={openUser}
         onClose={() => setSheet(null)}
         likeComment={likeComment}
+        setReplyTo={setReplyTo}
         comments={comments}
         cLoading={cLoading}
         draft={draft}
