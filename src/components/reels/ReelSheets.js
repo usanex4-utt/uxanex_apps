@@ -23,6 +23,21 @@ const fmt = (n) => {
   if (n >= 1e3) return `${(n / 1e3).toFixed(n >= 1e4 ? 0 : 1).replace(/\.0$/, "")}K`;
   return String(n);
 };
+const timeAgo = (value) => {
+  const t = new Date(value).getTime();
+  if (!Number.isFinite(t)) return "";
+
+  const mins = Math.max(0, Math.floor((Date.now() - t) / 60000));
+
+  if (mins < 1) return "now";
+  if (mins < 60) return `${mins}m`;
+
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h`;
+
+  const days = Math.floor(hrs / 24);
+  return `${days}d`;
+};
 
 const SheetHandle = () => (
   <View className="items-center pt-2.5 pb-1">
