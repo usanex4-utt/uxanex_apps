@@ -1031,6 +1031,7 @@ export default function ReelsScreen({ navigation }) {
       <ReelCommentsSheet
         visible={sheet?.type === "comments"}
         sheet={sheet}
+        openUser={openUser}
         onClose={() => setSheet(null)}
         comments={comments}
         cLoading={cLoading}
