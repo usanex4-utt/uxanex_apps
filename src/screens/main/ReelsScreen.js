@@ -1033,6 +1033,7 @@ export default function ReelsScreen({ navigation }) {
         sheet={sheet}
         openUser={openUser}
         onClose={() => setSheet(null)}
+        likeComment={likeComment}
         comments={comments}
         cLoading={cLoading}
         draft={draft}
