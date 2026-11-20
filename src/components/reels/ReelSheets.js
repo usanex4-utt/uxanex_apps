@@ -61,65 +61,79 @@ export const ReelCommentsSheet = ({
               </View>
             ) : null}
           </View>
+            
+{cLoading ? (
+  <ActivityIndicator color="#247cff" className="mt-8" />
+) : (
+  <FlatList
+    data={comments}
+    keyExtractor={(c) => String(c.id)}
+    keyboardShouldPersistTaps="handled"
+    contentContainerClassName="px-4 py-4 gap-4"
+    ListEmptyComponent={
+      <View className="items-center pt-10">
+        <Ionicons name="chatbubbles-outline" size={34} color="#5d6a80" />
+        <Text className="text-[#9aa7bb] text-[13px] mt-3">
+          No comments yet. Start the conversation.
+        </Text>
+      </View>
+    }
+    renderItem={({ item: c }) => (
+      <View className="flex-row items-start">
+        <Pressable onPress={() => openUser?.(c.user?.user_id)}>
+          <Avatar
+            uri={c.user?.profile_photo}
+            name={c.user?.name || c.user?.username}
+            size={36}
+          />
+        </Pressable>
 
-          {cLoading ? (
-            <ActivityIndicator color="#247cff" className="mt-8" />
-          ) : (
-            <FlatList
-              data={comments}
-              keyExtractor={(c) => String(c.id)}
-              keyboardShouldPersistTaps="handled"
-              contentContainerClassName="px-4 py-4 gap-4"
-              ListEmptyComponent={
-                <View className="items-center pt-10">
-                  <Ionicons name="chatbubbles-outline" size={34} color="#5d6a80" />
-                  <Text className="text-[#9aa7bb] text-[13px] mt-3">
-                    No comments yet. Start the conversation.
-                  </Text>
-                </View>
-              }
-              renderItem={({ item: c }) => (
-                <View className="flex-row items-start">
-                  <Pressable onPress={() => openUser?.(c.user?.user_id)}>
-                   <Avatar
-                    uri={c.user?.profile_photo}
-                    name={c.user?.name || c.user?.username}
-                    size={36}
-                   />
-                  </Pressable>
-                  <View className="flex-1 ml-3">
-                    <View className="self-start max-w-full bg-[#121b2e] rounded-2xl rounded-tl-md px-3.5 py-2.5">
-                      <Pressable onPress={() => openUser?.(c.user?.user_id)}>
-                        <Text className="text-[#8fb4ff] text-[12px] font-semibold mb-0.5">
-                         @{c.user?.username}
-                       </Text>
-                      </Pressable>
-                      <Text className="text-white text-[14px] leading-5">{c.content}</Text>
-                      <View className="flex-row items-center mt-2 gap-4">
-                       <Pressable onPress={() => likeComment?.(c)}>
-                        <Text className="text-[#9aa7bb] text-[12px] font-semibold">
-                         {c.liked ? "♥ Liked" : "♡ Like"} · {fmt(c.likes_count)}
-                    {replyTo && (
-                    <View className="flex-row items-center justify-between px-4 py-2 bg-[#121b2e]">
-                     <View className="flex-row items-center gap-2">
-                      <Avatar
-                       uri={replyTo.user?.profile_photo}
-                       name={replyTo.user?.name || replyTo.user?.username}
-                       size={30}
-                      />
-                      <Text className="text-[#8fb4ff] text-[12px]">
-                       Replying to @{replyTo.user?.username}
-                       </Text>
-                      </View>
-                      <Pressable onPress={() => setReplyTo(null)}>
-                       <Ionicons name="close" size={18} color="#9aa7bb" />
-                       </Pressable>
-                      </View>
-                    )}
-                </View>
-              )}
-            />
-          )}
+        <View className="flex-1 ml-3">
+          <View className="self-start max-w-full bg-[#121b2e] rounded-2xl rounded-tl-md px-3.5 py-2.5">
+            <Pressable onPress={() => openUser?.(c.user?.user_id)}>
+              <Text className="text-[#8fb4ff] text-[12px] font-semibold mb-0.5">
+                @{c.user?.username}
+              </Text>
+            </Pressable>
+
+            <Text className="text-white text-[14px] leading-5">
+              {c.content}
+            </Text>
+
+            <View className="flex-row items-center mt-2 gap-4">
+              <Pressable onPress={() => likeComment?.(c)}>
+                <Text className="text-[#9aa7bb] text-[12px] font-semibold">
+                  {c.liked ? "♥ Liked" : "♡ Like"} · {fmt(c.likes_count)}
+                </Text>
+              </Pressable>
+
+              <Pressable onPress={() => setReplyTo?.(c)}>
+                <Text className="text-[#8fb4ff] text-[12px] font-semibold">
+                  Reply
+                </Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+
+        {c.user_id === user?.id && (
+          <Pressable
+            onPress={() => deleteComment(c)}
+            hitSlop={10}
+            className="ml-2 mt-2 active:opacity-60"
+          >
+            <Ionicons name="trash-outline" size={17} color="#7f8b9b" />
+          </Pressable>
+        )}
+      </View>
+    )}
+  />
+)}
+
+            
+            
+
+          
 
           <View className="flex-row items-center gap-2.5 px-3.5 pt-2.5 pb-6 border-t border-white/10 bg-[#0b1220]">
             <TextInput
