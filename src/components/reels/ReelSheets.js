@@ -135,6 +135,54 @@ export const ReelCommentsSheet = ({
               </Pressable>
             </View>
           </View>
+
+                  {comments
+  .filter((reply) => String(reply.parent_comment_id) === String(c.id))
+  .map((reply) => (
+    <View key={reply.id} className="flex-row items-start mt-3 ml-2">
+      <Pressable onPress={() => openUser?.(reply.user?.user_id)}>
+        <Avatar
+          uri={reply.user?.profile_photo}
+          name={reply.user?.name || reply.user?.username}
+          size={28}
+        />
+      </Pressable>
+
+      <View className="flex-1 ml-2">
+        <View className="bg-[#121b2e] rounded-xl px-3 py-2">
+          <View className="flex-row items-center gap-2">
+            <Pressable onPress={() => openUser?.(reply.user?.user_id)}>
+              <Text className="text-[#8fb4ff] text-[12px] font-semibold">
+                @{reply.user?.username}
+              </Text>
+            </Pressable>
+            <Text className="text-[#71809a] text-[11px]">
+              {timeAgo(reply.created_at)}
+            </Text>
+          </View>
+
+          <Text className="text-white text-[13px] leading-5">
+            {reply.content}
+          </Text>
+
+          <Pressable
+            onPress={() => likeComment?.(reply)}
+            className="mt-2 self-start"
+          >
+            <Text className="text-[#9aa7bb] text-[12px]">
+              {reply.liked ? "♥ Liked" : "♡ Like"} · {fmt(reply.likes_count)}
+            </Text>
+          </Pressable>
+        </View>
+      </View>
+
+      {reply.user_id === user?.id && (
+        <Pressable onPress={() => deleteComment(reply)} hitSlop={10}>
+          <Ionicons name="trash-outline" size={16} color="#7f8b9b" />
+        </Pressable>
+      )}
+    </View>
+  ))}
         </View>
 
          {c.user_id === user?.id && (
