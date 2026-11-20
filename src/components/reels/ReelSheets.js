@@ -114,6 +114,23 @@ export const ReelCommentsSheet = ({
                       <Ionicons name="trash-outline" size={17} color="#7f8b9b" />
                     </Pressable>
                   )}
+                    {replyTo && (
+                    <View className="flex-row items-center justify-between px-4 py-2 bg-[#121b2e]">
+                     <View className="flex-row items-center gap-2">
+                      <Avatar
+                       uri={replyTo.user?.profile_photo}
+                       name={replyTo.user?.name || replyTo.user?.username}
+                       size={30}
+                      />
+                      <Text className="text-[#8fb4ff] text-[12px]">
+                       Replying to @{replyTo.user?.username}
+                       </Text>
+                      </View>
+                      <Pressable onPress={() => setReplyTo(null)}>
+                       <Ionicons name="close" size={18} color="#9aa7bb" />
+                       </Pressable>
+                      </View>
+                    )}
                 </View>
               )}
             />
