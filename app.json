@@ -6,8 +6,16 @@
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
     "backgroundColor": "#05070b",
-    "ios": { "supportsTablet": false, "bundleIdentifier": "com.utanexa.app" },
-    "android": { "package": "com.utanexa.app" },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.utanexa.app"
+    },
+    "android": {
+      "package": "com.utanexa.app",
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
+    },
     "plugins": [
       [
         "expo-image-picker",
@@ -16,11 +24,20 @@
         }
       ]
     ],
-    "platforms": ["ios", "android", "web"],
+    "platforms": [
+      "ios",
+      "android",
+      "web"
+    ],
     "web": {
       "bundler": "metro",
       "output": "single",
-      "favicon": "./assets/logo.png"
+      "favicon": "./assets/utanexa-logo.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "cacc6b62-ec7f-4ed3-ab2c-db7bc6e567aa"
+      }
     }
   }
 }
