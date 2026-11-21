@@ -375,6 +375,8 @@ const initialState = {
   feed: {
     ids: [],
     cursor: null,
+    repostOffset: 0,
+    repostMore: true,
     more: true,
     status: "idle",
     error: null,
@@ -472,6 +474,8 @@ const slice = createSlice({
     resetReelsFeed(state) {
       state.feed.ids = [];
       state.feed.cursor = null;
+      state.feed.repostOffset = 0;
+      state.feed.repostMore = true;
       state.feed.more = true;
       state.feed.status = "idle";
       state.feed.error = null;
@@ -508,6 +512,8 @@ const slice = createSlice({
       state.feed = {
         ids: [],
         cursor: null,
+        repostOffset: 0,
+        repostMore: true,
         more: true,
         status: "idle",
         error: null,
