@@ -8,6 +8,7 @@ import {
   Image,
 } from "react-native";
 
+import ReposterAvatar from "./ReposterAvatar";
 import { Video, ResizeMode } from "expo-av";
 import { Ionicons } from "@expo/vector-icons";
 import { absUrl } from "../../api/client";
