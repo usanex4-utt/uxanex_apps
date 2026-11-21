@@ -531,9 +531,9 @@ function ReelItem(props) {
              name={item.reposted_by.username || item.reposted_by.name}
              size={38}
             />
-                className="absolute -right-1 -bottom-1 w-5 h-5 rounded-full items-center justify-center"
-                
-            </Text>
+                <Text className="text-white text-[12px] ml-2 font-semibold">
+                 Reposted by @{item.reposted_by.username || "User"}
+                 </Text>
           </Pressable>
         ) : null}
         <View className="flex-row items-center mb-2">
