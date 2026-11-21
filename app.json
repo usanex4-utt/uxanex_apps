@@ -6,18 +6,21 @@
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
     "backgroundColor": "#05070b",
-    "icon": "./assets/utanexa-logo.png",
-"splash": {
-  "image": "./assets/utanexa-logo.png",
-  "resizeMode": "contain",
-  "backgroundColor": "#05070b"
-},
     "ios": { "supportsTablet": false, "bundleIdentifier": "com.utanexa.app" },
     "android": { "package": "com.utanexa.app" },
     "plugins": [
-      ["expo-image-picker", { "photosPermission": "UtaNexa needs photo access to upload media." }]
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "UtaNexa needs photo access to upload media."
+        }
+      ]
     ],
     "platforms": ["ios", "android", "web"],
-    "web": { "bundler": "metro", "output": "single" }
+    "web": {
+      "bundler": "metro",
+      "output": "single",
+      "favicon": "./assets/logo.png"
+    }
   }
 }
