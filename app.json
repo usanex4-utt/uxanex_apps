@@ -6,6 +6,12 @@
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
     "backgroundColor": "#05070b",
+    "icon": "./assets/utanexa-logo.png",
+"splash": {
+  "image": "./assets/utanexa-logo.png",
+  "resizeMode": "contain",
+  "backgroundColor": "#05070b"
+},
     "ios": { "supportsTablet": false, "bundleIdentifier": "com.utanexa.app" },
     "android": { "package": "com.utanexa.app" },
     "plugins": [
