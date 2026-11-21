@@ -526,13 +526,11 @@ function ReelItem(props) {
             onPress={() => openUser(item.reposted_by.user_id)}
             className="flex-row items-center mb-3 self-start"
           >
-            <View className="relative">
-              <Avatar
-                uri={item.reposted_by.profile_photo}
-                name={item.reposted_by.username || item.reposted_by.name}
-                size={38}
-              />
-              <View
+            <ReposterAvatar
+             uri={item.reposted_by.profile_photo}
+             name={item.reposted_by.username || item.reposted_by.name}
+             size={38}
+            />
                 className="absolute -right-1 -bottom-1 w-5 h-5 rounded-full items-center justify-center"
                 style={{
                   backgroundColor: "#8B35F5",
