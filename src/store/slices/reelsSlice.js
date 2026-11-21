@@ -68,25 +68,90 @@ const hydrateReelState = (state, reels) => {
 /* ─────────────────────────────────────
    FETCH REELS FEED
 ───────────────────────────────────── */
+
 export const fetchReelsFeed = createAsyncThunk(
   "reels/fetchFeed",
   async ({ reset = false } = {}, { getState }) => {
-    const cursor = getState().reels.feed.cursor;
+    const feed = getState().reels.feed;
+
+    const cursor = reset ? null : feed.cursor;
+    const repostOffset = reset ? 0 : (feed.repostOffset || 0);
 
     const params = new URLSearchParams();
     params.append("limit", String(PAGE));
 
-    if (!reset && cursor) {
-      params.append("cursor", cursor);
+    if (!reset && cursor !== null && cursor !== undefined) {
+      params.append("cursor", String(cursor));
     }
 
-    const d = await api(`${EP.reelsFeed}?${params.toString()}`);
+    const normalPromise =
+      reset || cursor !== null && cursor !== undefined
+        ? api(`${EP.reelsFeed}?${params.toString()}`)
+        : Promise.resolve({ reels: [], next_cursor: null });
 
-    const list = (d.reels || []).map(normalizeReel).filter(Boolean);
+    const repostPromise =
+      reset || feed.repostMore !== false
+        ? api(
+            `${EP.reelsFeedReposts}?limit=${PAGE}&offset=${repostOffset}`
+          ).catch(() => ({ reposts: [] }))
+        : Promise.resolve({ reposts: [] });
+
+    const [normalData, repostData] = await Promise.all([
+      normalPromise,
+      repostPromise,
+    ]);
+
+    const normalList = (normalData.reels || [])
+      .map(normalizeReel)
+      .filter(Boolean);
+
+    const repostList = (repostData.reposts || [])
+      .map(normalizeReel)
+      .filter(Boolean)
+      .map((reel) => ({
+        ...reel,
+        is_repost: true,
+      }));
+
+    const merged = [];
+    const seen = new Map();
+
+    const addReel = (reel) => {
+      const key = String(reel.id);
+
+      if (seen.has(key)) {
+        const index = seen.get(key);
+        merged[index] = {
+          ...merged[index],
+          ...reel,
+          is_repost: true,
+        };
+        return;
+      }
+
+      seen.set(key, merged.length);
+      merged.push(reel);
+    };
+
+    for (
+      let i = 0;
+      i < Math.max(normalList.length, repostList.length);
+      i++
+    ) {
+      if (normalList[i]) addReel(normalList[i]);
+      if (repostList[i]) addReel(repostList[i]);
+    }
+
+    const nextCursor = normalData.next_cursor ?? null;
+    const nextRepostOffset =
+      repostOffset + (repostData.reposts || []).length;
 
     return {
-      list,
-      cursor: d.next_cursor || null,
+      list: merged,
+      cursor: nextCursor,
+      normalMore: nextCursor !== null,
+      repostOffset: nextRepostOffset,
+      repostMore: (repostData.reposts || []).length >= PAGE,
       reset,
     };
   },
@@ -94,17 +159,14 @@ export const fetchReelsFeed = createAsyncThunk(
     condition: ({ reset = false } = {}, { getState }) => {
       const feed = getState().reels.feed;
 
-      // Prevent duplicate simultaneous requests.
       if (feed.status === "loading") return false;
-
-      // Don't request another page when pagination is finished.
-      // Initial / reset requests are still allowed.
       if (!reset && !feed.more) return false;
 
       return true;
     },
   }
 );
+
 
 
 /* ─────────────────────────────────────
