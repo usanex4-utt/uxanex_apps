@@ -541,7 +541,14 @@ const slice = createSlice({
     /* ───────── FETCH FEED SUCCESS ───────── */
 
     builder.addCase(fetchReelsFeed.fulfilled, (state, action) => {
-      const { list, cursor, reset } = action.payload;
+      const {
+       list,
+       cursor,
+       normalMore,
+       repostOffset,
+       repostMore,
+       reset,
+      } = action.payload;
 
       adapter.upsertMany(state, list);
 
@@ -560,7 +567,9 @@ const slice = createSlice({
       hydrateReelState(state, list);
 
       state.feed.cursor = cursor;
-      state.feed.more = list.length >= PAGE && Boolean(cursor);
+      state.feed.repostOffset = repostOffset;
+      state.feed.repostMore = repostMore;
+      state.feed.more = normalMore || repostMore;
       state.feed.status = "idle";
       state.feed.error = null;
       state.feed.lastFetchedAt = Date.now();
