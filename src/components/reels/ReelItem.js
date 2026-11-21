@@ -532,17 +532,7 @@ function ReelItem(props) {
              size={38}
             />
                 className="absolute -right-1 -bottom-1 w-5 h-5 rounded-full items-center justify-center"
-                style={{
-                  backgroundColor: "#8B35F5",
-                  borderWidth: 1.5,
-                  borderColor: "#fff",
-                }}
-              >
-                <Ionicons name="repeat" size={12} color="#fff" />
-              </View>
-            </View>
-            <Text className="text-white text-[12px] ml-2 font-semibold">
-              Reposted by @{item.reposted_by.username || "User"}
+                
             </Text>
           </Pressable>
         ) : null}
