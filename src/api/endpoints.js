@@ -40,7 +40,8 @@ export const EP = {
   userFollowing:      (id)   => `/api/users/${id}/following`,      // GET
 
   // ── reels (backend/routes/reels.py) ───────────────────────
-  reelsFeed:                 "/api/reels/feed",                    // GET ?limit=&cursor=
+  reelsFeed:                 "/api/reels/feed", // GET ?limit=&cursor=
+  reelsFeedReposts:          "/api/reels/feed/reposts",
   reelsMine:                 "/api/reels/me/list",                 // GET
   reelsSaved:                "/api/reels/me/saved",                // GET
   reelsOfUser:        (id)   => `/api/reels/user/${id}/list`,      // GET
