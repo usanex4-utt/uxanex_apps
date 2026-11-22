@@ -1,5 +1,6 @@
 import CreatorComingSoonScreen from "../screens/main/CreatorComingSoonScreen";
 import React, { useEffect } from "react";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import {
   View,
@@ -85,6 +86,7 @@ const ICONS = {
 // ── Bottom Tab Navigator ───────────────────────────────────────
 function Tabs() {
   const dispatch = useDispatch();
+  const insets = useSafeAreaInsets();
 
   const unreadCount = useSelector(selectUnreadCount);
 
@@ -112,8 +114,8 @@ function Tabs() {
         tabBarStyle: {
           backgroundColor: "#070a0f",
           borderTopColor: "#121923",
-          height: 64,
-          paddingBottom: 8,
+          height: 56 + insets.bottom,
+          paddingBottom: Math.max(insets.bottom, 6),
           paddingTop: 6,
         },
 
