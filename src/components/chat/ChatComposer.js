@@ -23,7 +23,7 @@ export default function ChatComposer({
       {recording ? (
         <View className="flex-row items-center gap-2">
           <Pressable onPress={() => onStopRec(false)} className="w-11 h-11 rounded-full bg-white/8 items-center justify-center active:opacity-70">
-            <Ionicons name="trash-outline" size={20} color="#ff8a8a" />
+            <Ionicons name="trash-outline" size={20} color="#ffffff" />
           </Pressable>
           <View className="flex-1 h-12 rounded-[24px] bg-[#121b2d] border border-white/8 flex-row items-center px-4">
             <View className="w-2.5 h-2.5 rounded-full bg-[#ff5f6d] mr-3" />
