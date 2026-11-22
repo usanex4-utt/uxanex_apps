@@ -274,8 +274,8 @@ export default function MomentViewer({
             <Text className="text-white/70 text-[11px]">{when(current.created_at)}{current.expires_at ? `  ·  ${timeLeft(current.expires_at)}` : ""}</Text>
           </View>
           {isMine && (
-            <Pressable onPress={askDelete} hitSlop={10} className="w-9 h-9 rounded-full bg-red-500/30 border border-red-400/50 items-center justify-center mr-2 active:opacity-80">
-              <Ionicons name="trash-outline" size={18} color="#ff8a8a" />
+            <Pressable onPress={askDelete} hitSlop={10} className="w-9 h-9 rounded-full items-center justify-center mr-2 active:opacity-80"
+              <Ionicons name="trash-outline" size={18} color="#ffffff" />
             </Pressable>
           )}
           <Pressable onPress={() => setMoreOpen(true)} hitSlop={10} className="w-9 h-9 rounded-full bg-black/40 items-center justify-center">
@@ -537,12 +537,17 @@ const MoreSheet = ({ visible, isMine, moment, muted, onToggleMute, onClose, onSh
     </View>
   </Sheet>
 );
+const Row = ({ icon, label, onPress, danger }) => {
+  const isDelete = icon === "trash-outline";
 
-const Row = ({ icon, label, onPress, danger }) => (
-  <Pressable onPress={onPress} className="flex-row items-center h-14 px-3 rounded-xl active:bg-white/5">
-    <View className={`w-9 h-9 rounded-xl items-center justify-center ${danger ? "bg-red-500/15" : "bg-white/8"}`}>
-      <Ionicons name={icon} size={18} color={danger ? "#ff6b6b" : "#dbe4f3"} />
-    </View>
-    <Text className={`ml-3 text-[15px] font-medium ${danger ? "text-danger" : "text-ink"}`}>{label}</Text>
-  </Pressable>
-);
+  return (
+    <Pressable onPress={onPress} className="flex-row items-center h-14 px-3 rounded-xl active:bg-white/5">
+      <View className={`w-9 h-9 rounded-xl items-center justify-center ${isDelete ? "" : danger ? "bg-red-500/15" : "bg-white/8"}`}>
+        <Ionicons name={icon} size={18} color={isDelete ? "#ffffff" : danger ? "#ff6b6b" : "#dbe4f3"} />
+      </View>
+      <Text className={`ml-3 text-[15px] font-medium ${isDelete ? "text-white" : danger ? "text-danger" : "text-ink"}`}>{label}</Text>
+    </Pressable>
+  );
+};
+       
+
