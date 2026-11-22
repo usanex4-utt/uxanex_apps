@@ -44,18 +44,21 @@ const SheetHandle = () => (
     <View className="w-10 h-1 rounded-full bg-white/20" />
   </View>
 );
+const MenuRow = ({ icon, label, onPress, danger, chevron }) => {
+  const isDelete = icon === "trash-outline";
 
-const MenuRow = ({ icon, label, onPress, danger, chevron }) => (
-  <Pressable onPress={onPress} className="flex-row items-center h-14 active:opacity-60">
-    <View className={`w-9 h-9 rounded-xl items-center justify-center ${danger ? "bg-red-500/15" : "bg-white/8"}`}>
-      <Ionicons name={icon} size={18} color={danger ? "#ff6b6b" : "#dbe4f3"} />
-    </View>
-    <Text className={`flex-1 ml-3 text-[15px] font-medium ${danger ? "text-danger" : "text-ink"}`}>
-      {label}
-    </Text>
-    {chevron && <Ionicons name="chevron-forward" size={16} color="#5d6a80" />}
-  </Pressable>
-);
+  return (
+    <Pressable onPress={onPress} className="flex-row items-center h-14 active:opacity-60">
+      <View className={`w-9 h-9 rounded-xl items-center justify-center ${isDelete ? "" : danger ? "bg-red-500/15" : "bg-white/8"}`}>
+        <Ionicons name={icon} size={18} color={isDelete ? "#ffffff" : danger ? "#ff6b6b" : "#dbe4f3"} />
+      </View>
+      <Text className={`flex-1 ml-3 text-[15px] font-medium ${isDelete ? "text-white" : danger ? "text-danger" : "text-ink"}`}>
+        {label}
+      </Text>
+      {chevron && <Ionicons name="chevron-forward" size={16} color="#5d6a80" />}
+    </Pressable>
+  );
+};
 
 export const ReelCommentsSheet = ({
   visible, sheet, openUser, likeComment, setReplyTo, replyTo, onClose, comments, cLoading, draft, setDraft,
