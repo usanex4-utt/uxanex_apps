@@ -110,9 +110,8 @@ export default function MomentArchiveScreen({ navigation }) {
                     <Ionicons name="refresh-outline" size={16} color="#8fb4ff" />
                   </Pressable>
                   <Pressable onPress={() => askDelete(m)} hitSlop={6}
-                    className="w-9 h-9 rounded-full bg-red-500/15 items-center
-                               justify-center ml-2 active:opacity-70">
-                    <Ionicons name="trash-outline" size={15} color="#ff6b6b" />
+                    className="w-9 h-9 rounded-full items-center justify-center ml-2 active:opacity-70"
+                    <Ionicons name="trash-outline" size={15} color="#ffffff" />
                   </Pressable>
                 </View>
               );
