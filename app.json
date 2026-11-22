@@ -4,6 +4,12 @@
     "name": "UtaNexa",
     "slug": "utanexa",
     "version": "1.0.0",
+    "runtimeVersion": {
+     "policy": "appVersion"
+    },
+    "updates": {
+    "url": "https://u.expo.dev/cacc6b62-ec7f-4ed3-ab2c-db7bc6e567aa"
+    },
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
     "backgroundColor": "#05070b",
