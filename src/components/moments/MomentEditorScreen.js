@@ -302,9 +302,9 @@ export default function MomentEditorScreen({ navigation, route }) {
 
           {busy && (
             <Pressable onPress={() => abortRef.current?.abort()}
-              className="mt-4 self-center h-10 px-5 rounded-full bg-red-500/15 border border-red-500/30 flex-row items-center active:opacity-70">
-              <Ionicons name="close-circle-outline" size={16} color="#ff6b6b" />
-              <Text className="text-[#ff6b6b] font-bold text-[12px] ml-2">Cancel upload</Text>
+             className="mt-4 w-full min-h-[64px] flex-row items-center justify-center px-4 py-3 rounded-2xl bg-white/6 border border-white/10 active:opacity-80">
+             <Ionicons name="close-circle-outline" size={20} color="#ffffff" />
+             <Text className="text-white font-semibold text-[13px] ml-2">Cancel upload</Text>
             </Pressable>
           )}
         </ScrollView>
