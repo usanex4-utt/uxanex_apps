@@ -123,7 +123,7 @@ export default function ReelPlayerModal({
             style={{
               top: (insets?.top || 0) + 8,
             }}
-            className="absolute left-4 w-10 h-10 rounded-full items-center justify-center active:opacity-70"
+            className="absolute left-4 w-10 h-10 rounded-full items-center justify-center active:opacity-70">
             
             <Ionicons
               name="trash-outline"
