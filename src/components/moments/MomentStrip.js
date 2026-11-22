@@ -16,6 +16,7 @@ import { selectMomentGroups } from "../../store/selectors";
 
 import MomentRing from "./MomentRing";
 import MomentViewer from "./MomentViewer";
+import { Avatar } from "../ui";
 import MomentSkeleton from "./MomentSkeleton"; // <-- Naya Import
 
 export default function MomentStrip({ onCreate, refreshKey }) {
@@ -117,32 +118,50 @@ export default function MomentStrip({ onCreate, refreshKey }) {
               />
             ) : (
               <Pressable
-                onPress={onCreate}
-                style={{ alignItems: "center" }}
-                className="active:opacity-80"
+               onPress={onCreate}
+               style={{ alignItems: "center" }}
+               className="active:opacity-80"
               >
-                <View
-                  style={{ width: 74, height: 74 }}
-                  className="items-center justify-center"
-                >
-                  <View
-                    style={{
-                      width: 70,
-                      height: 70,
-                      borderRadius: 35,
-                      padding: 2.5,
-                      backgroundColor: "rgba(36,124,255,0.25)",
-                    }}
-                  >
-                    <View className="flex-1 rounded-full bg-[#0f172a] items-center justify-center border-[3px] border-[#05070b]">
-                      <Ionicons name="add" size={26} color="#247cff" />
-                    </View>
-                  </View>
-                </View>
-                <Text className="text-[#8bb8ff] text-[11px] mt-1 font-semibold">
-                  Add Moment
-                </Text>
-              </Pressable>
+               <View
+               style={{
+                width: 74,
+                height: 74,
+                borderRadius: 37,
+                borderWidth: 3,
+                borderColor: "rgba(36,124,255,0.35)",
+                alignItems: "center",
+                justifyContent: "center",
+               }}
+              >
+               <Avatar
+                uri={user?.profile_photo}
+                name={user?.name || user?.username}
+                size={64}
+               />
+
+               <View
+                style={{
+                 position: "absolute",
+                 right: -2,
+                 bottom: -2,
+                 width: 25,
+                 height: 25,
+                 borderRadius: 13,
+                 backgroundColor: "#247cff",
+                 alignItems: "center",
+                 justifyContent: "center",
+                 borderWidth: 2,
+                 borderColor: "#05070b",
+                }}
+               >
+                <Ionicons name="add" size={19} color="#fff" />
+               </View>
+              </View>
+
+              <Text className="text-[#8bb8ff] text-[11px] mt-1 font-semibold">
+               Add Moment
+              </Text>
+             </Pressable>
             )}
 
             {/* OTHER USERS' MOMENTS */}
