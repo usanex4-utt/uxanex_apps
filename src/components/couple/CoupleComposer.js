@@ -12,8 +12,8 @@ export default function CoupleComposer({
     <View className="px-3 pt-2.5 pb-3 bg-white/95 border-t border-black/5">
       {recording ? (
         <View className="flex-row items-center gap-2">
-          <Pressable onPress={() => onStopRec(false)} className="w-11 h-11 rounded-full bg-black/5 items-center justify-center active:opacity-70">
-            <Ionicons name="trash-outline" size={20} color="#e03131" />
+          <Pressable onPress={() => onStopRec(false)} className="w-11 h-11 rounded-full bg-black/70 items-center justify-center active:opacity-70">
+            <Ionicons name="trash-outline" size={20} color="#ffffff" />
           </Pressable>
           <View className="flex-1 h-12 rounded-[24px] bg-[#f6f2f6] border border-black/5 flex-row items-center px-4">
             <View className="w-2.5 h-2.5 rounded-full bg-red-500 mr-3" />
