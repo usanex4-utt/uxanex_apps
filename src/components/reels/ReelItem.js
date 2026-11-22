@@ -1,4 +1,4 @@
-import React, { memo, useState, useEffect, useRef } from "react";
+import React, { memo, useRef } from "react";
 import {
   View,
   Text,
@@ -13,11 +13,6 @@ import { Video, ResizeMode } from "expo-av";
 import { Ionicons } from "@expo/vector-icons";
 import { absUrl } from "../../api/client";
 import { Avatar } from "../ui";
-
-const LOGO_URL =
-  "https://res.cloudinary.com/xqbosxje/image/upload/v1794860442/utanexa_logo.png";
-
-const WATERMARK_DURATION = 5000; // 5 Seconds
 
 // ========================================
 // HELPERS
@@ -53,65 +48,6 @@ const parseTags = (value) => {
     .filter(Boolean)
     .map((tag) => (tag.startsWith("#") ? tag : `#${tag}`));
 };
-
-// ========================================
-// WATERMARK (UI Fix)
-// ========================================
-
-const ReelWatermark = memo(function ReelWatermark({ username }) {
-  return (
-    <View
-      pointerEvents="none"
-      style={{
-        position: "absolute",
-        top: 58, 
-        right: 16,
-        zIndex: 100,
-        elevation: 10,
-        flexDirection: "row",
-        alignItems: "center",
-      }}
-    >
-      {/* Logo Box */}
-      <View
-        style={{
-          width: 38,
-          height: 38,
-          borderRadius: 11,
-          borderWidth: 1.5,
-          borderColor: "#FFFFFF",
-          backgroundColor: "rgba(255,255,255,0.10)",
-          alignItems: "center",
-          justifyContent: "center",
-          overflow: "hidden",
-        }}
-      >
-        <Image
-          source={{ uri: LOGO_URL }}
-          style={{ width: 29, height: 29 }}
-          resizeMode="contain"
-        />
-      </View>
-
-      {/* Username Text (Pure White + Shadow) */}
-      <Text
-        numberOfLines={1}
-        style={{
-          marginLeft: 9,
-          color: "#FFFFFF", // Sab white me
-          fontSize: 14,
-          fontWeight: "800",
-          maxWidth: 160,
-          textShadowColor: "rgba(0,0,0,0.9)", // Shadow taaki bright background pe dikhe
-          textShadowOffset: { width: 0, height: 1.5 },
-          textShadowRadius: 4,
-        }}
-      >
-        {username}
-      </Text>
-    </View>
-  );
-});
 
 // ========================================
 // RIGHT RAIL BUTTON
@@ -342,23 +278,6 @@ function ReelItem(props) {
     }
   };
 
-  const [showWatermark, setShowWatermark] = useState(false);
-
-  useEffect(() => {
-    if (!isVisible) {
-      setShowWatermark(false);
-      return undefined;
-    }
-
-    setShowWatermark(true);
-
-    const timer = setTimeout(() => {
-      setShowWatermark(false);
-    }, WATERMARK_DURATION);
-
-    return () => clearTimeout(timer);
-  }, [item.id, isVisible]);
-
   return (
     <View style={{ height: h }} className="bg-black">
       <View style={{ flex: 1 }}>
@@ -511,10 +430,6 @@ function ReelItem(props) {
         >
           <Ionicons name="heart" size={90} color="#ff2d55" />
         </Animated.View>
-      ) : null}
-
-      {showWatermark && isVisible ? (
-        <ReelWatermark username={username} />
       ) : null}
 
       <View
