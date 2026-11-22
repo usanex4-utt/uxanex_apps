@@ -34,6 +34,7 @@ export default function MomentViewer({
   visible, moments: initial, startIndex = 0, owner, viewerId, onClose, onMutated,
 }) {
   const insets = useSafeAreaInsets();
+  const viewerTopInset = Platform.OS === "android" ? 0 : insets.top;
   
   const [moments, setMoments] = useState(initial || []);
   const [index, setIndex] = useState(startIndex);
