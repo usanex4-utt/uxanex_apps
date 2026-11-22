@@ -258,7 +258,7 @@ export default function MomentViewer({
       <View className="flex-1 bg-black">
         
         {/* Progress Bars */}
-        <View className="absolute left-0 right-0 z-20 flex-row px-2 gap-1" style={{ top: insets.top + 8 }}>
+        <View className="absolute left-0 right-0 z-20 flex-row px-2 gap-1" style={{ top: viewerTopInset + 8 }}
           {moments.map((m, i) => (
             <View key={m.id || i} className="flex-1 h-[3px] bg-white/25 rounded-full overflow-hidden">
               {i < index ? <View className="flex-1 bg-white" /> : i === index ? <View className="h-full bg-white" style={{ width: `${Math.round(progress * 100)}%` }} /> : null}
@@ -267,7 +267,7 @@ export default function MomentViewer({
         </View>
 
         {/* Header */}
-        <View className="absolute left-4 right-4 z-20 flex-row items-center" style={{ top: insets.top + 22 }}>
+        <View className="absolute left-4 right-4 z-20 flex-row items-center" style={{ top: viewerTopInset + 22 }}
           <Avatar uri={owner?.profile_photo} name={owner?.name || owner?.username} size={36} />
           <View className="ml-3 flex-1">
             <Text className="text-white font-bold text-[14px]" numberOfLines={1}>{owner?.name || owner?.username || "Moment"}</Text>
