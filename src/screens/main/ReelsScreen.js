@@ -4,7 +4,6 @@ import {
   Text,
   Pressable,
   FlatList,
-  useWindowDimensions,
   ActivityIndicator,
   Animated,
   AppState,
@@ -16,7 +15,6 @@ import { Ionicons } from "@expo/vector-icons";
 import * as Clipboard from "expo-clipboard";
 import { useFocusEffect, useRoute } from "@react-navigation/native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useDispatch, useSelector } from "react-redux";
 import * as FileSystem from "expo-file-system";
 import * as MediaLibrary from "expo-media-library";
@@ -59,10 +57,8 @@ export default function ReelsScreen({ navigation }) {
   const dispatch = useDispatch();
   const { user } = useAuth();
   const route = useRoute();
-  const { height } = useWindowDimensions();
-  const tabH = useBottomTabBarHeight();
   const insets = useSafeAreaInsets();
-  const h = height - tabH;
+  const [h, setH] = useState(0);
 
   // ── Redux ──────────────────────────────────────
   const reels = useSelector(selectFeedReels);
@@ -919,7 +915,20 @@ export default function ReelsScreen({ navigation }) {
 
   // ── Render ─────────────────────────────────────
   return (
-    <View className="flex-1 bg-black">
+    <View
+    className="flex-1 bg-black"
+    onLayout={(event) => {
+     const measuredHeight = Math.round(
+      event.nativeEvent.layout.height
+     );
+
+     setH((previous) =>
+      Math.abs(previous - measuredHeight) > 1
+       ? measuredHeight
+       : previous
+     );
+    }}
+   >
       {/* Top bar: + left · mute right */}
       <View
         pointerEvents="box-none"
