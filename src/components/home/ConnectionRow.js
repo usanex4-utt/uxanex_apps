@@ -78,15 +78,6 @@ const ConnectionRow = ({ item, user, navigation, onLongPress }) => {
           ) : null}
         </View>
       </View>
-
-      {/* Chat Icon */}
-      <View className="w-10 h-10 rounded-full bg-brand/15 border border-brand/30 items-center justify-center">
-        <Ionicons
-          name="chatbubble-ellipses"
-          size={18}
-          color="#4d94ff"
-        />
-      </View>
     </Pressable>
   );
 };
