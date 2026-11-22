@@ -107,7 +107,7 @@ export default function ReelPlayerModal({
             top: (insets?.top || 0) + 8,
             right: 64,
           }}
-          className="absolute w-10 h-10 rounded-full bg-black/55 border border-white/20 items-center justify-center active:opacity-70"
+          className="absolute left-4 w-10 h-10 rounded-full items-center justify-center active:opacity-70"
         >
           <Ionicons
             name="share-outline"
