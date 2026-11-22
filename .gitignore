@@ -14,3 +14,8 @@ coverage/
 .DS_Store
 Thumbs.db
 "@ | Set-Content .gitignore
+/android
+/ios
+node_modules/
+dist/
+.expo/

@@ -5,26 +5,23 @@
     "slug": "utanexa",
     "version": "1.0.0",
     "runtimeVersion": {
-     "policy": "appVersion"
+      "policy": "appVersion"
     },
     "updates": {
-    "url": "https://u.expo.dev/cacc6b62-ec7f-4ed3-ab2c-db7bc6e567aa"
+      "url": "https://u.expo.dev/cacc6b62-ec7f-4ed3-ab2c-db7bc6e567aa"
     },
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
     "backgroundColor": "#05070b",
-
     "splash": {
       "image": "./assets/utanexa-logo.png",
       "resizeMode": "contain",
       "backgroundColor": "#05070b"
     },
-
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.utanexa.app"
     },
-
     "android": {
       "package": "com.utanexa.app",
       "permissions": [
@@ -35,28 +32,25 @@
         "backgroundColor": "#05070b"
       }
     },
-
     "plugins": [
       [
         "expo-image-picker",
         {
           "photosPermission": "UtaNexa needs photo access to upload media."
         }
-      ]
+      ],
+      "expo-system-ui"
     ],
-
     "platforms": [
       "ios",
       "android",
       "web"
     ],
-
     "web": {
       "bundler": "metro",
       "output": "single",
       "favicon": "./assets/utanexa-logo.png"
     },
-
     "extra": {
       "eas": {
         "projectId": "cacc6b62-ec7f-4ed3-ab2c-db7bc6e567aa"
