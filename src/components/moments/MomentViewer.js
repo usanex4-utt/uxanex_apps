@@ -274,7 +274,7 @@ export default function MomentViewer({
             <Text className="text-white/70 text-[11px]">{when(current.created_at)}{current.expires_at ? `  ·  ${timeLeft(current.expires_at)}` : ""}</Text>
           </View>
           {isMine && (
-            <Pressable onPress={askDelete} hitSlop={10} className="w-9 h-9 rounded-full items-center justify-center mr-2 active:opacity-80"
+            <Pressable onPress={askDelete} hitSlop={10} className="w-9 h-9 rounded-full items-center justify-center mr-2 active:opacity-80">
               <Ionicons name="trash-outline" size={18} color="#ffffff" />
             </Pressable>
           )}
