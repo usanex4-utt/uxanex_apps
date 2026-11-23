@@ -115,10 +115,10 @@ function ProfileReelItem({
           shouldPlay={active && !paused}
           isLooping={false}
           onPlaybackStatusUpdate={(status) => {
-           if (status.didJustFinish && autoScroll) {
-             onVideoEnd?.();
-            }
-           }}
+           if (active && status.didJustFinish && autoScroll) {
+            onVideoEnd?.(item.id);
+          }
+         }}
           isMuted={muted}
         />
       ) : (
