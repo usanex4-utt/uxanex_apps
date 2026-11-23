@@ -244,18 +244,6 @@ function ProfileReelItem({
       </View>
      )}
 
-      {/* Volume control */}
-      <Pressable
-        onPress={onMute}
-        className="absolute right-4 top-20 w-10 h-10 rounded-full bg-black/45 items-center justify-center"
-      >
-        <Ionicons
-          name={muted ? "volume-mute" : "volume-high"}
-          size={20}
-          color="#fff"
-        />
-      </Pressable>
-
       {/* Pause indicator */}
       {active && paused && (
         <View
