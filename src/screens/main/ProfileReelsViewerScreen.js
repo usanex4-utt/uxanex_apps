@@ -807,7 +807,13 @@ useEffect(() => {
           setSheet(null);
           toggleSave(reel);
         }}
+        onEdit={() => {
+          const reel = sheet?.reel;
+          setSheet(null);
+          navigation.navigate("MyReelEditor", { reel });
+        }}
        />
+         
           
     </View>
   );
