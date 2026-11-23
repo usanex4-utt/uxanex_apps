@@ -194,7 +194,8 @@ function ProfileReelItem({
       </View>
 
       {/* Right-side actions */}
-      <View className="absolute right-3 bottom-28 items-center">
+      {!fullScreen && (
+        <View className="absolute right-3 bottom-28 items-center">
         <ActionButton
           icon={liked ? "heart" : "heart-outline"}
           color={liked ? "#ff3158" : "#fff"}
@@ -232,6 +233,7 @@ function ProfileReelItem({
           onPress={onMore}
         />
       </View>
+     )}
 
       {/* Volume control */}
       <Pressable
