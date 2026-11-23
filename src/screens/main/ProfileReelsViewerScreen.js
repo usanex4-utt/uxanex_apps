@@ -671,21 +671,14 @@ useEffect(() => {
     );
   }, [isOwner, currentReel, deleting, navigation, reels.length]);
 
-  const openMore = useCallback((reel) => {
-    Alert.alert("Your Reel", "Choose an action", [
-      {
-        text: "Edit Reel",
-        onPress: () =>
-          navigation.navigate("MyReelEditor", { reel }),
-      },
-      {
-        text: "Delete Reel",
-        style: "destructive",
-        onPress: () => deleteCurrentReel(),
-      },
-      { text: "Cancel", style: "cancel" },
-    ]);
-  }, [navigation, deleteCurrentReel]);
+    const openMore = useCallback((reel) => {
+    if (!isOwner || !reel?.id) return;
+
+    setSheet({
+      type: "your-reel-options",
+      reel,
+    });
+  }, [isOwner]);
 
   if (!reels.length) {
     return (
