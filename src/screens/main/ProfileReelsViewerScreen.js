@@ -342,17 +342,22 @@ export default function ProfileReelsViewerScreen({
   }).current;
 
   // Pause every inactive Reel so audio never overlaps
-useEffect(() => {
-  const activeId = String(reels[activeIndex]?.id || "");
 
-  Object.entries(videoRefs.current).forEach(([id, ref]) => {
-    if (!ref) return;
+  // Keep only the active Reel playing
+  useEffect(() => {
+    const activeId = String(reels[activeIndex]?.id || "");
 
-    if (paused || String(id) !== activeId) {
-      ref.pauseAsync().catch(() => {});
-    }
-  });
-}, [activeIndex, paused, reels]);
+    Object.entries(videoRefs.current).forEach(([id, ref]) => {
+      if (!ref) return;
+
+      if (String(id) === activeId && !paused) {
+        ref.playAsync().catch(() => {});
+      } else {
+        ref.pauseAsync().catch(() => {});
+      }
+    });
+  }, [activeIndex, paused, reels]);
+  
 
   // Pause all videos when leaving this screen
 useEffect(() => {
