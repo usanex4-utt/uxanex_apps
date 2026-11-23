@@ -311,6 +311,32 @@ export default function ProfileReelsViewerScreen({
 
   const listRef = useRef(null);
   const videoRefs = useRef({});
+  useEffect(() => {
+  if (!isOwner) return;
+
+  let active = true;
+
+  const loadReelPreferences = async () => {
+    try {
+      const data = await api(EP.reelPreferences);
+
+      if (active && data?.success) {
+        setReelPreferences({
+          hide_reel_counts: !!data.hide_reel_counts,
+          disable_reel_downloads: !!data.disable_reel_downloads,
+        });
+      }
+    } catch (error) {
+      console.log("Reel preferences load failed:", error.message);
+    }
+  };
+
+  loadReelPreferences();
+
+  return () => {
+    active = false;
+  };
+}, [isOwner]);
 
   const isOwner = !!route.params?.isOwner;
   const profileUser = route.params?.profileUser || {};
