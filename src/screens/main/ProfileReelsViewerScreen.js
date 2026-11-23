@@ -282,6 +282,10 @@ export default function ProfileReelsViewerScreen({
   const [muted, setMuted] = useState(false);
   const [paused, setPaused] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [reelPreferences, setReelPreferences] = useState({
+  hide_reel_counts: false,
+  disable_reel_downloads: false,
+});
 
   const [liked, setLiked] = useState(() => {
     const result = {};
