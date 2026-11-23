@@ -788,7 +788,7 @@ const handleVideoEnd = useCallback((endedReelId) => {
              }
              navigation.goBack();
             }}
-            className="w-10 h-10 rounded-full bg-black/45 items-center justify-center"
+            className="w-10 h-10 items-center justify-center"
            >
             <Ionicons name="chevron-back" size={25} color="#fff" />
           </Pressable>
