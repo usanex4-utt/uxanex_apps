@@ -31,6 +31,7 @@ export const EP = {
 
   // ── profile (backend/routes/profile.py) ───────────────────
   myProfile:                 "/api/profile/me",                    // GET | PUT (update body)
+  reelPreferences:           "/api/profile/me/reel-preferences", // GET | PATCH
   myPhoto:                   "/api/profile/me/photo",              // POST (multipart "photo")
   profilePrivacy:            "/api/profile/me/privacy",            // PUT { is_private }  ⚠ backend must expose PUT
   profile:            (id)   => `/api/profile/${id}`,              // GET public profile by user_id
