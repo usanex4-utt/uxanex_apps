@@ -71,6 +71,8 @@ function ProfileReelItem({
   onMore,
   videoRef,
   onMute,
+  hideCounts,
+  fullScreen,
 }) {
   const creator = item?.creator || profileUser || {};
   const videoUrl = item?.video_url ? absUrl(item.video_url) : null;
