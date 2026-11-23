@@ -431,7 +431,10 @@ useEffect(() => {
   }, [paused, currentReel]);
 
   const toggleMute = useCallback(() => {
-  const handleVideoEnd = useCallback(() => {
+  setMuted((previous) => !previous);
+}, []);
+
+const handleVideoEnd = useCallback(() => {
   if (!autoScroll) return;
 
   const nextIndex = activeIndex + 1;
@@ -446,8 +449,6 @@ useEffect(() => {
     animated: true,
   });
 }, [autoScroll, activeIndex, reels.length]);
-    setMuted((previous) => !previous);
-  }, []);
 
   const toggleLike = useCallback(async (reel) => {
     if (!reel?.id) return;
