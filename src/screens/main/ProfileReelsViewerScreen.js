@@ -788,6 +788,12 @@ useEffect(() => {
         replyTo={replyTo}
         user={profileUser}
       />
+      <YourReelOptionsSheet
+        visible={sheet?.type === "your-reel-options"}
+        reel={sheet?.reel}
+        onClose={() => setSheet(null)}
+      />
+          
     </View>
   );
 }
