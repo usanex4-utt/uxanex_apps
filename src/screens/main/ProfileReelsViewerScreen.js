@@ -24,7 +24,10 @@ import { Ionicons } from "@expo/vector-icons";
 
 import { api, absUrl } from "../../api/client";
 import { EP } from "../../api/endpoints";
-import { ReelCommentsSheet } from "../../components/reels/ReelSheets";
+import {
+  ReelCommentsSheet,
+  YourReelOptionsSheet,
+} from "../../components/reels/ReelSheets";
 
 const count = (value) => {
   const n = Number(value) || 0;
