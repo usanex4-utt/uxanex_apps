@@ -799,7 +799,16 @@ const handleVideoEnd = useCallback((endedReelId) => {
             </Text>
            )}
 
-          <View className="w-10 h-10" />
+          <Pressable
+           onPress={toggleMute}
+           className="w-10 h-10 items-center justify-center"
+          >
+           <Ionicons
+            name={muted ? "volume-mute" : "volume-high"}
+            size={22}
+            color="#fff"
+           />
+         </Pressable>
         </View>
       </SafeAreaView>
 
