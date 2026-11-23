@@ -201,20 +201,20 @@ function ProfileReelItem({
         <ActionButton
           icon={liked ? "heart" : "heart-outline"}
           color={liked ? "#ff3158" : "#fff"}
-          label={likeCount}
+          label={!hideCounts ? likeCount : undefined}
           onPress={onLike}
         />
 
         <ActionButton
           icon="chatbubble-outline"
-          label={item?.comment_count || 0}
+          label={!hideCounts ? (item?.comment_count || 0) : undefined}
           onPress={onComment}
         />
 
         <ActionButton
           icon={item?.is_reposted ? "repeat" : "repeat-outline"}
           color={item?.is_reposted ? "#72b0ff" : "#fff"}
-          label={item?.repost_count || 0}
+          label={!hideCounts ? (item?.repost_count || 0) : undefined}
           onPress={onRepost}
         />
 
@@ -226,7 +226,7 @@ function ProfileReelItem({
         <ActionButton
           icon={saved ? "bookmark" : "bookmark-outline"}
           color={saved ? "#72b0ff" : "#fff"}
-          label={item?.save_count || 0}
+          label={!hideCounts ? (item?.save_count || 0) : undefined}
           onPress={onSave}
         />
 
@@ -732,7 +732,8 @@ useEffect(() => {
               if (ref) videoRefs.current[item.id] = ref;
               else delete videoRefs.current[item.id];
             }}
-            onMute={toggleMute}
+            hideCounts={isOwner && reelPreferences.hide_reel_counts}
+            fullScreen={fullScreen}
           />
         )}
         pagingEnabled
