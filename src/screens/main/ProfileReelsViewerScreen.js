@@ -113,7 +113,12 @@ function ProfileReelItem({
           }}
           resizeMode={ResizeMode.COVER}
           shouldPlay={active && !paused}
-          isLooping
+          isLooping={false}
+          onPlaybackStatusUpdate={(status) => {
+           if (status.didJustFinish && autoScroll) {
+             onVideoEnd?.();
+            }
+           }}
           isMuted={muted}
         />
       ) : (
