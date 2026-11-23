@@ -329,6 +329,7 @@ export default function ProfileReelsViewerScreen({
 
   const listRef = useRef(null);
   const videoRefs = useRef({});
+  const autoScrollHandledRef = useRef(new Set());
   const isOwner = !!route.params?.isOwner;
 
   useEffect(() => {
