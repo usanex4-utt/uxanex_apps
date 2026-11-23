@@ -134,14 +134,18 @@ function ProfileReelItem({
         className="absolute left-3 right-[76px] bottom-8"
       >
         <View className="flex-row items-center mb-3">
-          <Image
-            source={
-              creator.profile_photo
-                ? { uri: absUrl(creator.profile_photo) }
-                : require("../../../assets/icon.png")
-            }
+          {creator.profile_photo ? (
+           <Image
+            source={{ uri: absUrl(creator.profile_photo) }}
             className="w-10 h-10 rounded-full border border-white/50"
-          />
+           />
+         ) : (
+           <View className="w-10 h-10 rounded-full border border-white/50 bg-slate-700 items-center justify-center">
+            <Text className="text-white font-bold">
+             {(creator.username || "U").charAt(0).toUpperCase()}
+             </Text>
+            </View>
+           )}
 
           <View className="ml-2 flex-1">
             <Text
