@@ -439,9 +439,16 @@ useEffect(() => {
   const toggleMute = useCallback(() => {
   setMuted((previous) => !previous);
 }, []);
-
-const handleVideoEnd = useCallback(() => {
+const handleVideoEnd = useCallback((endedReelId) => {
   if (!autoScroll) return;
+
+  const currentId = String(reels[activeIndex]?.id || "");
+  const endedId = String(endedReelId || "");
+
+  if (!currentId || endedId !== currentId) return;
+  if (autoScrollHandledRef.current.has(endedId)) return;
+
+  autoScrollHandledRef.current.add(endedId);
 
   const nextIndex = activeIndex + 1;
 
@@ -454,7 +461,8 @@ const handleVideoEnd = useCallback(() => {
     index: nextIndex,
     animated: true,
   });
-}, [autoScroll, activeIndex, reels.length]);
+}, [autoScroll, activeIndex, reels]);
+
 
   const toggleLike = useCallback(async (reel) => {
     if (!reel?.id) return;
