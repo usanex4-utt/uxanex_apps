@@ -362,3 +362,178 @@ export const ReelMenuSheet = ({
     </Modal>
   );
 };
+
+
+const YourReelOptionRow = ({
+  icon,
+  label,
+  onPress,
+  danger = false,
+  value,
+  toggle = false,
+}) => (
+  <Pressable
+    onPress={onPress}
+    className="flex-row items-center min-h-[48px] py-2"
+  >
+    <View className="w-8 items-center justify-center">
+      <Ionicons
+        name={icon}
+        size={19}
+        color={danger ? "#ff626b" : "#cbd5e1"}
+      />
+    </View>
+
+    <Text
+      className={`flex-1 ml-3 text-[13px] font-medium ${
+        danger ? "text-[#ff626b]" : "text-white"
+      }`}
+    >
+      {label}
+    </Text>
+
+    {toggle ? (
+      <View
+        className={`w-10 h-[22px] rounded-full justify-center px-[3px] ${
+          value ? "bg-[#247cff]" : "bg-white/20"
+        }`}
+      >
+        <View
+          className={`w-4 h-4 rounded-full bg-white ${
+            value ? "self-end" : "self-start"
+          }`}
+        />
+      </View>
+    ) : (
+      <Ionicons name="chevron-forward" size={15} color="#64748b" />
+    )}
+  </Pressable>
+);
+
+export const YourReelOptionsSheet = ({
+  visible,
+  reel,
+  onClose,
+  onEdit,
+  onShare,
+  onRepost,
+  onSave,
+  autoScroll,
+  onToggleAutoScroll,
+  onFullScreen,
+  disableDownloads,
+  onToggleDownloads,
+  onDownload,
+  hideCounts,
+  onToggleHideCounts,
+  onDelete,
+}) => (
+  <Modal
+    visible={visible}
+    transparent
+    animationType="slide"
+    onRequestClose={onClose}
+  >
+    <Pressable
+      className="flex-1 bg-black/60 justify-end"
+      onPress={onClose}
+    >
+      <Pressable
+        className="h-[75%] bg-[#101827] rounded-t-[26px] border-t border-white/10 px-4"
+        onPress={() => {}}
+      >
+        <SheetHandle />
+
+        <View className="h-11 flex-row items-center justify-between border-b border-white/10">
+          <Text className="text-white text-[16px] font-bold">
+            Reel Options
+          </Text>
+
+          <Pressable onPress={onClose} hitSlop={10}>
+            <Ionicons name="close" size={23} color="#cbd5e1" />
+          </Pressable>
+        </View>
+
+        <View className="flex-row items-center justify-around py-3 border-b border-white/10">
+          <Pressable onPress={onShare} className="items-center flex-1">
+            <Ionicons name="share-social-outline" size={21} color="#dbeafe" />
+            <Text className="text-white text-[11px] mt-1">Share</Text>
+          </Pressable>
+
+          <Pressable onPress={onRepost} className="items-center flex-1">
+            <Ionicons name="repeat-outline" size={21} color="#dbeafe" />
+            <Text className="text-white text-[11px] mt-1">Repost</Text>
+          </Pressable>
+
+          <Pressable onPress={onSave} className="items-center flex-1">
+            <Ionicons name="bookmark-outline" size={21} color="#dbeafe" />
+            <Text className="text-white text-[11px] mt-1">Save</Text>
+          </Pressable>
+        </View>
+
+        <View className="pt-1">
+          <YourReelOptionRow
+            icon="create-outline"
+            label="Edit Reel"
+            onPress={onEdit}
+          />
+
+          <View className="h-px bg-white/5" />
+
+          <YourReelOptionRow
+            icon="play-circle-outline"
+            label="Auto Scroll"
+            toggle
+            value={autoScroll}
+            onPress={onToggleAutoScroll}
+          />
+
+          <YourReelOptionRow
+            icon="scan-outline"
+            label="View Full Screen"
+            onPress={onFullScreen}
+          />
+
+          <View className="h-px bg-white/5" />
+
+          <YourReelOptionRow
+            icon="download-outline"
+            label="Turn Off Downloading"
+            toggle
+            value={disableDownloads}
+            onPress={onToggleDownloads}
+          />
+
+          <YourReelOptionRow
+            icon="cloud-download-outline"
+            label="Download Reel"
+            onPress={onDownload}
+          />
+
+          <View className="h-px bg-white/5" />
+
+          <YourReelOptionRow
+            icon="eye-off-outline"
+            label="Hide Count"
+            toggle
+            value={hideCounts}
+            onPress={onToggleHideCounts}
+          />
+        </View>
+
+        <View className="flex-1" />
+
+        <View className="border-t border-white/10 pb-5 pt-2">
+          <YourReelOptionRow
+            icon="trash-outline"
+            label="Delete Reel"
+            danger
+            onPress={onDelete}
+          />
+        </View>
+      </Pressable>
+    </Pressable>
+  </Modal>
+);
+
+
