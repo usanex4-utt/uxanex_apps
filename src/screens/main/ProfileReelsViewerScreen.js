@@ -341,6 +341,32 @@ export default function ProfileReelsViewerScreen({
     itemVisiblePercentThreshold: 80,
   }).current;
 
+  // Pause every inactive Reel so audio never overlaps
+useEffect(() => {
+  const activeId = String(reels[activeIndex]?.id || "");
+
+  Object.entries(videoRefs.current).forEach(([id, ref]) => {
+    if (!ref) return;
+
+    if (paused || String(id) !== activeId) {
+      ref.pauseAsync().catch(() => {});
+    }
+  });
+}, [activeIndex, paused, reels]);
+
+  // Pause all videos when leaving this screen
+useEffect(() => {
+  const unsubscribe = navigation.addListener("blur", () => {
+    Object.values(videoRefs.current).forEach((ref) => {
+      if (ref) {
+        ref.pauseAsync().catch(() => {});
+      }
+    });
+  });
+
+  return unsubscribe;
+}, [navigation]);
+
   const togglePause = useCallback(() => {
     const next = !paused;
     setPaused(next);
