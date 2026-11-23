@@ -792,6 +792,22 @@ useEffect(() => {
         visible={sheet?.type === "your-reel-options"}
         reel={sheet?.reel}
         onClose={() => setSheet(null)}
+        onShare={() => {
+          const reel = sheet?.reel;
+          setSheet(null);
+          handleShare(reel);
+        }}
+        onRepost={() => {
+          const reel = sheet?.reel;
+          setSheet(null);
+          handleRepost(reel);
+        }}
+        onSave={() => {
+          const reel = sheet?.reel;
+          setSheet(null);
+          toggleSave(reel);
+        }}
+       />
       />
           
     </View>
