@@ -311,9 +311,10 @@ export default function ProfileReelsViewerScreen({
 
   const listRef = useRef(null);
   const videoRefs = useRef({});
-  useEffect(() => {
-  if (!isOwner) return;
   const isOwner = !!route.params?.isOwner;
+
+  useEffect(() => {
+   if (!isOwner) return;
     
 
   let active = true;
