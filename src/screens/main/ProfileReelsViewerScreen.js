@@ -757,6 +757,8 @@ const handleVideoEnd = useCallback(() => {
             }}
             hideCounts={isOwner && reelPreferences.hide_reel_counts}
             fullScreen={fullScreen}
+            autoScroll={autoScroll}
+            onVideoEnd={handleVideoEnd}
           />
         )}
         pagingEnabled
