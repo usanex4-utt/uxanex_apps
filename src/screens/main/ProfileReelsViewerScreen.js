@@ -784,9 +784,15 @@ const handleVideoEnd = useCallback(() => {
       >
         <View className="h-14 flex-row items-center justify-between px-4">
           <Pressable
-            onPress={() => navigation.goBack()}
+           onPress={() => {
+            if (fullScreen) {
+              setFullScreen(false);
+              return;
+             }
+             navigation.goBack();
+            }}
             className="w-10 h-10 rounded-full bg-black/45 items-center justify-center"
-          >
+           >
             <Ionicons name="chevron-back" size={25} color="#fff" />
           </Pressable>
 
