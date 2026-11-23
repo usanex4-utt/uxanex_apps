@@ -796,9 +796,11 @@ const handleVideoEnd = useCallback(() => {
             <Ionicons name="chevron-back" size={25} color="#fff" />
           </Pressable>
 
-          <Text className="text-white font-bold text-[16px]">
-            Your Reels
-          </Text>
+          {!fullScreen && (
+            <Text className="text-white font-bold text-[16px]">
+             Your Reels
+            </Text>
+           )}
 
           <View className="w-10 h-10" />
         </View>
