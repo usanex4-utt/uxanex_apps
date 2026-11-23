@@ -834,6 +834,10 @@ const handleVideoEnd = useCallback(() => {
         }}
         autoScroll={autoScroll}
         onToggleAutoScroll={() => setAutoScroll((prev) => !prev)}
+        onFullScreen={() => {
+         setSheet(null);
+         setFullScreen(true);
+        }}
         onEdit={() => {
           const reel = sheet?.reel;
           setSheet(null);
