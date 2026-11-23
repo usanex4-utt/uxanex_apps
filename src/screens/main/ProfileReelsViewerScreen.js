@@ -1,4 +1,11 @@
-import React, { useMemo, useRef, useState, useCallback, useEffect } from "react";
+
+import React, {
+  useMemo,
+  useRef,
+  useState,
+  useCallback,
+  useEffect,
+} from "react";
 
 import {
   View,
@@ -7,166 +14,558 @@ import {
   FlatList,
   useWindowDimensions,
   Alert,
+  Image,
+  Share,
 } from "react-native";
+
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Video, ResizeMode } from "expo-av";
 import { Ionicons } from "@expo/vector-icons";
 
 import { api, absUrl } from "../../api/client";
 import { EP } from "../../api/endpoints";
+import { ReelCommentsSheet } from "../../components/reels/ReelSheets";
 
-function ProfileReelItem({ item, active, height, profileUser }) {
+const count = (value) => {
+  const n = Number(value) || 0;
+  if (n >= 1000000) return `${(n / 1000000).toFixed(1)}M`;
+  if (n >= 1000) return `${(n / 1000).toFixed(1)}K`;
+  return String(n);
+};
+
+function ActionButton({ icon, color = "#fff", label, onPress }) {
+  return (
+    <Pressable
+      onPress={onPress}
+      hitSlop={8}
+      className="items-center justify-center mb-5"
+    >
+      <Ionicons name={icon} size={27} color={color} />
+      {label !== undefined && (
+        <Text className="text-white text-[11px] font-semibold mt-1">
+          {count(label)}
+        </Text>
+      )}
+    </Pressable>
+  );
+}
+
+function ProfileReelItem({
+  item,
+  active,
+  height,
+  profileUser,
+  muted,
+  paused,
+  liked,
+  saved,
+  onVideoTap,
+  onLike,
+  onComment,
+  onRepost,
+  onShare,
+  onSave,
+  onMore,
+  videoRef,
+  onMute,
+}) {
+  const creator = item?.creator || profileUser || {};
   const videoUrl = item?.video_url ? absUrl(item.video_url) : null;
   const thumbnailUrl = item?.thumbnail_url
     ? absUrl(item.thumbnail_url)
     : null;
 
+  const username =
+    creator.username || profileUser?.username || "User";
+
+  const userId =
+    creator.user_id || profileUser?.user_id || "";
+
+  const likeCount =
+    Number(item?.likes_count || 0) +
+    Number(item?.like_count || 0);
+
   return (
     <View style={{ height }} className="bg-black">
       {videoUrl ? (
         <Video
+          ref={videoRef}
           source={{ uri: videoUrl }}
-          posterSource={thumbnailUrl ? { uri: thumbnailUrl } : undefined}
+          posterSource={
+            thumbnailUrl ? { uri: thumbnailUrl } : undefined
+          }
           usePoster={!!thumbnailUrl}
-          style={{ width: "100%", height: "100%" }}
-          resizeMode={ResizeMode.CONTAIN}
-          shouldPlay={active}
+          style={{
+            position: "absolute",
+            top: 0,
+            bottom: 0,
+            left: 0,
+            right: 0,
+            width: "100%",
+            height: "100%",
+          }}
+          resizeMode={ResizeMode.COVER}
+          shouldPlay={active && !paused}
           isLooping
-          isMuted={false}
+          isMuted={muted}
         />
       ) : (
-        <View className="flex-1 items-center justify-center">
+        <View className="flex-1 items-center justify-center bg-[#111827]">
           <Ionicons name="videocam-off-outline" size={42} color="#888" />
           <Text className="text-white/60 mt-2">Video unavailable</Text>
         </View>
       )}
 
-      <View className="absolute bottom-0 left-0 right-0 px-4 pb-8 pt-20"
-        style={{ backgroundColor: "rgba(0,0,0,0.48)" }}>
-        <View>
-         <Text className="text-white font-bold text-[15px]">
-          @{item?.creator?.username || profileUser?.username || "User"}
-         </Text>
+      {/* Video tap: Play / Pause */}
+      <Pressable
+        onPress={onVideoTap}
+        style={{
+          position: "absolute",
+          top: 0,
+          bottom: 0,
+          left: 0,
+          right: 0,
+        }}
+      />
 
-        {item?.is_repost && item?.reposted_by?.username ? (
-         <Text className="text-white/60 text-[12px] mt-1">
-          Reposted by @{item.reposted_by.username}
-         </Text>
-       ) : null}
-      </View>
+      {/* Bottom user and caption details */}
+      <View
+        pointerEvents="box-none"
+        className="absolute left-3 right-[76px] bottom-8"
+      >
+        <View className="flex-row items-center mb-3">
+          <Image
+            source={
+              creator.profile_photo
+                ? { uri: absUrl(creator.profile_photo) }
+                : require("../../../assets/icon.png")
+            }
+            className="w-10 h-10 rounded-full border border-white/50"
+          />
+
+          <View className="ml-2 flex-1">
+            <Text
+              className="text-white font-bold text-[14px]"
+              numberOfLines={1}
+            >
+              @{username}
+            </Text>
+
+            {!!userId && (
+              <Text className="text-white/65 text-[11px]">
+                ID {userId}
+              </Text>
+            )}
+          </View>
+        </View>
 
         {!!item?.caption && (
-          <Text className="text-white text-[13px] mt-2" numberOfLines={4}>
+          <Text
+            className="text-white text-[13px] leading-5"
+            numberOfLines={4}
+          >
             {item.caption}
           </Text>
         )}
 
         {!!item?.hashtags && (
-          <Text className="text-[#9ec4ff] text-[12px] mt-1" numberOfLines={2}>
+          <Text
+            className="text-[#9ec4ff] text-[12px] mt-1"
+            numberOfLines={2}
+          >
             {item.hashtags}
           </Text>
         )}
 
         {!!item?.category && (
-          <Text className="text-white/60 text-[11px] mt-1">
+          <Text className="text-white/65 text-[11px] mt-1">
             {item.category}
           </Text>
         )}
       </View>
 
-      <View className="absolute right-3 bottom-36 items-center">
-        <View className="items-center mb-5">
-          <Ionicons name="eye-outline" size={25} color="#fff" />
-          <Text className="text-white text-[11px] mt-1">
-            {item?.views_count ?? item?.view_count ?? 0}
-          </Text>
-        </View>
+      {/* Right-side actions */}
+      <View className="absolute right-3 bottom-28 items-center">
+        <ActionButton
+          icon={liked ? "heart" : "heart-outline"}
+          color={liked ? "#ff3158" : "#fff"}
+          label={likeCount}
+          onPress={onLike}
+        />
 
-        <View className="items-center mb-5">
-          <Ionicons name="heart-outline" size={25} color="#fff" />
-          <Text className="text-white text-[11px] mt-1">
-            {item?.likes_count ?? item?.like_count ?? 0}
-          </Text>
-        </View>
+        <ActionButton
+          icon="chatbubble-outline"
+          label={item?.comment_count || 0}
+          onPress={onComment}
+        />
 
-        <View className="items-center mb-5">
-          <Ionicons name="chatbubble-outline" size={24} color="#fff" />
-          <Text className="text-white text-[11px] mt-1">
-            {item?.comment_count ?? 0}
-          </Text>
-        </View>
+        <ActionButton
+          icon={item?.is_reposted ? "repeat" : "repeat-outline"}
+          color={item?.is_reposted ? "#72b0ff" : "#fff"}
+          label={item?.repost_count || 0}
+          onPress={onRepost}
+        />
 
-        <View className="items-center mb-5">
-          <Ionicons name="thumbs-up-outline" size={24} color="#fff" />
-          <Text className="text-white text-[11px] mt-1">
-            {item?.interested_count ?? 0}
-          </Text>
-        </View>
+        <ActionButton
+          icon="paper-plane-outline"
+          onPress={onShare}
+        />
 
-        <View className="items-center">
-          <Ionicons name="thumbs-down-outline" size={24} color="#fff" />
-          <Text className="text-white text-[11px] mt-1">
-            {item?.not_interested_count ?? 0}
-          </Text>
-        </View>
+        <ActionButton
+          icon={saved ? "bookmark" : "bookmark-outline"}
+          color={saved ? "#72b0ff" : "#fff"}
+          label={item?.save_count || 0}
+          onPress={onSave}
+        />
+
+        <ActionButton
+          icon="ellipsis-horizontal"
+          onPress={onMore}
+        />
       </View>
+
+      {/* Volume control */}
+      <Pressable
+        onPress={onMute}
+        className="absolute right-4 top-20 w-10 h-10 rounded-full bg-black/45 items-center justify-center"
+      >
+        <Ionicons
+          name={muted ? "volume-mute" : "volume-high"}
+          size={20}
+          color="#fff"
+        />
+      </Pressable>
+
+      {/* Pause indicator */}
+      {active && paused && (
+        <View
+          pointerEvents="none"
+          className="absolute inset-0 items-center justify-center"
+        >
+          <View className="w-16 h-16 rounded-full bg-black/55 items-center justify-center">
+            <Ionicons name="play" size={35} color="#fff" />
+          </View>
+        </View>
+      )}
     </View>
   );
 }
 
-export default function ProfileReelsViewerScreen({ navigation, route }) {
+export default function ProfileReelsViewerScreen({
+  navigation,
+  route,
+}) {
   const { height } = useWindowDimensions();
 
   const initialReels = useMemo(
-    () => Array.isArray(route.params?.reels) ? route.params.reels : [],
+    () =>
+      Array.isArray(route.params?.reels)
+        ? route.params.reels
+        : [],
     [route.params?.reels]
   );
 
   const [reels, setReels] = useState(initialReels);
+
   const [activeIndex, setActiveIndex] = useState(() => {
     const id = route.params?.startReelId;
-    const index = initialReels.findIndex((r) => String(r.id) === String(id));
+    const index = initialReels.findIndex(
+      (r) => String(r.id) === String(id)
+    );
     return index >= 0 ? index : 0;
   });
+
+  const [muted, setMuted] = useState(false);
+  const [paused, setPaused] = useState(false);
   const [deleting, setDeleting] = useState(false);
-  useEffect(() => {
-  const updatedReel = route.params?.updatedReel;
 
-  if (!updatedReel?.id) return;
+  const [liked, setLiked] = useState(() => {
+    const result = {};
+    initialReels.forEach((r) => {
+      result[r.id] = !!(r.is_liked || r.liked);
+    });
+    return result;
+  });
 
-  setReels((previous) =>
-    previous.map((item) =>
-      String(item.id) === String(updatedReel.id)
-        ? { ...item, ...updatedReel }
-        : item
-    )
-  );
+  const [saved, setSaved] = useState(() => {
+    const result = {};
+    initialReels.forEach((r) => {
+      result[r.id] = !!(r.is_saved || r.saved);
+    });
+    return result;
+  });
 
-  navigation.setParams({ updatedReel: undefined });
-}, [route.params?.updatedReel, navigation]);
+  const [sheet, setSheet] = useState(null);
+  const [comments, setComments] = useState([]);
+  const [draft, setDraft] = useState("");
+  const [replyTo, setReplyTo] = useState(null);
+  const [cLoading, setCLoading] = useState(false);
+
+  const listRef = useRef(null);
+  const videoRefs = useRef({});
 
   const isOwner = !!route.params?.isOwner;
   const profileUser = route.params?.profileUser || {};
-  const listRef = useRef(null);
 
-  const onViewableItemsChanged = useRef(({ viewableItems }) => {
-    if (viewableItems?.length) {
-      setActiveIndex(viewableItems[0].index ?? 0);
+  const currentReel = reels[activeIndex];
+
+  useEffect(() => {
+    const updatedReel = route.params?.updatedReel;
+    if (!updatedReel?.id) return;
+
+    setReels((previous) =>
+      previous.map((item) =>
+        String(item.id) === String(updatedReel.id)
+          ? { ...item, ...updatedReel }
+          : item
+      )
+    );
+
+    navigation.setParams({ updatedReel: undefined });
+  }, [route.params?.updatedReel, navigation]);
+
+  const onViewableItemsChanged = useRef(
+    ({ viewableItems }) => {
+      if (viewableItems?.length) {
+        setActiveIndex(viewableItems[0].index ?? 0);
+        setPaused(false);
+      }
     }
-  }).current;
+  ).current;
 
   const viewabilityConfig = useRef({
     itemVisiblePercentThreshold: 80,
   }).current;
 
-  const currentReel = reels[activeIndex];
+  const togglePause = useCallback(() => {
+    const next = !paused;
+    setPaused(next);
+
+    const id = currentReel?.id;
+    const ref = id ? videoRefs.current[id] : null;
+
+    if (ref) {
+      if (next) ref.pauseAsync().catch(() => {});
+      else ref.playAsync().catch(() => {});
+    }
+  }, [paused, currentReel]);
+
+  const toggleMute = useCallback(() => {
+    setMuted((previous) => !previous);
+  }, []);
+
+  const toggleLike = useCallback(async (reel) => {
+    if (!reel?.id) return;
+
+    const id = reel.id;
+    const next = !liked[id];
+
+    setLiked((previous) => ({ ...previous, [id]: next }));
+
+    setReels((previous) =>
+      previous.map((r) =>
+        r.id === id
+          ? {
+              ...r,
+              likes_count: Math.max(
+                0,
+                Number(r.likes_count || r.like_count || 0) +
+                  (next ? 1 : -1)
+              ),
+            }
+          : r
+      )
+    );
+
+    try {
+      await api(next ? EP.reelLike(id) : EP.reelUnlike(id), {
+        method: next ? "POST" : "DELETE",
+      });
+    } catch (error) {
+      setLiked((previous) => ({ ...previous, [id]: !next }));
+      Alert.alert("Like update failed", error.message || "Try again.");
+    }
+  }, [liked]);
+
+  const toggleSave = useCallback(async (reel) => {
+    if (!reel?.id) return;
+
+    const id = reel.id;
+    const next = !saved[id];
+
+    setSaved((previous) => ({ ...previous, [id]: next }));
+
+    try {
+      await api(next ? EP.reelSave(id) : EP.reelUnsave(id), {
+        method: next ? "POST" : "DELETE",
+      });
+    } catch (error) {
+      setSaved((previous) => ({ ...previous, [id]: !next }));
+      Alert.alert("Save update failed", error.message || "Try again.");
+    }
+  }, [saved]);
+
+  const openComments = useCallback(async (reel) => {
+    if (!reel?.id) return;
+
+    setSheet({ type: "comments", reel });
+    setComments([]);
+    setDraft("");
+    setReplyTo(null);
+    setCLoading(true);
+
+    try {
+      const data = await api(
+        EP.reelComments(reel.id) + "?limit=100"
+      );
+      setComments(data.comments || []);
+    } catch (error) {
+      Alert.alert("Comments", error.message || "Could not load comments.");
+    } finally {
+      setCLoading(false);
+    }
+  }, []);
+
+  const sendComment = useCallback(async () => {
+    const reel = sheet?.reel;
+    const content = draft.trim();
+
+    if (!reel?.id || !content) return;
+
+    setDraft("");
+
+    try {
+      const data = await api(EP.reelComments(reel.id), {
+        method: "POST",
+        body: {
+          content,
+          parent_comment_id: replyTo?.id || null,
+        },
+      });
+
+      if (data?.comment) {
+        setComments((previous) => [
+          {
+            ...data.comment,
+            parent_comment_id: replyTo?.id || null,
+          },
+          ...previous,
+        ]);
+      }
+
+      setReels((previous) =>
+        previous.map((r) =>
+          r.id === reel.id
+            ? {
+                ...r,
+                comment_count: Number(r.comment_count || 0) + 1,
+              }
+            : r
+        )
+      );
+
+      setReplyTo(null);
+    } catch (error) {
+      setDraft(content);
+      Alert.alert("Comment failed", error.message || "Try again.");
+    }
+  }, [sheet, draft, replyTo]);
+
+  const likeComment = useCallback(async (comment) => {
+    if (!comment?.id) return;
+
+    try {
+      const data = await api(EP.commentLike(comment.id), {
+        method: "POST",
+      });
+
+      setComments((previous) =>
+        previous.map((c) =>
+          c.id === comment.id
+            ? {
+                ...c,
+                liked: !!data.liked,
+                likes_count: Number(data.likes_count || 0),
+              }
+            : c
+        )
+      );
+    } catch (error) {
+      Alert.alert("Comment like failed", error.message || "Try again.");
+    }
+  }, []);
+
+  const deleteComment = useCallback(async (comment) => {
+    const reel = sheet?.reel;
+    if (!reel?.id || !comment?.id) return;
+
+    try {
+      await api(
+        EP.reelCommentDelete(reel.id, comment.id),
+        { method: "DELETE" }
+      );
+
+      setComments((previous) =>
+        previous.filter((c) => c.id !== comment.id)
+      );
+    } catch (error) {
+      Alert.alert("Delete failed", error.message || "Try again.");
+    }
+  }, [sheet]);
+
+  const handleRepost = useCallback(async (reel) => {
+    if (!reel?.id) return;
+
+    try {
+      const data = await api(EP.reelRepost(reel.id), {
+        method: "POST",
+      });
+
+      setReels((previous) =>
+        previous.map((r) =>
+          r.id === reel.id
+            ? {
+                ...r,
+                is_reposted: !!data.is_reposted,
+                repost_count: Number(data.repost_count || 0),
+              }
+            : r
+        )
+      );
+
+      Alert.alert(
+        data.is_reposted ? "Reposted" : "Repost removed",
+        data.message || "Your Repost status has been updated."
+      );
+    } catch (error) {
+      Alert.alert("Repost failed", error.message || "Try again.");
+    }
+  }, []);
+
+  const handleShare = useCallback(async (reel) => {
+    if (!reel?.id) return;
+
+    try {
+      await api(EP.reelShare(reel.id), {
+        method: "POST",
+        body: { share_type: "direct" },
+      });
+
+      const url = absUrl(reel.video_url);
+      await Share.share({
+        message: `Check out this Reel on UtaNexa: ${url}`,
+      });
+    } catch (error) {
+      Alert.alert("Share failed", error.message || "Try again.");
+    }
+  }, []);
 
   const deleteCurrentReel = useCallback(() => {
     if (!isOwner || !currentReel || deleting) return;
 
     Alert.alert(
       "Delete Reel?",
-      "This Reel and its media will be permanently deleted. Its historical records will be preserved.",
+      "This Reel and its media will be deleted. Historical records will be preserved.",
       [
         { text: "Cancel", style: "cancel" },
         {
@@ -174,6 +573,7 @@ export default function ProfileReelsViewerScreen({ navigation, route }) {
           style: "destructive",
           onPress: async () => {
             setDeleting(true);
+
             try {
               await api(EP.reelDelete(currentReel.id), {
                 method: "DELETE",
@@ -183,9 +583,18 @@ export default function ProfileReelsViewerScreen({ navigation, route }) {
                 previous.filter((r) => r.id !== currentReel.id)
               );
 
-              navigation.goBack();
+              if (reels.length <= 1) {
+                navigation.goBack();
+              } else {
+                setActiveIndex((previous) =>
+                  Math.max(0, Math.min(previous, reels.length - 2))
+                );
+              }
             } catch (error) {
-              Alert.alert("Delete failed", error.message || "Please try again.");
+              Alert.alert(
+                "Delete failed",
+                error.message || "Please try again."
+              );
             } finally {
               setDeleting(false);
             }
@@ -193,12 +602,31 @@ export default function ProfileReelsViewerScreen({ navigation, route }) {
         },
       ]
     );
-  }, [isOwner, currentReel, deleting, navigation]);
+  }, [isOwner, currentReel, deleting, navigation, reels.length]);
+
+  const openMore = useCallback((reel) => {
+    Alert.alert("Your Reel", "Choose an action", [
+      {
+        text: "Edit Reel",
+        onPress: () =>
+          navigation.navigate("MyReelEditor", { reel }),
+      },
+      {
+        text: "Delete Reel",
+        style: "destructive",
+        onPress: () => deleteCurrentReel(),
+      },
+      { text: "Cancel", style: "cancel" },
+    ]);
+  }, [navigation, deleteCurrentReel]);
 
   if (!reels.length) {
     return (
       <SafeAreaView className="flex-1 bg-[#050b18] items-center justify-center">
-        <Text className="text-white text-base">No Reels available.</Text>
+        <Ionicons name="film-outline" size={45} color="#8a9bb5" />
+        <Text className="text-white text-base mt-3">
+          No Reels available.
+        </Text>
         <Pressable onPress={() => navigation.goBack()} className="mt-5">
           <Text className="text-[#1685ff] font-bold">Go Back</Text>
         </Pressable>
@@ -218,6 +646,22 @@ export default function ProfileReelsViewerScreen({ navigation, route }) {
             active={index === activeIndex}
             height={height}
             profileUser={profileUser}
+            muted={muted}
+            paused={paused}
+            liked={!!liked[item.id]}
+            saved={!!saved[item.id]}
+            onVideoTap={togglePause}
+            onLike={() => toggleLike(item)}
+            onComment={() => openComments(item)}
+            onRepost={() => handleRepost(item)}
+            onShare={() => handleShare(item)}
+            onSave={() => toggleSave(item)}
+            onMore={() => openMore(item)}
+            videoRef={(ref) => {
+              if (ref) videoRefs.current[item.id] = ref;
+              else delete videoRefs.current[item.id];
+            }}
+            onMute={toggleMute}
           />
         )}
         pagingEnabled
@@ -236,6 +680,7 @@ export default function ProfileReelsViewerScreen({ navigation, route }) {
         removeClippedSubviews
       />
 
+      {/* Header */}
       <SafeAreaView
         pointerEvents="box-none"
         className="absolute top-0 left-0 right-0"
@@ -249,35 +694,52 @@ export default function ProfileReelsViewerScreen({ navigation, route }) {
           </Pressable>
 
           <Text className="text-white font-bold text-[16px]">
-            Reels
+            Your Reels
           </Text>
 
           {isOwner ? (
-           <View className="flex-row items-center gap-3">
-            <Pressable
-             onPress={() =>
-              navigation.navigate("MyReelEditor", {
-               reel: currentReel,
-              })
-             }
-             className="w-10 h-10 rounded-full bg-black/45 items-center justify-center"
-            >
-             <Ionicons name="create-outline" size={22} color="#1685ff" />
-            </Pressable>
+            <View className="flex-row items-center gap-3">
+              <Pressable
+                onPress={() =>
+                  currentReel &&
+                  navigation.navigate("MyReelEditor", {
+                    reel: currentReel,
+                  })
+                }
+                className="w-10 h-10 rounded-full bg-black/45 items-center justify-center"
+              >
+                <Ionicons name="create-outline" size={22} color="#1685ff" />
+              </Pressable>
 
-            <Pressable
-             onPress={deleteCurrentReel}
-             disabled={deleting}
-             className="w-10 h-10 rounded-full bg-black/45 items-center justify-center"
-            >
-             <Ionicons name="trash-outline" size={21} color="#ff5b65" />
-           </Pressable>
-          </View>
-         ) : (
-           <View className="w-10 h-10" />
+              <Pressable
+                onPress={deleteCurrentReel}
+                disabled={deleting}
+                className="w-10 h-10 rounded-full bg-black/45 items-center justify-center"
+              >
+                <Ionicons name="trash-outline" size={21} color="#ff5b65" />
+              </Pressable>
+            </View>
+          ) : (
+            <View className="w-10 h-10" />
           )}
         </View>
       </SafeAreaView>
+
+      <ReelCommentsSheet
+        visible={sheet?.type === "comments"}
+        sheet={sheet}
+        onClose={() => setSheet(null)}
+        comments={comments}
+        cLoading={cLoading}
+        draft={draft}
+        setDraft={setDraft}
+        sendComment={sendComment}
+        likeComment={likeComment}
+        deleteComment={deleteComment}
+        setReplyTo={setReplyTo}
+        replyTo={replyTo}
+        user={profileUser}
+      />
     </View>
   );
 }
