@@ -832,6 +832,8 @@ const handleVideoEnd = useCallback(() => {
           setSheet(null);
           toggleSave(reel);
         }}
+        autoScroll={autoScroll}
+        onToggleAutoScroll={() => setAutoScroll((prev) => !prev)}
         onEdit={() => {
           const reel = sheet?.reel;
           setSheet(null);
