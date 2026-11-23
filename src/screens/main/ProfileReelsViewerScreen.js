@@ -133,7 +133,8 @@ function ProfileReelItem({
         }}
       />
 
-      {/* Bottom user and caption details */}
+    {/* Bottom user and caption details */}
+    {!fullScreen && (
       <View
         pointerEvents="box-none"
         className="absolute left-3 right-[76px] bottom-8"
@@ -192,6 +193,7 @@ function ProfileReelItem({
           </Text>
         )}
       </View>
+     )}
 
       {/* Right-side actions */}
       {!fullScreen && (
