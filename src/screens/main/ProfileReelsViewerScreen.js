@@ -313,6 +313,8 @@ export default function ProfileReelsViewerScreen({
   const videoRefs = useRef({});
   useEffect(() => {
   if (!isOwner) return;
+  const isOwner = !!route.params?.isOwner;
+    
 
   let active = true;
 
@@ -338,7 +340,6 @@ export default function ProfileReelsViewerScreen({
   };
 }, [isOwner]);
 
-  const isOwner = !!route.params?.isOwner;
   const profileUser = route.params?.profileUser || {};
 
   const currentReel = reels[activeIndex];
