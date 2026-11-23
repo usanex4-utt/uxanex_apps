@@ -808,7 +808,6 @@ useEffect(() => {
           toggleSave(reel);
         }}
        />
-      />
           
     </View>
   );
