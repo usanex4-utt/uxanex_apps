@@ -431,6 +431,21 @@ useEffect(() => {
   }, [paused, currentReel]);
 
   const toggleMute = useCallback(() => {
+  const handleVideoEnd = useCallback(() => {
+  if (!autoScroll) return;
+
+  const nextIndex = activeIndex + 1;
+
+  if (nextIndex >= reels.length) {
+    setAutoScroll(false);
+    return;
+  }
+
+  listRef.current?.scrollToIndex({
+    index: nextIndex,
+    animated: true,
+  });
+}, [autoScroll, activeIndex, reels.length]);
     setMuted((previous) => !previous);
   }, []);
 
