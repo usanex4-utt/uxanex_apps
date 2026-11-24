@@ -540,7 +540,7 @@ function ReelItem(props) {
         <RailBtn
           icon={isLiked ? "heart" : "heart-outline"}
           color={isLiked ? "#ff2d55" : "#fff"}
-          label={likeCount(item)}
+          label={!hideCounts ? likeCount(item) : undefined}
           onPress={() => toggleLike(item)}
           scale={railButtonScale}
         />
