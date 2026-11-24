@@ -1043,6 +1043,11 @@ const handleVideoEnd = useCallback((endedReelId) => {
           )
         }
         disableDownloads={!!sheet?.reel?.disable_download}
+        onDownload={() => {
+         const reel = sheet?.reel;
+         setSheet(null);
+         handleDownload(reel);
+        }}
         onToggleDownloads={() =>
          updateReelDownloadPreference(
           sheet?.reel,
