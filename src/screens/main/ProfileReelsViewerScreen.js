@@ -320,6 +320,7 @@ export default function ProfileReelsViewerScreen({
   );
 
   const [reels, setReels] = useState(initialReels);
+  const [downloadingId, setDownloadingId] = useState(null);
 
   const [activeIndex, setActiveIndex] = useState(() => {
     const id = route.params?.startReelId;
