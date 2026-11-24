@@ -479,6 +479,51 @@ export default function ProfileReelsViewerScreen({
     },
     []
   );
+  const handleDownload = useCallback(async (reel) => {
+  if (!reel?.id || downloadingId === reel.id) return;
+
+  setDownloadingId(reel.id);
+
+  try {
+    const data = await api(EP.reelDownload(reel.id), {
+      method: "POST",
+    });
+
+    if (!data?.success || !data?.download_url) {
+      throw new Error(data?.detail || "Download failed");
+    }
+
+    if (Platform.OS === "web") {
+      const response = await fetch(data.download_url);
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = data.filename || "utanexa-reel.mp4";
+      link.click();
+      URL.revokeObjectURL(url);
+    } else {
+      const permission = await MediaLibrary.requestPermissionsAsync();
+
+      if (!permission.granted) {
+        throw new Error("Gallery permission is required");
+      }
+
+      const fileUri = FileSystem.cacheDirectory + (data.filename || "utanexa-reel.mp4");
+      const result = await FileSystem.downloadAsync(data.download_url, fileUri);
+      const asset = await MediaLibrary.createAssetAsync(result.uri);
+      await MediaLibrary.createAlbumAsync("UtaNexa", asset, false)
+        .catch(() => {});
+    }
+
+    Alert.alert("Download", "Reel saved successfully.");
+  } catch (error) {
+    Alert.alert("Download Failed", error.message || "Please try again.");
+  } finally {
+    setDownloadingId(null);
+  }
+}, [downloadingId]);
+  
   
 
   const profileUser = route.params?.profileUser || {};
