@@ -217,26 +217,7 @@ function ProfileReelItem({
               </Text>
             )}
           </>
-        )}
-
-        
-
-        {detailsExpanded && (
-          <>
-            {!!item?.hashtags && (
-              <Text className="text-[#9ec4ff] text-[12px] mt-1">
-                {item.hashtags}
-              </Text>
-            )}
-
-            {!!item?.category && (
-              <Text className="text-white/65 text-[11px] mt-1">
-                {item.category}
-              </Text>
-            )}
-          </>
-        )}
-          
+        )} 
       </View>
      )}
 
