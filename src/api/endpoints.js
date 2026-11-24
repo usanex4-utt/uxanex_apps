@@ -63,6 +63,7 @@ export const EP = {
   reelShare:          (id)   => `/api/reels/${id}/share`,  // POST { share_type? }
   reelRepost:         (id)   => `/api/reels/${id}/repost`,
   reelDownload:       (id)   => `/api/reels/${id}/download`,       // POST → { download_url (watermarked), filename, download_count }
+  reelDownloadPreference: (id) => `/api/reels/${id}/download-preference`,
 
   // interested / not-interested (toggle — same URLs, POST only)
   reelInterested:     (id)   => `/api/reels/${id}/interested`,     // POST
@@ -91,7 +92,6 @@ export const EP = {
 
   // ── couple chat (backend/routes/couple_realtime.py) ───────
   coupleWs:           (id)   => `/ws/couple/${id}`,                // WS   (partner public user_id)  ⚠ note: no /api prefix
-  reelDownloadPreference: (id) => `/api/reels/${id}/download-preference`,
 
   // ⚠️ ENDPOINT NOT YET IMPLEMENTED IN BACKEND — must add `POST /api/couple/upload-media`
   //    before using. Currently uploadAndSend in CoupleChatScreen should NOT call this.
