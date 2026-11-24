@@ -187,26 +187,39 @@ function ProfileReelItem({
         </View>
 
         
-        {!!item?.caption && (
-          <Text
-            className="text-white text-[13px] leading-5"
-            numberOfLines={detailsExpanded ? undefined : 2}
-          >
-            {item.caption}
+        {(!!captionText || canExpandDetails) && (
+          <Text className="text-white text-[13px] leading-5">
+            {!!captionText && (
+              <Text>{visibleCaption}</Text>
+            )}
+            {canExpandDetails && (
+              <Text
+                className="text-white/75 font-bold"
+                onPress={() => setDetailsExpanded((prev) => !prev)}
+              >
+                {detailsExpanded ? " Less" : " More"}
+              </Text>
+            )}
           </Text>
         )}
 
-        {(!!item?.caption || !!item?.hashtags || !!item?.category) && (
-          <Pressable
-            onPress={() => setDetailsExpanded((prev) => !prev)}
-            className="mt-1 self-start"
-            hitSlop={8}
-          >
-            <Text className="text-white/75 text-[12px] font-semibold">
-              {detailsExpanded ? "Less" : "More"}
-            </Text>
-          </Pressable>
+        {detailsExpanded && (
+          <>
+            {!!item?.hashtags && (
+              <Text className="text-[#9ec4ff] text-[12px] mt-1">
+                {item.hashtags}
+              </Text>
+            )}
+
+            {!!item?.category && (
+              <Text className="text-white/65 text-[11px] mt-1">
+                {item.category}
+              </Text>
+            )}
+          </>
         )}
+
+        
 
         {detailsExpanded && (
           <>
