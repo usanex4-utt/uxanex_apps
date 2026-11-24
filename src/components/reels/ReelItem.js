@@ -547,14 +547,14 @@ function ReelItem(props) {
 
         <RailBtn
           icon="chatbubble-outline"
-          label={item.comment_count || 0}
+          label={!hideCounts ? (item.comment_count || 0) : undefined}
           onPress={() => openComments(item)}
           scale={railButtonScale}
         />
 
         <RailBtn
           icon="repeat-outline"
-          label={item.repost_count || 0}
+          label={!hideCounts ? (item.repost_count || 0) : undefined}
           onPress={() => {
             if (typeof handleRepeat === "function") {
               handleRepeat(item);
@@ -576,7 +576,7 @@ function ReelItem(props) {
         <RailBtn
           icon={isSaved ? "bookmark" : "bookmark-outline"}
           color={isSaved ? "#72b0ff" : "#fff"}
-          label={item.save_count || 0}
+          label={!hideCounts ? (item.save_count || 0) : undefined}
           onPress={() => toggleSave(item)}
           scale={railButtonScale}
         />
