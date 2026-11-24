@@ -505,11 +505,13 @@ export const YourReelOptionsSheet = ({
             onPress={onToggleDownloads}
           />
 
+          {!reel?.disable_download && (
           <YourReelOptionRow
             icon="cloud-download-outline"
             label="Download Reel"
             onPress={onDownload}
           />
+         )}
 
           <View className="h-px bg-white/5" />
 
