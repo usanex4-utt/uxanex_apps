@@ -265,7 +265,8 @@ export const ReelMenuSheet = ({
 }) => {
   const reel = sheet?.reel;
   const isOwner = reel?.user_id === user?.id;
-  const canDownload = typeof download === "function";
+  const canDownload =
+   typeof download === "function" && !reel?.disable_download;
   const canReport = typeof report === "function";
   const canRemove = typeof remove === "function";
   const canNotInterested = typeof notInterested === "function";
