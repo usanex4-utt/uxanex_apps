@@ -48,7 +48,7 @@ const PATTERNS = [
   'galaxy',
   'diamond',
   'stardust',
-  ' aurora',
+  'aurora',
 ];
 
 const SHAPES = [
