@@ -823,7 +823,7 @@ const handleVideoEnd = useCallback((endedReelId) => {
               if (ref) videoRefs.current[item.id] = ref;
               else delete videoRefs.current[item.id];
             }}
-            hideCounts={isOwner && reelPreferences.hide_reel_counts}
+            hideCounts={!!(item?.creator?.hide_reel_counts ?? (isOwner && reelPreferences.hide_reel_counts))}
             fullScreen={fullScreen}
             autoScroll={autoScroll}
             onVideoEnd={handleVideoEnd}
