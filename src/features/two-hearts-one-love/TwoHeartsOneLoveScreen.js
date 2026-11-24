@@ -91,7 +91,7 @@ export default function TwoHeartsOneLoveScreen({
 
           {phase === 'fusion' && (
            <HeartFusionAnimation
-            heartData={heartData}
+            heartData={generatedHeart}
             onComplete={onFusionComplete}
            />
           )}
