@@ -443,7 +443,6 @@ const openReelInFeed = useCallback((reel) => {
             setTab={setTab}
             grid={grid}
             setPlayer={openReelInFeed}          // 👈 tap → Reels tab
-            onLongPressItem={askDeleteReel}     // 👈 long-press → delete (own reels)
             loading={loading}
           />
         </ScrollView>
