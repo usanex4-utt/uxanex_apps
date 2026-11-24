@@ -507,12 +507,27 @@ export const YourReelOptionsSheet = ({
           />
 
           {!reel?.disable_download && (
-          <YourReelOptionRow
-            icon="cloud-download-outline"
-            label="Download Reel"
-            onPress={onDownload}
-          />
-         )}
+            <Pressable
+             onPress={onDownload}
+             disabled={isDownloading}
+             className="flex-row items-center h-11"
+           >
+            <View className="w-8 items-center justify-center">
+            {isDownloading ? (
+              <ActivityIndicator size="small" color="#3b82f6" />
+           ) : (
+              <Ionicons
+               name="cloud-download-outline"
+               size={19}
+               color="#cbd5e1"
+              />
+             )}
+            </View>
+            <Text className="flex-1 ml-3 text-[13px] font-medium text-white">
+            {isDownloading ? "Downloading..." : "Download Reel"}
+            </Text>
+           </Pressable>
+          )}
 
           <View className="h-px bg-white/5" />
 
