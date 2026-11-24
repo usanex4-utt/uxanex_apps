@@ -16,7 +16,10 @@ import {
   Alert,
   Image,
   Share,
+  Platform,
 } from "react-native";
+import * as FileSystem from "expo-file-system";
+import * as MediaLibrary from "expo-media-library";
 
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Video, ResizeMode } from "expo-av";
