@@ -77,6 +77,15 @@ function ProfileReelItem({
   onVideoEnd,
 }) {
   const [detailsExpanded, setDetailsExpanded] = useState(false);
+  const captionText = String(item?.caption || "").trim();
+  const captionWords = captionText ? captionText.split(/\s+/) : [];
+  const hasExtraDetails = !!item?.hashtags || !!item?.category;
+  const canExpandDetails = captionWords.length > 7 || hasExtraDetails;
+
+  const visibleCaption =
+    !detailsExpanded && captionWords.length > 7
+      ? `${captionWords.slice(0, 7).join(" ")}...`
+      : captionText;
   const creator = item?.creator || profileUser || {};
   const videoUrl = item?.video_url ? absUrl(item.video_url) : null;
   const thumbnailUrl = item?.thumbnail_url
