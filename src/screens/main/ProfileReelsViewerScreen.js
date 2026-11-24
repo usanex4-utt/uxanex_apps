@@ -419,6 +419,64 @@ export default function ProfileReelsViewerScreen({
   }
 }, [reelPreferences]);
 
+  
+  const updateReelDownloadPreference = useCallback(
+    async (reel, value) => {
+      if (!reel?.id) return;
+
+      const previous = !!reel.disable_download;
+
+      const updateLocalReel = (nextValue) => {
+        setReels((items) =>
+          items.map((item) =>
+            String(item.id) === String(reel.id)
+              ? { ...item, disable_download: nextValue }
+              : item
+          )
+        );
+
+        setSheet((current) =>
+          current?.reel &&
+          String(current.reel.id) === String(reel.id)
+            ? {
+                ...current,
+                reel: {
+                  ...current.reel,
+                  disable_download: nextValue,
+                },
+              }
+            : current
+        );
+      };
+
+      updateLocalReel(value);
+
+      try {
+        const data = await api(
+          EP.reelDownloadPreference(reel.id),
+          {
+            method: "PATCH",
+            body: { disable_download: value },
+          }
+        );
+
+        if (!data?.success) {
+          throw new Error("Download setting could not be saved");
+        }
+
+        updateLocalReel(!!data.disable_download);
+      } catch (error) {
+        updateLocalReel(previous);
+        Alert.alert(
+          "Download Settings",
+          error.message || "Please try again."
+        );
+      }
+    },
+    []
+  );
+  
+
   const profileUser = route.params?.profileUser || {};
 
   const currentReel = reels[activeIndex];
