@@ -222,6 +222,7 @@ function ReelItem(props) {
   } = props;
 
   const c = item.creator || {};
+  const hideCounts = !!c.hide_reel_counts;
 
   const isLiked = !!liked[item.id];
   const isSaved = !!saved[item.id];
