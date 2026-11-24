@@ -9,6 +9,7 @@ import {
 import CrystalHeart from './CrystalHeart';
 import HeartFusionAnimation from './HeartFusionAnimation';
 import RatingScreen from './RatingScreen';
+import generateSurpriseHeart from './SurpriseHeartGenerator';
 
 export default function TwoHeartsOneLoveScreen({
   phase = 'waiting',
