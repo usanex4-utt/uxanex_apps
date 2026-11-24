@@ -76,6 +76,7 @@ function ProfileReelItem({
   autoScroll,
   onVideoEnd,
 }) {
+  const [detailsExpanded, setDetailsExpanded] = useState(false);
   const creator = item?.creator || profileUser || {};
   const videoUrl = item?.video_url ? absUrl(item.video_url) : null;
   const thumbnailUrl = item?.thumbnail_url
