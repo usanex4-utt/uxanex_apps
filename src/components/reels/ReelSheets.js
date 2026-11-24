@@ -425,6 +425,7 @@ export const YourReelOptionsSheet = ({
   disableDownloads,
   onToggleDownloads,
   onDownload,
+  isDownloading,
   hideCounts,
   onToggleHideCounts,
   onDelete,
