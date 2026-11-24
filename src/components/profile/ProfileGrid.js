@@ -101,14 +101,14 @@ const ReelCell = memo(function ReelCell({
           </View>
         )}
 
-        {!isPost ? (
-          <View className="absolute bottom-1.5 left-1.5 right-1.5 flex-row items-center">
+        {!isPost && !item?.creator?.hide_reel_counts ? (
+           <View className="absolute bottom-1.5 left-1.5 right-1.5 flex-row items-center">
             <Ionicons name="play" size={12} color="#fff" />
             <Text className="text-white text-[11px] font-bold ml-1">
-              {fmt(item.views_count || item.view_count || item.views || 0)}
-            </Text>
-          </View>
-        ) : null}
+             {fmt(item.views_count || item.view_count || item.views || 0)}
+             </Text>
+            </View>
+         ) : null}
       </View>
     </Pressable>
   );
