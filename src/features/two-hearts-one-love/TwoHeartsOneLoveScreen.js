@@ -22,6 +22,15 @@ export default function TwoHeartsOneLoveScreen({
   onFusionComplete,
 }) {
   const [muted, setMuted] = useState(false);
+  const generatedHeart = useMemo(() => {
+  if (phase !== 'fusion') return null;
+
+  return heartData || generateSurpriseHeart({
+    fusionSeed: 'demo-fusion-001',
+    firstHeart: 'Ruby Love',
+    secondHeart: 'Ocean Love',
+  });
+}, [phase, heartData]);
 
   return (
     <View style={styles.container}>
