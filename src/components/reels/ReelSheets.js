@@ -374,7 +374,7 @@ const YourReelOptionRow = ({
 }) => (
   <Pressable
     onPress={onPress}
-    className="flex-row items-center min-h-[48px] py-2"
+    className="flex-row items-center h-11"
   >
     <View className="w-8 items-center justify-center">
       <Ionicons
