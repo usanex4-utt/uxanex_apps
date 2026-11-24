@@ -1009,6 +1009,10 @@ const handleVideoEnd = useCallback((endedReelId) => {
         visible={sheet?.type === "your-reel-options"}
         reel={sheet?.reel}
         onClose={() => setSheet(null)}
+        onDelete={() => {
+          setSheet(null);
+          deleteCurrentReel();
+         }}
         onShare={() => {
           const reel = sheet?.reel;
           setSheet(null);
