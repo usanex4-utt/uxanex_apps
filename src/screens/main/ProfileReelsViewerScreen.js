@@ -391,6 +391,34 @@ export default function ProfileReelsViewerScreen({
   };
 }, [isOwner]);
 
+
+  const updateReelPreference = useCallback(async (key, value) => {
+  const previous = reelPreferences[key];
+
+  setReelPreferences((prev) => ({
+    ...prev,
+    [key]: value,
+  }));
+
+  try {
+    const data = await api(EP.reelPreferences, {
+      method: "PATCH",
+      body: { [key]: value },
+    });
+
+    if (!data?.success) {
+      throw new Error("Preference could not be saved");
+    }
+  } catch (error) {
+    setReelPreferences((prev) => ({
+      ...prev,
+      [key]: previous,
+    }));
+
+    Alert.alert("Settings", error.message || "Please try again.");
+  }
+}, [reelPreferences]);
+
   const profileUser = route.params?.profileUser || {};
 
   const currentReel = reels[activeIndex];
