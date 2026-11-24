@@ -154,7 +154,7 @@ function ProfileReelItem({
     {!fullScreen && (
       <View
         pointerEvents="box-none"
-        className="absolute left-3 right-[76px] bottom-8"
+        className="absolute left-3 right-[76px] bottom-24"
       >
         <View className="flex-row items-center mb-3">
           {creator.profile_photo ? (
@@ -223,7 +223,7 @@ function ProfileReelItem({
 
       {/* Right-side actions */}
       {!fullScreen && (
-        <View className="absolute right-3 bottom-28 items-center">
+        <View className="absolute right-3 bottom-20 items-center">
         <ActionButton
           icon={liked ? "heart" : "heart-outline"}
           color={liked ? "#ff3158" : "#fff"}
@@ -262,6 +262,30 @@ function ProfileReelItem({
         />
       </View>
      )}
+
+
+      {!fullScreen && (
+        <Pressable
+         onPress={onComment}
+         className="absolute left-4 right-4 bottom-3 h-[52px] rounded-full bg-[#263448] flex-row items-center px-4"
+        >
+          <Ionicons
+            name="happy-outline"
+            size={21}
+            color="#D5DCE8"
+          />
+
+          <Text className="text-white/70 text-[14px] flex-1 ml-3">
+            Add a comment...
+          </Text>
+
+          <Ionicons
+            name="paper-plane-outline"
+            size={23}
+            color="#79ABFF"
+          />
+        </Pressable>
+      )}
 
       {/* Pause indicator */}
       {active && paused && (
