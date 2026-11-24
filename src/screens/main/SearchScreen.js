@@ -222,15 +222,12 @@ const ReelCell = React.memo(function ReelCell({
 
         <View className="absolute inset-x-0 bottom-0 h-12" />
 
-      {!reel?.creator?.hide_reel_counts ? (
-        <View className="absolute bottom-1.5 left-1.5 right-1.5 flex-row items-center">
-         <Ionicons name="play" size={12} color="#fff" />
-
-         <Text className="text-white text-[11px] font-bold ml-1">
-          {fmt(reel?.views_count || 0)}
-         </Text>
-        </View>
-     ) : null}
+      <View className="absolute bottom-1.5 left-1.5 right-1.5 flex-row items-center">
+       <Ionicons name="play" size={12} color="#fff" />
+       <Text className="text-white text-[11px] font-bold ml-1">
+        {fmt(reel?.views_count || 0)}
+        </Text>
+       </View>
       </View>
     </Pressable>
   );
