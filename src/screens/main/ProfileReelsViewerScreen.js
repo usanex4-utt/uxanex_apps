@@ -924,6 +924,20 @@ const handleVideoEnd = useCallback((endedReelId) => {
          setFullScreen(true);
         }}
         onEdit={() => {
+                  hideCounts={reelPreferences.hide_reel_counts}
+        onToggleHideCounts={() =>
+          updateReelPreference(
+            "hide_reel_counts",
+            !reelPreferences.hide_reel_counts
+          )
+        }
+        disableDownloads={reelPreferences.disable_reel_downloads}
+        onToggleDownloads={() =>
+          updateReelPreference(
+            "disable_reel_downloads",
+            !reelPreferences.disable_reel_downloads
+          )
+          }
           const reel = sheet?.reel;
           setSheet(null);
           navigation.navigate("MyReelEditor", { reel });
