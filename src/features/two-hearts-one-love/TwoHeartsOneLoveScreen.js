@@ -17,6 +17,8 @@ export default function TwoHeartsOneLoveScreen({
   countdown = null,
   onStart,
   onRatingSubmit,
+  heartData = null,
+  onFusionComplete,
 }) {
   const [muted, setMuted] = useState(false);
 
@@ -78,7 +80,10 @@ export default function TwoHeartsOneLoveScreen({
           )}
 
           {phase === 'fusion' && (
-            <HeartFusionAnimation />
+           <HeartFusionAnimation
+            heartData={heartData}
+            onComplete={onFusionComplete}
+           />
           )}
         </>
       )}
