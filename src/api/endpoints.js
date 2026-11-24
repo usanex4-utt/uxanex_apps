@@ -91,6 +91,7 @@ export const EP = {
 
   // ── couple chat (backend/routes/couple_realtime.py) ───────
   coupleWs:           (id)   => `/ws/couple/${id}`,                // WS   (partner public user_id)  ⚠ note: no /api prefix
+  reelDownloadPreference: (id) => `/api/reels/${id}/download-preference`,
 
   // ⚠️ ENDPOINT NOT YET IMPLEMENTED IN BACKEND — must add `POST /api/couple/upload-media`
   //    before using. Currently uploadAndSend in CoupleChatScreen should NOT call this.
