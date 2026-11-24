@@ -101,7 +101,7 @@ const ReelCell = memo(function ReelCell({
           </View>
         )}
 
-        {!isPost && !item?.creator?.hide_reel_counts ? (
+        {!isPost ? (
            <View className="absolute bottom-1.5 left-1.5 right-1.5 flex-row items-center">
             <Ionicons name="play" size={12} color="#fff" />
             <Text className="text-white text-[11px] font-bold ml-1">
