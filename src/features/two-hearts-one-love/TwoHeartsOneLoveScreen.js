@@ -50,19 +50,7 @@ export default function TwoHeartsOneLoveScreen({
 
       {phase !== 'rating' && phase !== 'completed' && (
         <>
-          <View style={styles.hearts}>
-            <View style={styles.heartBox}>
-              <CrystalHeart color="#ff75ad" size={100} />
-              <Text style={styles.name}>Your Heart</Text>
-            </View>
-
-            <Text style={styles.plus}>+</Text>
-
-            <View style={styles.heartBox}>
-              <CrystalHeart color="#75caff" size={100} />
-              <Text style={styles.name}>Partner's Heart</Text>
-            </View>
-          </View>
+          
 
           {phase === 'waiting' && (
             <>
@@ -85,6 +73,29 @@ export default function TwoHeartsOneLoveScreen({
                 disabled={myStarted}
                 onPress={onStart}
               >
+                  <View style={styles.hearts}>
+  <View style={styles.heartBox}>
+    <CrystalHeart
+      color={firstHeart?.color || '#ff75ad'}
+      size={100}
+    />
+    <Text style={styles.name}>
+      {firstHeart?.name || 'Your Heart'}
+    </Text>
+  </View>
+
+  <Text style={styles.plus}>+</Text>
+
+  <View style={styles.heartBox}>
+    <CrystalHeart
+      color={secondHeart?.color || '#75caff'}
+      size={100}
+    />
+    <Text style={styles.name}>
+      {secondHeart?.name || "Partner's Heart"}
+    </Text>
+  </View>
+</View>
                 <Text style={styles.buttonText}>
                   {myStarted ? 'You are Ready ✓' : 'Start ❤️'}
                 </Text>
