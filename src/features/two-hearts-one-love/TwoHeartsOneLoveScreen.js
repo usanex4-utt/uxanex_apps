@@ -19,6 +19,9 @@ export default function TwoHeartsOneLoveScreen({
   onStart,
   onRatingSubmit,
   heartData = null,
+  fusionSeed = null,
+  firstHeart,
+  secondHeart,
   onFusionComplete,
 }) {
   const [muted, setMuted] = useState(false);
