@@ -121,7 +121,7 @@ export function generateSurpriseHeart({
     sparkleCount: 12 + Math.floor(random() * 25),
     particleCount: 20 + Math.floor(random() * 31),
     rotation: Math.floor(random() * 31) - 15,
-    createdAt: new Date().toISOString(),
+    createdAt: null,
   };
 }
 
