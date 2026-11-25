@@ -135,7 +135,10 @@ export default function RomanticBackground({
     const seed =
      backgroundSeed ??
      `${Date.now()}-${Math.random()}`;
-    return BACKGROUNDS[Math.abs(Number(seed) || 0) % BACKGROUNDS.length];
+
+    return BACKGROUNDS[
+     Math.abs(Number(seed) || 0) % BACKGROUNDS.length
+    ];
   }, [backgroundSeed]);
 
   const rainDrops = useMemo(
