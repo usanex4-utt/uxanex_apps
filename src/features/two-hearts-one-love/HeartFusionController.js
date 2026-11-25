@@ -21,6 +21,7 @@ export default function HeartFusionController({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [now, setNow] = useState(Date.now());
+  const [serverOffset, setServerOffset] = useState(0);
 
   const fuseRequested = useRef(false);
   const completeRequested = useRef(false);
@@ -31,17 +32,30 @@ export default function HeartFusionController({
 
   const partnerId = Number(partner?.id);
   const myId = Number(currentUserId);
-
   const refreshSession = useCallback(async (sessionId) => {
-    const response = await heartFusionApi.getSession(sessionId);
+  const requestStartedAt = Date.now();
 
-    if (mounted.current && response?.session) {
-      setSession(response.session);
-      setError('');
-    }
+  const response = await heartFusionApi.getSession(sessionId);
 
-    return response?.session || null;
-  }, []);
+  const requestFinishedAt = Date.now();
+  const serverNow = new Date(response?.server_now).getTime();
+
+  if (Number.isFinite(serverNow) && mounted.current) {
+    const clientMidpoint =
+      (requestStartedAt + requestFinishedAt) / 2;
+
+    setServerOffset(serverNow - clientMidpoint);
+  }
+
+  if (mounted.current && response?.session) {
+    setSession(response.session);
+    setError('');
+  }
+
+  return response?.session || null;
+}, []);
+
+  
 
   const loadActiveSession = useCallback(async () => {
     if (!partnerId || !myId) {
@@ -108,7 +122,7 @@ export default function HeartFusionController({
     : null;
 
   const elapsedSeconds = countdownStartedAt
-    ? Math.max(0, (now - countdownStartedAt) / 1000)
+    ? Math.max(0, (now + serverOffset - countdownStartedAt) / 1000)
     : 0;
 
   const countdown = Math.max(
