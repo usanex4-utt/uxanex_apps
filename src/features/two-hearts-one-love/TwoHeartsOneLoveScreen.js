@@ -131,6 +131,8 @@ export default function TwoHeartsOneLoveScreen({
                 secondHeart={secondHeart}
                 heartData={generatedHeart}
                 onComplete={onFusionComplete}
+                fusionStartedAt={fusionStartedAt}
+                serverOffset={serverOffset}
               />
             )}
           </>
