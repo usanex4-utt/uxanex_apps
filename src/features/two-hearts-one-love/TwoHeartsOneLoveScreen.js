@@ -26,6 +26,8 @@ export default function TwoHeartsOneLoveScreen({
   firstHeart,
   secondHeart,
   onFusionComplete,
+  fusionStartedAt,
+  serverOffset = 0,
 }) {
   const [muted, setMuted] = useState(false);
 
