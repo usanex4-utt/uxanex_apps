@@ -87,20 +87,43 @@ export default function HeartFusionAnimation({
   return (
     <View style={styles.container}>
       {/* First partner's selected heart */}
-      <Animated.View
-        style={[
-          styles.heart,
-          {
-            opacity: sourceOpacity,
-            transform: [{ translateY: topY }],
-          },
-        ]}
-      >
-        <CrystalHeart
-          color={firstHeart?.color || '#ff75ad'}
-          size={105}
-        />
-      </Animated.View>
+      {/* First partner's selected heart */}
+<Animated.View
+  style={[
+    styles.heart,
+    {
+      opacity: sourceOpacity,
+      transform: [{ translateY: topY }],
+    },
+  ]}
+>
+  <CrystalHeart
+    color={firstHeart?.color || '#ff75ad'}
+    size={105}
+  />
+  <Text style={styles.heartName}>
+    {firstHeart?.name || 'Your Heart'}
+  </Text>
+</Animated.View>
+
+{/* Second partner's selected heart */}
+<Animated.View
+  style={[
+    styles.heart,
+    {
+      opacity: sourceOpacity,
+      transform: [{ translateY: bottomY }],
+    },
+  ]}
+>
+  <CrystalHeart
+    color={secondHeart?.color || '#75caff'}
+    size={105}
+  />
+  <Text style={styles.heartName}>
+    {secondHeart?.name || "Partner's Heart"}
+  </Text>
+</Animated.View>
 
       {/* Second partner's selected heart */}
       <Animated.View
@@ -162,6 +185,13 @@ const styles = StyleSheet.create({
   heart: {
     position: 'absolute',
     alignItems: 'center',
+  },
+  heartName: {
+    color: '#ffffff',
+    fontSize: 13,
+    fontWeight: '600',
+    marginTop: 8,
+    textAlign: 'center',
   },
   burst: {
     position: 'absolute',
