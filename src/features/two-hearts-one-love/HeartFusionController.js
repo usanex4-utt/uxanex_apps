@@ -25,6 +25,9 @@ export default function HeartFusionController({
   const fuseRequested = useRef(false);
   const completeRequested = useRef(false);
   const mounted = useRef(true);
+  useEffect(() => {
+   completeRequested.current = false;
+  }, [session?.id]);
 
   const partnerId = Number(partner?.id);
   const myId = Number(currentUserId);
