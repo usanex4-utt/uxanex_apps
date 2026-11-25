@@ -59,15 +59,14 @@ export default function HeartFusionAnimation({
     inputRange: [0, 0.55, 0.7, 1],
     outputRange: [0, 0, 1.8, 0],
   });
+  const burstOpacity = progress.interpolate({
+    inputRange: [0, 0.55, 0.7, 1],
+    outputRange: [0, 0, 1, 0],
+  });
 
   const finalScale = progress.interpolate({
     inputRange: [0, 0.65, 0.82, 1],
     outputRange: [0.1, 0.1, 1.25, 1],
-  });
-
-  const finalOpacity = progress.interpolate({
-    inputRange: [0, 0.65, 0.78, 1],
-    outputRange: [0, 0, 1, 1],
   });
 
   return (
@@ -75,7 +74,10 @@ export default function HeartFusionAnimation({
       <Animated.View
         style={[
           styles.heart,
-          { transform: [{ translateY: topY }] },
+          {
+           opacity: sourceOpacity,
+           transform: [{ translateY: topY }],
+          },
         ]}
       >
         <CrystalHeart color="#ff75ad" size={105} />
@@ -84,7 +86,10 @@ export default function HeartFusionAnimation({
       <Animated.View
         style={[
           styles.heart,
-          { transform: [{ translateY: bottomY }] },
+          {
+           opacity: sourceOpacity,
+           transform: [{ translateY: bottomY }],
+          },
         ]}
       >
         <CrystalHeart color="#75caff" size={105} />
@@ -94,7 +99,7 @@ export default function HeartFusionAnimation({
         style={[
           styles.burst,
           {
-            opacity: burstScale,
+            opacity: burstOpacity,
             transform: [{ scale: burstScale }],
           },
         ]}
