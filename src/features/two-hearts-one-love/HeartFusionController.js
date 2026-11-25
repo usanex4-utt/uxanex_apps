@@ -134,7 +134,7 @@ export default function HeartFusionController({
     if (
       session?.status !== 'countdown' ||
       !countdownStartedAt ||
-      elapsedSeconds < 3 ||
+      elapsedSeconds < 3.5 ||
       fuseRequested.current
     ) {
       return;
