@@ -199,19 +199,19 @@ export default function HeartFusionController({
     }
   };
 
-  const handleFusionComplete = async () => {
-    if (completeRequested.current || !session?.id) return;
+  const handleFusionComplete = useCallback(async () => {
+  if (completeRequested.current || !session?.id) return;
 
-    completeRequested.current = true;
+  completeRequested.current = true;
 
-    try {
-      await heartFusionApi.complete(session.id);
-      await refreshSession(session.id);
-    } catch (e) {
-      completeRequested.current = false;
-      setError(e.message || 'Fusion completion save नहीं हुआ।');
-    }
-  };
+  try {
+    await heartFusionApi.complete(session.id);
+    await refreshSession(session.id);
+  } catch (e) {
+    completeRequested.current = false;
+    setError(e.message || 'Fusion completion save नहीं हुआ।');
+  }
+}, [session?.id, refreshSession]);
 
   const handleRating = async (rating) => {
     try {
