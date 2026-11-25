@@ -1,5 +1,5 @@
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useMemo } from 'react';
 import {
   View,
   Text,
@@ -10,21 +10,45 @@ import {
 
 const { width, height } = Dimensions.get('window');
 
-const HEARTS = [
-  { left: '8%', delay: 0, size: 18 },
-  { left: '25%', delay: 900, size: 14 },
-  { left: '45%', delay: 400, size: 22 },
-  { left: '65%', delay: 1300, size: 16 },
-  { left: '85%', delay: 600, size: 20 },
+const BACKGROUNDS = [
+  {
+    name: 'Rose Rain',
+    color: '#160817',
+    rain: 'rgba(255, 120, 180, 0.4)',
+    heart: '#ff5b9d',
+    symbol: '❤️',
+  },
+  {
+    name: 'Ocean Love',
+    color: '#061321',
+    rain: 'rgba(100, 190, 255, 0.4)',
+    heart: '#60caff',
+    symbol: '💙',
+  },
+  {
+    name: 'Golden Night',
+    color: '#171207',
+    rain: 'rgba(255, 210, 100, 0.4)',
+    heart: '#ffd166',
+    symbol: '💛',
+  },
+  {
+    name: 'Purple Galaxy',
+    color: '#10071e',
+    rain: 'rgba(190, 130, 255, 0.4)',
+    heart: '#c084fc',
+    symbol: '💜',
+  },
+  {
+    name: 'Emerald Dream',
+    color: '#041710',
+    rain: 'rgba(100, 255, 180, 0.4)',
+    heart: '#69f0ae',
+    symbol: '💚',
+  },
 ];
 
-const RAINDROPS = Array.from({ length: 35 }, (_, i) => ({
-  left: Math.random() * width,
-  delay: Math.random() * 2500,
-  duration: 1800 + Math.random() * 1200,
-}));
-
-function FloatingHeart({ item }) {
+function FloatingHeart({ item, color, symbol }) {
   const position = useRef(new Animated.Value(height)).current;
 
   useEffect(() => {
@@ -55,16 +79,17 @@ function FloatingHeart({ item }) {
         {
           left: item.left,
           fontSize: item.size,
+          color,
           transform: [{ translateY: position }],
         },
       ]}
     >
-      ❤️
+      {symbol}
     </Animated.Text>
   );
 }
 
-function RainDrop({ item }) {
+function RainDrop({ item, color }) {
   const position = useRef(new Animated.Value(-30)).current;
 
   useEffect(() => {
@@ -94,6 +119,7 @@ function RainDrop({ item }) {
         styles.raindrop,
         {
           left: item.left,
+          backgroundColor: color,
           transform: [{ translateY: position }],
         },
       ]}
@@ -101,20 +127,55 @@ function RainDrop({ item }) {
   );
 }
 
-export default function RomanticBackground({ children }) {
+export default function RomanticBackground({
+  children,
+  backgroundSeed = null,
+}) {
+  const background = useMemo(() => {
+    const seed = backgroundSeed ?? Math.floor(Math.random() * 1000000);
+    return BACKGROUNDS[Math.abs(Number(seed) || 0) % BACKGROUNDS.length];
+  }, [backgroundSeed]);
+
+  const rainDrops = useMemo(
+    () =>
+      Array.from({ length: 35 }, (_, i) => ({
+        left: Math.random() * width,
+        delay: Math.random() * 2500,
+        duration: 1800 + Math.random() * 1200,
+      })),
+    [backgroundSeed]
+  );
+
+  const hearts = useMemo(
+    () =>
+      Array.from({ length: 8 }, (_, i) => ({
+        left: `${8 + i * 12}%`,
+        delay: Math.random() * 1500,
+        size: 14 + Math.random() * 12,
+      })),
+    [backgroundSeed]
+  );
+
   return (
-    <View style={styles.container}>
-      {RAINDROPS.map((item, index) => (
-        <RainDrop key={`rain-${index}`} item={item} />
+    <View style={[styles.container, { backgroundColor: background.color }]}>
+      {rainDrops.map((item, index) => (
+        <RainDrop
+          key={`rain-${index}`}
+          item={item}
+          color={background.rain}
+        />
       ))}
 
-      {HEARTS.map((item, index) => (
-        <FloatingHeart key={`heart-${index}`} item={item} />
+      {hearts.map((item, index) => (
+        <FloatingHeart
+          key={`heart-${index}`}
+          item={item}
+          color={background.heart}
+          symbol={background.symbol}
+        />
       ))}
 
-      <View style={styles.content}>
-        {children}
-      </View>
+      <View style={styles.content}>{children}</View>
     </View>
   );
 }
@@ -122,7 +183,6 @@ export default function RomanticBackground({ children }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#050611',
     overflow: 'hidden',
   },
   content: {
@@ -131,15 +191,12 @@ const styles = StyleSheet.create({
   },
   floatingHeart: {
     position: 'absolute',
-    color: '#ff5b9d',
-    opacity: 0.65,
+    opacity: 0.7,
   },
   raindrop: {
     position: 'absolute',
     top: 0,
     width: 1,
     height: 24,
-    backgroundColor: 'rgba(160, 195, 255, 0.35)',
   },
 });
-          
