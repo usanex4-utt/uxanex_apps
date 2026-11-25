@@ -29,9 +29,9 @@ export default function TwoHeartsOneLoveScreen({
   if (phase !== 'fusion') return null;
 
   return heartData || generateSurpriseHeart({
-    fusionSeed: 'demo-fusion-001',
-    firstHeart: 'Ruby Love',
-    secondHeart: 'Ocean Love',
+    fusionSeed,
+    firstHeart,
+    secondHeart,
   });
 }, [phase, heartData]);
 
