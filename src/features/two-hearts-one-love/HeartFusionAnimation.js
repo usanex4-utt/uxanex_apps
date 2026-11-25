@@ -56,6 +56,10 @@ export default function HeartFusionAnimation({
     inputRange: [0, 0.65, 1],
     outputRange: [150, 0, 0],
   });
+  const sourceOpacity = progress.interpolate({
+    inputRange: [0, 0.65, 0.8, 1],
+    outputRange: [1, 1, 0, 0],
+  });
 
   const burstScale = progress.interpolate({
     inputRange: [0, 0.55, 0.7, 1],
@@ -64,6 +68,10 @@ export default function HeartFusionAnimation({
   const burstOpacity = progress.interpolate({
     inputRange: [0, 0.55, 0.7, 1],
     outputRange: [0, 0, 1, 0],
+  });
+  const finalOpacity = progress.interpolate({
+    inputRange: [0, 0.65, 0.78, 1],
+    outputRange: [0, 0, 1, 1],
   });
 
   const finalScale = progress.interpolate({
