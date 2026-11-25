@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import {
   View,
@@ -11,6 +12,7 @@ import HeartFusionAnimation from './HeartFusionAnimation';
 import RatingScreen from './RatingScreen';
 import generateSurpriseHeart from './SurpriseHeartGenerator';
 import RomanticBackground from './RomanticBackground';
+
 export default function TwoHeartsOneLoveScreen({
   phase = 'waiting',
   myStarted = false,
@@ -26,119 +28,131 @@ export default function TwoHeartsOneLoveScreen({
   onFusionComplete,
 }) {
   const [muted, setMuted] = useState(false);
-  const generatedHeart = useMemo(() => {
-  if (
-    phase !== 'fusion' ||
-    fusionSeed === null ||
-    fusionSeed === undefined
-   ) return null;
 
-  return heartData || generateSurpriseHeart({
+  const generatedHeart = useMemo(() => {
+    if (
+      phase !== 'fusion' ||
+      fusionSeed === null ||
+      fusionSeed === undefined
+    ) {
+      return null;
+    }
+
+    return heartData || generateSurpriseHeart({
+      fusionSeed,
+      firstHeart,
+      secondHeart,
+    });
+  }, [
+    phase,
+    heartData,
     fusionSeed,
     firstHeart,
     secondHeart,
-  });
-}, [phase, heartData, fusionSeed, firstHeart, secondHeart]);
+  ]);
 
   return (
-  <RomanticBackground backgroundSeed={backgroundSeed}>
-    <View style={styles.container}>
-      <Text style={styles.title}>Two Hearts, One Love</Text>
-      <Text style={styles.subtitle}>
-        दो दिल, एक नया एहसास ❤️
-      </Text>
+    <RomanticBackground backgroundSeed={backgroundSeed}>
+      <View style={styles.container}>
+        <Text style={styles.title}>
+          Two Hearts, One Love
+        </Text>
 
-      {phase !== 'rating' && phase !== 'completed' && (
-        <>
-          
+        <Text style={styles.subtitle}>
+          दो दिल, एक नया एहसास ❤️
+        </Text>
 
-          {phase === 'waiting' && (
-            <>
-              <Text style={styles.message}>
-                जब दोनों तैयार हों, तभी शुरुआत होगी।
-              </Text>
-
-              <Text style={styles.status}>
-                आपकी तैयारी: {myStarted ? 'Ready ✓' : 'Pending'}
-              </Text>
-              <Text style={styles.status}>
-                Partner: {partnerStarted ? 'Ready ✓' : 'Waiting'}
-              </Text>
-
-              <TouchableOpacity
-                style={[
-                  styles.button,
-                  myStarted && styles.disabled,
-                ]}
-                disabled={myStarted}
-                onPress={onStart}
-              >
-                  <View style={styles.hearts}>
-  <View style={styles.heartBox}>
-    <CrystalHeart
-      color={firstHeart?.color || '#ff75ad'}
-      size={100}
-    />
-    <Text style={styles.name}>
-      {firstHeart?.name || 'Your Heart'}
-    </Text>
-  </View>
-
-  <Text style={styles.plus}>+</Text>
-
-  <View style={styles.heartBox}>
-    <CrystalHeart
-      color={secondHeart?.color || '#75caff'}
-      size={100}
-    />
-    <Text style={styles.name}>
-      {secondHeart?.name || "Partner's Heart"}
-    </Text>
-  </View>
-</View>
-                <Text style={styles.buttonText}>
-                  {myStarted ? 'You are Ready ✓' : 'Start ❤️'}
+        {phase !== 'rating' && phase !== 'completed' && (
+          <>
+            <View style={styles.hearts}>
+              <View style={styles.heartBox}>
+                <CrystalHeart
+                  color={firstHeart?.color || '#ff75ad'}
+                  size={100}
+                />
+                <Text style={styles.name}>
+                  {firstHeart?.name || 'Your Heart'}
                 </Text>
-              </TouchableOpacity>
-            </>
-          )}
+              </View>
 
-          {phase === 'countdown' && (
-            <Text style={styles.countdown}>
-              {countdown ?? '3'}
-            </Text>
-          )}
+              <Text style={styles.plus}>+</Text>
 
-          {phase === 'fusion' && (
-           <HeartFusionAnimation
-            heartData={generatedHeart}
-            onComplete={onFusionComplete}
-           />
-          )}
-        </>
-      )}
+              <View style={styles.heartBox}>
+                <CrystalHeart
+                  color={secondHeart?.color || '#75caff'}
+                  size={100}
+                />
+                <Text style={styles.name}>
+                  {secondHeart?.name || "Partner's Heart"}
+                </Text>
+              </View>
+            </View>
 
-      {phase === 'rating' && (
-        <RatingScreen onSubmit={onRatingSubmit} />
-      )}
+            {phase === 'waiting' && (
+              <>
+                <Text style={styles.message}>
+                  जब दोनों तैयार हों, तभी शुरुआत होगी।
+                </Text>
 
-      {phase === 'completed' && (
-        <Text style={styles.message}>
-          अब आगे बातें करो ❤️
-        </Text>
-      )}
+                <Text style={styles.status}>
+                  आपकी तैयारी: {myStarted ? 'Ready ✓' : 'Pending'}
+                </Text>
 
-      <TouchableOpacity
-        style={styles.soundButton}
-        onPress={() => setMuted(!muted)}
-      >
-        <Text style={styles.soundText}>
-          {muted ? '🔇 Sound Off' : '🔊 Sound On'}
-        </Text>
-      </TouchableOpacity>
-        </View>
-       </RomanticBackground>
-       );
+                <Text style={styles.status}>
+                  Partner: {partnerStarted ? 'Ready ✓' : 'Waiting'}
+                </Text>
+
+                <TouchableOpacity
+                  style={[
+                    styles.button,
+                    myStarted && styles.disabled,
+                  ]}
+                  disabled={myStarted}
+                  onPress={onStart}
+                >
+                  <Text style={styles.buttonText}>
+                    {myStarted ? 'You are Ready ✓' : 'Start ❤️'}
+                  </Text>
+                </TouchableOpacity>
+              </>
+            )}
+
+            {phase === 'countdown' && (
+              <Text style={styles.countdown}>
+                {countdown ?? '3'}
+              </Text>
+            )}
+
+            {phase === 'fusion' && (
+              <HeartFusionAnimation
+                heartData={generatedHeart}
+                onComplete={onFusionComplete}
+              />
+            )}
+          </>
+        )}
+
+        {phase === 'rating' && (
+          <RatingScreen onSubmit={onRatingSubmit} />
+        )}
+
+        {phase === 'completed' && (
+          <Text style={styles.message}>
+            अब आगे बातें करो ❤️
+          </Text>
+        )}
+
+        <TouchableOpacity
+          style={styles.soundButton}
+          onPress={() => setMuted(!muted)}
+        >
+          <Text style={styles.soundText}>
+            {muted ? '🔇 Sound Off' : '🔊 Sound On'}
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </RomanticBackground>
+  );
 }
 
 const styles = StyleSheet.create({
