@@ -9,6 +9,16 @@ export default function CrystalHeart({
 }) {
   const colors = heartData?.colors || [color, '#ff80ab', '#880e4f'];
   const glow = heartData?.glow || color;
+  const pattern = heartData?.pattern || 'sparkle';
+  const shape = heartData?.shape || 'classic';
+
+  const shapeSymbol = {
+    classic: '❤️',
+    royal: '💗',
+    double: '💕',
+    infinity: '💞',
+    crystal: '💎',
+  };
 
   return (
     <View style={styles.container}>
@@ -16,22 +26,23 @@ export default function CrystalHeart({
         style={[
           styles.glow,
           {
-            width: size * 1.15,
-            height: size * 1.15,
+            width: size * 1.3,
+            height: size * 1.3,
             borderRadius: size,
             backgroundColor: glow,
-            opacity: 0.22,
+            opacity: 0.25,
           },
         ]}
       />
 
       <Text
         style={[
-          styles.heart,
+          styles.diamond,
           {
             fontSize: size,
+            color: colors[1] || color,
             textShadowColor: glow,
-            textShadowRadius: size * 0.22,
+            textShadowRadius: size * 0.3,
           },
         ]}
       >
@@ -40,20 +51,38 @@ export default function CrystalHeart({
 
       <Text
         style={[
-          styles.heartSymbol,
+          styles.heart,
           {
-            fontSize: size * 0.58,
+            fontSize: size * 0.62,
             color: colors[0],
           },
         ]}
       >
-        ❤️
+        {shapeSymbol[shape] || '❤️'}
       </Text>
 
-      {heartData?.pattern === 'sparkle' && (
-        <Text style={[styles.sparkle, { fontSize: size * 0.25 }]}>
-          ✨
-        </Text>
+      {pattern === 'sparkle' && (
+        <Text style={styles.sparkle}>✨</Text>
+      )}
+
+      {pattern === 'galaxy' && (
+        <Text style={styles.pattern}>🌌</Text>
+      )}
+
+      {pattern === 'diamond' && (
+        <Text style={styles.pattern}>💠</Text>
+      )}
+
+      {pattern === 'stardust' && (
+        <Text style={styles.pattern}>🌟</Text>
+      )}
+
+      {pattern === 'aurora' && (
+        <Text style={styles.pattern}>🌈</Text>
+      )}
+
+      {pattern === 'crystal' && (
+        <Text style={styles.pattern}>🔷</Text>
       )}
     </View>
   );
@@ -67,10 +96,10 @@ const styles = StyleSheet.create({
   glow: {
     position: 'absolute',
   },
-  heart: {
+  diamond: {
     textAlign: 'center',
   },
-  heartSymbol: {
+  heart: {
     position: 'absolute',
     textAlign: 'center',
   },
@@ -78,5 +107,12 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 0,
     right: 0,
+    fontSize: 25,
+  },
+  pattern: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    fontSize: 22,
   },
 });
