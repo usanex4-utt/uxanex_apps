@@ -15,36 +15,56 @@ export default function HeartFusionAnimation({
   heartData,
   firstHeart,
   secondHeart,
+  fusionStartedAt,
+  serverOffset = 0,
 }) {
-  const progress = useRef(new Animated.Value(0)).current;
+  
+  const completedRef = useRef(false);
 
   useEffect(() => {
-    const animation = Animated.sequence([
-      Animated.timing(progress, {
-        toValue: 0.35,
-        duration: 1200,
-        easing: Easing.inOut(Easing.ease),
-        useNativeDriver: true,
-      }),
-      Animated.timing(progress, {
-        toValue: 0.65,
-        duration: 700,
-        easing: Easing.in(Easing.ease),
-        useNativeDriver: true,
-      }),
-      Animated.timing(progress, {
-        toValue: 1,
-        duration: 1100,
-        easing: Easing.out(Easing.ease),
-        useNativeDriver: true,
-      }),
-    ]);
+    const startedAt = new Date(fusionStartedAt).getTime();
+
+    const elapsed = Number.isFinite(startedAt)
+      ? Math.max(0, Date.now() + serverOffset - startedAt)
+      : 0;
+
+    const totalDuration = 3000;
+    const remaining = Math.max(0, totalDuration - elapsed);
+
+    progress.setValue(
+      Math.min(elapsed / totalDuration, 1)
+    );
+
+    if (remaining === 0) {
+      if (!completedRef.current) {
+        completedRef.current = true;
+        onComplete?.();
+      }
+      return;
+    }
+
+    const animation = Animated.timing(progress, {
+      toValue: 1,
+      duration: remaining,
+      easing: Easing.linear,
+      useNativeDriver: true,
+    });
 
     animation.start(({ finished }) => {
-      if (finished) {
+      if (finished && !completedRef.current) {
+        completedRef.current = true;
         onComplete?.();
       }
     });
+
+    return () => animation.stop();
+  }, [
+    progress,
+    onComplete,
+    fusionStartedAt,
+    serverOffset,
+  ]);
+  
 
     return () => animation.stop();
   }, [progress, onComplete]);
