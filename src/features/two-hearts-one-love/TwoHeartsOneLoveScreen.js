@@ -27,7 +27,11 @@ export default function TwoHeartsOneLoveScreen({
 }) {
   const [muted, setMuted] = useState(false);
   const generatedHeart = useMemo(() => {
-  if (phase !== 'fusion' || !fusionSeed) return null;
+  if (
+    phase !== 'fusion' ||
+    fusionSeed === null ||
+    fusionSeed === undefined
+   ) return null;
 
   return heartData || generateSurpriseHeart({
     fusionSeed,
@@ -121,14 +125,15 @@ export default function TwoHeartsOneLoveScreen({
           {muted ? '🔇 Sound Off' : '🔊 Sound On'}
         </Text>
       </TouchableOpacity>
-    </View>
-  );
+        </View>
+       </RomanticBackground>
+       );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#090d1b',
+    backgroundColor: 'transparent',
     alignItems: 'center',
     justifyContent: 'center',
     padding: 20,
