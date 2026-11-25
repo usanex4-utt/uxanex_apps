@@ -375,6 +375,8 @@ export default function HeartFusionController({
         firstHeart={session.first_heart}
         secondHeart={session.second_heart}
         onFusionComplete={handleFusionComplete}
+        fusionStartedAt={session.fusion_started_at}
+        serverOffset={serverOffset}
       />
 
       {busy ? (
