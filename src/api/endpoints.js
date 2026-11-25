@@ -92,6 +92,24 @@ export const EP = {
 
   // ── couple chat (backend/routes/couple_realtime.py) ───────
   coupleWs:           (id)   => `/ws/couple/${id}`,                // WS   (partner public user_id)  ⚠ note: no /api prefix
+  
+  // ── Two Hearts One Love / Heart Fusion ───────────────
+  heartFusionCreate: "/api/couple/heart-fusion/sessions",
+  heartFusionActive: (id) =>
+    `/api/couple/heart-fusion/rooms/${id}/active-session`,
+  heartFusionSubmitHeart: (id) =>
+    `/api/couple/heart-fusion/sessions/${id}/heart`,
+  heartFusionSession: (id) =>
+    `/api/couple/heart-fusion/sessions/${id}`,
+  heartFusionStart: (id) =>
+    `/api/couple/heart-fusion/sessions/${id}/start`,
+  heartFusionFuse: (id) =>
+    `/api/couple/heart-fusion/sessions/${id}/fuse`,
+  heartFusionComplete: (id) =>
+    `/api/couple/heart-fusion/sessions/${id}/complete`,
+  heartFusionRating: (id) =>
+    `/api/couple/heart-fusion/sessions/${id}/rating`,
+  
 
   // ⚠️ ENDPOINT NOT YET IMPLEMENTED IN BACKEND — must add `POST /api/couple/upload-media`
   //    before using. Currently uploadAndSend in CoupleChatScreen should NOT call this.
