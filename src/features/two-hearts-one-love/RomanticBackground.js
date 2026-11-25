@@ -132,7 +132,9 @@ export default function RomanticBackground({
   backgroundSeed = null,
 }) {
   const background = useMemo(() => {
-    const seed = backgroundSeed ?? Math.floor(Math.random() * 1000000);
+    const seed =
+     backgroundSeed ??
+     `${Date.now()}-${Math.random()}`;
     return BACKGROUNDS[Math.abs(Number(seed) || 0) % BACKGROUNDS.length];
   }, [backgroundSeed]);
 
