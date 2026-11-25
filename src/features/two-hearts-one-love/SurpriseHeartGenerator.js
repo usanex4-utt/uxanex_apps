@@ -91,7 +91,9 @@ export function generateSurpriseHeart({
   secondHeart,
 }) {
   const seedInput =
-    fusionSeed ||
+    fusionSeed !== null && fusionSeed !== undefined
+     ? fusionSeed
+     :
     `${Date.now()}-${Math.random()}-${firstHeart || ''}-${secondHeart || ''}`;
 
   const seed = hashSeed(seedInput);
