@@ -1,11 +1,55 @@
 
-import React, { memo } from "react";
+import React, { memo, useEffect, useState } from "react";
 import { View, Text, Pressable } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Avatar } from "../ui";
+import { api } from "../../api/client";
+import { EP } from "../../api/endpoints";
 
 const ConnectionRow = ({ item, user, navigation, onLongPress }) => {
   const fam = item.category === "family";
+
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [followLoading, setFollowLoading] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+
+    if (!item.user_id || item.user_id === user?.user_id) return;
+
+    api(EP.followStatus(encodeURIComponent(item.user_id)))
+      .then((data) => {
+        if (active) setIsFollowing(Boolean(data?.is_following));
+      })
+      .catch((error) => {
+        console.warn("Follow status error:", error?.message);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [item.user_id, user?.user_id]);
+
+  const handleFollowToggle = async (event) => {
+    event?.stopPropagation?.();
+
+    if (followLoading) return;
+
+    setFollowLoading(true);
+
+    try {
+      await api(isFollowing ? EP.unfollow : EP.follow, {
+        method: "POST",
+        body: { user_id: item.user_id },
+      });
+
+      setIsFollowing(!isFollowing);
+    } catch (error) {
+      console.warn("Follow action failed:", error?.message);
+    } finally {
+      setFollowLoading(false);
+    }
+  };
 
   const openProfile = () => {
     if (item.user_id === user?.user_id) {
@@ -26,17 +70,14 @@ const ConnectionRow = ({ item, user, navigation, onLongPress }) => {
       onPress={openChat}
       onLongPress={onLongPress}
       className="flex-row items-center mx-0 mb-0.5 p-3.5 rounded-3xl"
-      
-style={({ pressed }) => ({
-  backgroundColor: pressed
-    ? "rgba(47,124,255,0.18)"
-    : "transparent",
-  transform: [{ scale: pressed ? 0.97 : 1 }],
-  opacity: pressed ? 0.90 : 1,
-})}
-  
-     >
-      
+      style={({ pressed }) => ({
+        backgroundColor: pressed
+          ? "rgba(47,124,255,0.18)"
+          : "transparent",
+        transform: [{ scale: pressed ? 0.97 : 1 }],
+        opacity: pressed ? 0.90 : 1,
+      })}
+    >
       {/* Profile Avatar */}
       <Pressable
         onPress={openProfile}
@@ -88,6 +129,31 @@ style={({ pressed }) => ({
           ) : null}
         </View>
       </View>
+
+      {/* Follow / Unfollow Button */}
+      {item.user_id !== user?.user_id && (
+        <Pressable
+          onPress={handleFollowToggle}
+          disabled={followLoading}
+          className={`ml-2 px-3 py-2 rounded-full ${
+            isFollowing
+              ? "border border-white/20 bg-white/5"
+              : "bg-brand"
+          }`}
+        >
+          <Text
+            className={`text-[12px] font-bold ${
+              isFollowing ? "text-ink" : "text-white"
+            }`}
+          >
+            {followLoading
+              ? "..."
+              : isFollowing
+              ? "Following"
+              : "Follow"}
+          </Text>
+        </Pressable>
+      )}
     </Pressable>
   );
 };
