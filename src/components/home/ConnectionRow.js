@@ -25,7 +25,7 @@ const ConnectionRow = ({ item, user, navigation, onLongPress }) => {
     <Pressable
       onPress={openChat}
       onLongPress={onLongPress}
-      className="flex-row items-center mx-4 mb-2 p-3.5 rounded-3xl"
+      className="flex-row items-center mx-4 mb-1 p-3.5 rounded-3xl"
       style={({ pressed }) => ({
        backgroundColor: pressed
         ? "rgba(47,124,255,0.10)"
