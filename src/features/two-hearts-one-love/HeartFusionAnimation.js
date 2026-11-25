@@ -125,21 +125,7 @@ export default function HeartFusionAnimation({
   </Text>
 </Animated.View>
 
-      {/* Second partner's selected heart */}
-      <Animated.View
-        style={[
-          styles.heart,
-          {
-            opacity: sourceOpacity,
-            transform: [{ translateY: bottomY }],
-          },
-        ]}
-      >
-        <CrystalHeart
-          color={secondHeart?.color || '#75caff'}
-          size={105}
-        />
-      </Animated.View>
+      
 
       {/* Fusion burst */}
       <Animated.View
