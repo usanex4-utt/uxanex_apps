@@ -126,8 +126,8 @@ export default function HeartFusionController({
     : 0;
 
   const countdown = Math.max(
-    1,
-    3 - Math.floor(elapsedSeconds)
+   0,
+   3 - Math.floor(elapsedSeconds)
   );
 
   useEffect(() => {
