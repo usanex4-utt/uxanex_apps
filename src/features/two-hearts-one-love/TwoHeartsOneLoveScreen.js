@@ -10,7 +10,7 @@ import CrystalHeart from './CrystalHeart';
 import HeartFusionAnimation from './HeartFusionAnimation';
 import RatingScreen from './RatingScreen';
 import generateSurpriseHeart from './SurpriseHeartGenerator';
-
+import RomanticBackground from './RomanticBackground';
 export default function TwoHeartsOneLoveScreen({
   phase = 'waiting',
   myStarted = false,
@@ -20,6 +20,7 @@ export default function TwoHeartsOneLoveScreen({
   onRatingSubmit,
   heartData = null,
   fusionSeed = null,
+  backgroundSeed = null,
   firstHeart,
   secondHeart,
   onFusionComplete,
@@ -36,6 +37,7 @@ export default function TwoHeartsOneLoveScreen({
 }, [phase, heartData, fusionSeed, firstHeart, secondHeart]);
 
   return (
+  <RomanticBackground backgroundSeed={backgroundSeed}>
     <View style={styles.container}>
       <Text style={styles.title}>Two Hearts, One Love</Text>
       <Text style={styles.subtitle}>
