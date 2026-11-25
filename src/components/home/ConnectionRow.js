@@ -26,12 +26,15 @@ const ConnectionRow = ({ item, user, navigation, onLongPress }) => {
       onPress={openChat}
       onLongPress={onLongPress}
       className="flex-row items-center mx-0 mb-0.5 p-3.5 rounded-3xl"
-      style={({ pressed }) => ({
-       backgroundColor: pressed
-        ? "rgba(47,124,255,0.10)"
-        : "transparent",
-       transform: [{ scale: pressed ? 0.99 : 1 }],
-      })}
+      
+style={({ pressed }) => ({
+  backgroundColor: pressed
+    ? "rgba(47,124,255,0.18)"
+    : "transparent",
+  transform: [{ scale: pressed ? 0.97 : 1 }],
+  opacity: pressed ? 0.90 : 1,
+})}
+  
      >
       
       {/* Profile Avatar */}
