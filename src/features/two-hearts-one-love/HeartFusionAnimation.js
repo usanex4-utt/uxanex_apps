@@ -13,6 +13,8 @@ import CrystalHeart from './CrystalHeart';
 export default function HeartFusionAnimation({
   onComplete,
   heartData,
+  firstHeart,
+  secondHeart,
 }) {
   const progress = useRef(new Animated.Value(0)).current;
 
@@ -56,6 +58,7 @@ export default function HeartFusionAnimation({
     inputRange: [0, 0.65, 1],
     outputRange: [150, 0, 0],
   });
+
   const sourceOpacity = progress.interpolate({
     inputRange: [0, 0.65, 0.8, 1],
     outputRange: [1, 1, 0, 0],
@@ -65,10 +68,12 @@ export default function HeartFusionAnimation({
     inputRange: [0, 0.55, 0.7, 1],
     outputRange: [0, 0, 1.8, 0],
   });
+
   const burstOpacity = progress.interpolate({
     inputRange: [0, 0.55, 0.7, 1],
     outputRange: [0, 0, 1, 0],
   });
+
   const finalOpacity = progress.interpolate({
     inputRange: [0, 0.65, 0.78, 1],
     outputRange: [0, 0, 1, 1],
@@ -81,30 +86,39 @@ export default function HeartFusionAnimation({
 
   return (
     <View style={styles.container}>
+      {/* First partner's selected heart */}
       <Animated.View
         style={[
           styles.heart,
           {
-           opacity: sourceOpacity,
-           transform: [{ translateY: topY }],
+            opacity: sourceOpacity,
+            transform: [{ translateY: topY }],
           },
         ]}
       >
-        <CrystalHeart color="#ff75ad" size={105} />
+        <CrystalHeart
+          color={firstHeart?.color || '#ff75ad'}
+          size={105}
+        />
       </Animated.View>
 
+      {/* Second partner's selected heart */}
       <Animated.View
         style={[
           styles.heart,
           {
-           opacity: sourceOpacity,
-           transform: [{ translateY: bottomY }],
+            opacity: sourceOpacity,
+            transform: [{ translateY: bottomY }],
           },
         ]}
       >
-        <CrystalHeart color="#75caff" size={105} />
+        <CrystalHeart
+          color={secondHeart?.color || '#75caff'}
+          size={105}
+        />
       </Animated.View>
 
+      {/* Fusion burst */}
       <Animated.View
         style={[
           styles.burst,
@@ -117,6 +131,7 @@ export default function HeartFusionAnimation({
         <Text style={styles.burstText}>✨💥✨</Text>
       </Animated.View>
 
+      {/* Newly generated Surprise Crystal Heart */}
       <Animated.View
         style={[
           styles.finalHeart,
