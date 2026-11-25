@@ -132,14 +132,21 @@ export default function RomanticBackground({
   backgroundSeed = null,
 }) {
   const background = useMemo(() => {
-    const seed =
-     backgroundSeed ??
-     `${Date.now()}-${Math.random()}`;
-
+  if (backgroundSeed === null || backgroundSeed === undefined) {
     return BACKGROUNDS[
-     Math.abs(Number(seed) || 0) % BACKGROUNDS.length
+      Math.floor(Math.random() * BACKGROUNDS.length)
     ];
-  }, [backgroundSeed]);
+  }
+
+  const seedText = String(backgroundSeed);
+  let hash = 0;
+
+  for (let i = 0; i < seedText.length; i++) {
+    hash = (hash * 31 + seedText.charCodeAt(i)) >>> 0;
+  }
+
+  return BACKGROUNDS[hash % BACKGROUNDS.length];
+}, [backgroundSeed]);
 
   const rainDrops = useMemo(
     () =>
