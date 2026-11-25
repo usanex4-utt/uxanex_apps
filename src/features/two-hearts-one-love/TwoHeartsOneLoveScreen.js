@@ -33,7 +33,7 @@ export default function TwoHeartsOneLoveScreen({
     firstHeart,
     secondHeart,
   });
-}, [phase, heartData]);
+}, [phase, heartData, fusionSeed, firstHeart, secondHeart]);
 
   return (
     <View style={styles.container}>
