@@ -39,7 +39,9 @@ export default function HeartFusionAnimation({
     ]);
 
     animation.start(({ finished }) => {
-      if (finished && onComplete) onComplete();
+      if (finished) {
+        onComplete?.();
+      }
     });
 
     return () => animation.stop();
