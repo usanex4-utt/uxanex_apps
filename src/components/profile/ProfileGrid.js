@@ -9,7 +9,6 @@ const TAB_ICONS = {
   reposts: "repeat",
   saved: "bookmark-outline",
   posts: "grid-outline",
-  video: "videocam-outline",
 };
 
 const LABEL = {
@@ -17,7 +16,6 @@ const LABEL = {
   reposts: "Reposts",
   saved: "Saved",
   posts: "Posts",
-  video: "Video",
 };
 
 const TILE_RATIO = 1.33;
