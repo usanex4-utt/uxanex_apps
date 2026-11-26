@@ -357,7 +357,7 @@ const openReelInFeed = useCallback((reel) => {
    tab === "posts" ? posts : [];
 
   return (
-    <SafeAreaView className="flex-1 bg-[#050b18]" edges={["top"]}>
+    <SafeAreaView className="flex-1 bg-bg" edges={["top"]}>
       {/* Header */}
       <View className="h-16 flex-row items-center justify-between px-4">
         {isMe ? (
