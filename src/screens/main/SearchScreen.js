@@ -708,53 +708,52 @@ export default function SearchScreen({ navigation }) {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
           keyExtractor={(u, i) => String(u.user_id || i)}
-          contentContainerClassName="px-4 pt-1 pb-10"
+          contentContainerClassName="pt-1 pb-10"
+            
           renderItem={({ item: u }) => (
-            <View className="mb-3.5 rounded-[26px] bg-[#04070b] pb-1.5 shadow-xl shadow-black/80">
-              <View className="flex-row items-center p-3.5 rounded-[26px] bg-[#0f1621] border border-white/6 border-t-white/15">
-                <Pressable
-                  onPress={() => setViewer(u)}
-                  className="active:opacity-80"
-                >
-                  <View className="rounded-full p-[3px] bg-[#2f7cff]/45 shadow-lg shadow-[#2f7cff]/50">
-                    <View className="rounded-full p-0.5 bg-[#0f1621]">
-                      <Avatar
-                        uri={u.profile_photo}
-                        name={u.name || u.username}
-                        size={50}
-                      />
-                    </View>
-                  </View>
-                </Pressable>
-
-                <Pressable
-                  className="flex-1 mx-3.5"
-                  onPress={() => openProfile(u)}
-                >
-                  <Text
-                    className="text-white text-[16px] font-bold"
-                    numberOfLines={1}
-                  >
-                    {u.name || u.username}
-                  </Text>
-
-                  <Text
-                    className="text-[#8d96a5] text-[13px] mt-0.5"
-                    numberOfLines={1}
-                  >
-                    @{u.username}
-                  </Text>
-                </Pressable>
-
-                <Action
-                  u={u}
-                  onConnect={connect}
-                  onAccept={accept}
-                  onCancel={cancel}
-                  onMessage={openChat} // 👈 FIX #3: Chat open karne ke liye prop pass kiya
-                />
-              </View>
+           <View className="flex-row items-center mx-0 mb-0.5 p-3.5 rounded-3xl">
+            <Pressable
+             onPress={() => setViewer(u)}
+             className="active:opacity-80"
+           >
+             <View className="rounded-full p-[3px] bg-[#2f7cff]/45 shadow-lg shadow-[#2f7cff]/50">
+              <View className="rounded-full p-0.5 bg-[#0f1621]">
+               <Avatar
+                uri={u.profile_photo}
+                name={u.name || u.username}
+                size={50}
+               />
+             </View>
             </View>
+           </Pressable>
+
+            <Pressable
+             className="flex-1 mx-3.5"
+             onPress={() => openProfile(u)}
+            >
+             <Text
+              className="text-white text-[16px] font-bold"
+              numberOfLines={1}
+             >
+              {u.name || u.username}
+              </Text>
+
+             <Text
+              className="text-[#8d96a5] text-[13px] mt-0.5"
+              numberOfLines={1}
+             >
+              @{u.username}
+               </Text>
+              </Pressable>
+
+              <Action
+               u={u}
+               onConnect={connect}
+               onAccept={accept}
+               onCancel={cancel}
+               onMessage={openChat}
+               />
+             </View>
           )}
         />
       )}
