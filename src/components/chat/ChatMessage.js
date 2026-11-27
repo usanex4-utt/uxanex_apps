@@ -123,6 +123,90 @@ const EmojiPicker = ({ emojis = [], onPick }) => (
   </View>
 );
 
+
+// =====================================================
+// AUDIO PLAYER
+// =====================================================
+
+const AudioPlayer = ({ uri }) => {
+  const soundRef = useRef(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    return () => {
+      if (soundRef.current) {
+        soundRef.current.unloadAsync().catch(() => {});
+        soundRef.current = null;
+      }
+    };
+  }, []);
+
+  const togglePlayback = async () => {
+    if (isLoading || !uri) return;
+
+    setIsLoading(true);
+
+    try {
+      if (!soundRef.current) {
+        const { sound } = await Audio.Sound.createAsync(
+          { uri },
+          { shouldPlay: true },
+          (status) => {
+            if (status.isLoaded) {
+              setIsPlaying(status.isPlaying);
+            }
+          }
+        );
+
+        soundRef.current = sound;
+      } else {
+        const status = await soundRef.current.getStatusAsync();
+
+        if (status.isPlaying) {
+          await soundRef.current.pauseAsync();
+        } else {
+          if (status.didJustFinish) {
+            await soundRef.current.setPositionAsync(0);
+          }
+          await soundRef.current.playAsync();
+        }
+      }
+    } catch (error) {
+      console.warn("Audio playback failed:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <Pressable
+      onPress={togglePlayback}
+      className="flex-row items-center mb-1.5 pr-4 py-3 pl-3 rounded-xl bg-black/20 active:opacity-70"
+    >
+      <Ionicons
+        name={
+          isLoading
+            ? "hourglass-outline"
+            : isPlaying
+              ? "pause-circle"
+              : "play-circle"
+        }
+        size={30}
+        color="#bcd4ff"
+      />
+
+      <Text className="text-[#dbe8ff] text-[13px] font-semibold ml-2">
+        {isLoading
+          ? "Loading..."
+          : isPlaying
+            ? "Pause audio"
+            : "Play audio"}
+      </Text>
+    </Pressable>
+  );
+};
+
 // =====================================================
 // MESSAGE COMPONENT
 // =====================================================
