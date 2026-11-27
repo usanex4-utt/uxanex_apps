@@ -201,6 +201,10 @@ export default function ChatScreen({ navigation, route }) {
                 message_id: incoming.id,
               }));
             }
+                ws.send(JSON.stringify({
+                type: "read",
+                message_id: incoming.id,
+              }));
           } else if (m.type === "delivered") {
             setMessages((prev) =>
               prev.map((item) =>
