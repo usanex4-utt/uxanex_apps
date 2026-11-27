@@ -269,12 +269,12 @@ const Message = memo(
             />
           ) : null}
 
-          {/* SENT / READ STATUS */}
+                    {/* SENT / DELIVERED / READ STATUS */}
 
           {mine && !m.pending ? (
             <Ionicons
               name={
-                m.is_read
+                m.is_read || m.is_delivered
                   ? "checkmark-done"
                   : "checkmark"
               }
