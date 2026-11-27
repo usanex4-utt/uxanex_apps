@@ -282,40 +282,35 @@ const Message = memo(
 
         {/* AUDIO / DOCUMENT MESSAGE */}
 
-        {m.media_url &&
-        m.media_type !== "image" &&
-        m.media_type !== "video" ? (
+        
 
-          <Pressable
-            onPress={openMedia}
-            className="flex-row items-center mb-1.5 pr-3 py-2 pl-2 rounded-xl bg-black/20 active:opacity-70"
-          >
+    
+         {/* AUDIO MESSAGE */}
 
-            <View className="w-9 h-9 rounded-lg bg-white/10 items-center justify-center">
+{m.media_url && m.media_type === "audio" ? (
+  <AudioPlayer uri={url} />
+) : null}
 
-              <Ionicons
-                name={
-                  m.media_type === "audio"
-                    ? "musical-notes"
-                    : "document-text"
-                }
-                size={18}
-                color="#bcd4ff"
-              />
+{/* DOCUMENT MESSAGE */}
 
-            </View>
+{m.media_url && m.media_type === "document" ? (
+  <Pressable
+    onPress={openMedia}
+    className="flex-row items-center mb-1.5 pr-3 py-2 pl-2 rounded-xl bg-black/20 active:opacity-70"
+  >
+    <View className="w-9 h-9 rounded-lg bg-white/10 items-center justify-center">
+      <Ionicons
+        name="document-text"
+        size={18}
+        color="#bcd4ff"
+      />
+    </View>
 
-            <Text className="text-[#dbe8ff] text-[13px] font-semibold ml-2.5">
-              {m.media_type === "audio"
-                ? "Play audio"
-                : "Open file"}
-            </Text>
-
-          </Pressable>
-
-        ) : null}
-
-        {/* MESSAGE TEXT */}
+    <Text className="text-[#dbe8ff] text-[13px] font-semibold ml-2.5">
+      Open file
+    </Text>
+  </Pressable>
+) : null}
 
         {m.content ? (
           <Text className="text-[#f4f6fb] text-[15px] leading-[21px]">
