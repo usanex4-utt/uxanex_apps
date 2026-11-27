@@ -201,7 +201,7 @@ export default function ChatScreen({ navigation, route }) {
                 message_id: incoming.id,
               }));
             }
-                      } else if (m.type === "delivered") {
+          } else if (m.type === "delivered") {
             setMessages((prev) =>
               prev.map((item) =>
                 item.id === m.message_id
