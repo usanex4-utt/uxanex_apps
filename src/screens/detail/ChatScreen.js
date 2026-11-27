@@ -174,7 +174,7 @@ export default function ChatScreen({ navigation, route }) {
             if (!m.online) {
               setTyping(false);
             }
-                    } else if (m.type === "typing") {
+           } else if (m.type === "typing") {
             setTyping(!!m.typing);
 
             clearTimeout(hide);
