@@ -254,13 +254,11 @@ const Message = memo(
         {/* IMAGE MESSAGE */}
 
         {m.media_url && m.media_type === "image" ? (
-          <Pressable onPress={openMedia}>
             <Image
               source={{ uri: url }}
               className="w-[230px] h-[230px] rounded-2xl mb-1"
               resizeMode="cover"
             />
-          </Pressable>
         ) : null}
 
         {/* VIDEO MESSAGE */}
