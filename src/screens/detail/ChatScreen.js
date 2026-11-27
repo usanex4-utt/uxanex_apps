@@ -174,7 +174,7 @@ export default function ChatScreen({ navigation, route }) {
             if (!m.online) {
               setTyping(false);
             }
-          } else if (m.type === "typing") {
+                    } else if (m.type === "typing") {
             setTyping(!!m.typing);
 
             clearTimeout(hide);
@@ -182,6 +182,18 @@ export default function ChatScreen({ navigation, route }) {
             if (m.typing) {
               hide = setTimeout(() => setTyping(false), 6000);
             }
+          } else if (m.type === "message" && m.message) {
+            const incoming = m.message;
+
+            setMessages((prev) => {
+              const exists = prev.some(
+                (item) => item.id === incoming.id
+              );
+
+              if (exists) return prev;
+
+              return [...prev, incoming];
+            });
           }
         } catch {}
       };
