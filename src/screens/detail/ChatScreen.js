@@ -217,6 +217,7 @@ export default function ChatScreen({ navigation, route }) {
                   : item
               )
             );
+          }
         } catch {}
       };
 
