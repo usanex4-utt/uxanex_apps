@@ -209,8 +209,7 @@ export default function ChatScreen({ navigation, route }) {
                   : item
               )
             );
-          }
-                    } else if (m.type === "read") {
+          } else if (m.type === "read") {
             setMessages((prev) =>
               prev.map((item) =>
                 item.id === m.message_id
