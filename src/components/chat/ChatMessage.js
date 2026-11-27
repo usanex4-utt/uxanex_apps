@@ -1,5 +1,5 @@
 
-import React, { memo } from "react";
+import React, { memo, useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -9,7 +9,7 @@ import {
 } from "react-native";
 
 import { Ionicons } from "@expo/vector-icons";
-import { Video, ResizeMode } from "expo-av";
+import { Audio, Video, ResizeMode } from "expo-av";
 
 import { absUrl } from "../../api/client";
 import { Avatar } from "../ui";
