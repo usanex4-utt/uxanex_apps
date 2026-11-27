@@ -210,6 +210,14 @@ export default function ChatScreen({ navigation, route }) {
               )
             );
           }
+                    } else if (m.type === "read") {
+            setMessages((prev) =>
+              prev.map((item) =>
+                item.id === m.message_id
+                  ? { ...item, is_read: true }
+                  : item
+              )
+            );
         } catch {}
       };
 
