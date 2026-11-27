@@ -447,10 +447,13 @@ export default function ChatScreen({ navigation, route }) {
     if (r.canceled) return;
 
     const a = r.assets[0];
+    if (!a.name) {
+      return Alert.alert("Invalid audio", "Audio file name is missing. Please select another file.");
+    }
 
     send({
       uri: a.uri,
-      name: a.name || "audio.m4a",
+      name: a.name,
       type: a.mimeType || "audio/mpeg",
     });
   };
