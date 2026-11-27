@@ -456,7 +456,7 @@ const openReelInFeed = useCallback((reel) => {
             setTab={setTab}
             grid={grid}
             setPlayer={openReelInFeed}          // 👈 tap → Reels tab
-            loading={loading}
+            loading={tabloading}
           />
         </ScrollView>
       )}
