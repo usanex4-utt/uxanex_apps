@@ -424,10 +424,13 @@ export default function ChatScreen({ navigation, route }) {
     if (r.canceled) return;
 
     const a = r.assets[0];
+    if (!a.name) {
+      return Alert.alert("Invalid file", "File name is missing. Please select another file.");
+    }
 
     send({
       uri: a.uri,
-      name: a.name || "file",
+      name: a.name,
       type: a.mimeType || "application/octet-stream",
     });
   };
