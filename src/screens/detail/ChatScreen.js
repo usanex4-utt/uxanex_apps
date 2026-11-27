@@ -314,12 +314,24 @@ export default function ChatScreen({ navigation, route }) {
     try {
       const fd = new FormData();
 
-      fd.append("receiver_id", peer.user_id);
-      fd.append("content", body);
+fd.append("receiver_id", peer.user_id);
+fd.append("content", body);
 
-      if (file) {
-        fd.append("file", file);
-      }
+if (file) {
+  if (Platform.OS === "web") {
+    const response = await fetch(file.uri);
+    const blob = await response.blob();
+
+    fd.append(
+      "file",
+      new File([blob], file.name || "upload.bin", {
+        type: file.type || blob.type || "application/octet-stream",
+      })
+    );
+  } else {
+    fd.append("file", file);
+  }
+}
 
       const d = await api(EP.chatSend, {
         method: "POST",
