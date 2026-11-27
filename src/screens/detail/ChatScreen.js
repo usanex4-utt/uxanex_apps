@@ -195,16 +195,17 @@ export default function ChatScreen({ navigation, route }) {
               return [...prev, incoming];
             });
 
-            if (ws.readyState === WebSocket.OPEN) {
+             if (ws.readyState === WebSocket.OPEN) {
               ws.send(JSON.stringify({
                 type: "delivered",
                 message_id: incoming.id,
               }));
-            }
-                ws.send(JSON.stringify({
+
+              ws.send(JSON.stringify({
                 type: "read",
                 message_id: incoming.id,
               }));
+                        }
           } else if (m.type === "delivered") {
             setMessages((prev) =>
               prev.map((item) =>
