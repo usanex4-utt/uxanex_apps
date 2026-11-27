@@ -36,6 +36,7 @@ export default function ProfileScreen({ navigation, route }) {
   const [err, setErr] = useState("");
   const [menu, setMenu] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [tabLoading, setTabLoading] = useState(false);
   const [saving, setSaving] = useState(false);
 
   const [following, setFollowing] = useState(false);
@@ -90,33 +91,45 @@ export default function ProfileScreen({ navigation, route }) {
   }, [uid, isMe]);
 
     const loadTab = useCallback(async () => {
-    if (!uid) return;
+  if (!uid) return;
 
-    try {
-      if (tab === "reels") {
-        const d = await api(isMe ? EP.reelsMine : EP.reelsOfUser(uid));
-        setReels(d.reels || []);
-      } else if (tab === "saved" && isMe) {
-        const d = await api(EP.reelsSaved);
-        setSaved(d.reels || []);
-      } else if (tab === "reposts") {
-        const d = await api(EP.reelsReposts(uid));
-        setReposts(d.reposts || []);
-      }
-    } catch {
-      if (tab === "reels") setReels([]);
-      else if (tab === "saved") setSaved([]);
-      else if (tab === "reposts") setReposts([]);
+  if (tab === "posts") {
+    setTabLoading(false);
+    return;
+  }
+
+  setTabLoading(true);
+
+  try {
+    if (tab === "reels") {
+      const d = await api(isMe ? EP.reelsMine : EP.reelsOfUser(uid));
+      setReels(d.reels || []);
+    } else if (tab === "saved" && isMe) {
+      const d = await api(EP.reelsSaved);
+      setSaved(d.reels || []);
+    } else if (tab === "reposts") {
+      const d = await api(EP.reelsReposts(uid));
+      setReposts(d.reposts || []);
     }
-  }, [uid, tab, isMe]);
+  } catch {
+    if (tab === "reels") setReels([]);
+    else if (tab === "saved") setSaved([]);
+    else if (tab === "reposts") setReposts([]);
+  } finally {
+    setTabLoading(false);
+  }
+}, [uid, tab, isMe]);
 
   useFocusEffect(
-    useCallback(() => {
-      load();
-      loadTab();
-      return () => {};
-    }, [load, loadTab])
-  );
+  useCallback(() => {
+    load();
+    return () => {};
+  }, [load])
+);
+
+useEffect(() => {
+  loadTab();
+}, [loadTab]);
 
   useFocusEffect(
     useCallback(() => { setProfileOpenKey((prev) => prev + 1); }, [])
