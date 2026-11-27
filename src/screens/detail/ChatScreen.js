@@ -182,7 +182,7 @@ export default function ChatScreen({ navigation, route }) {
             if (m.typing) {
               hide = setTimeout(() => setTyping(false), 6000);
           }
-             } else if (m.type === "message" && m.message) {
+          } else if (m.type === "message" && m.message) {
             const incoming = m.message;
 
             setMessages((prev) => {
