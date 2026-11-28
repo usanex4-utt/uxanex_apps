@@ -50,6 +50,7 @@ import ReelAnalysisScreen from "../screens/main/ReelAnalysisScreen";
 // ── Detail Screens ─────────────────────────────────────────────
 import ChatScreen from "../screens/detail/ChatScreen";
 import CoupleChatScreen from "../screens/detail/CoupleChatScreen";
+import HeartFusionScreen from "../screens/detail/HeartFusionScreen";
 import ReelUploadScreen from "../screens/detail/ReelUploadScreen";
 import NexaScreen from "../screens/detail/NexaScreen";
 
