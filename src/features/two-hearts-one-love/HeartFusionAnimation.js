@@ -18,10 +18,12 @@ export default function HeartFusionAnimation({
   fusionStartedAt,
   serverOffset = 0,
 }) {
-  
+  const progress = useRef(new Animated.Value(0)).current;
   const completedRef = useRef(false);
 
   useEffect(() => {
+    completedRef.current = false;
+
     const startedAt = new Date(fusionStartedAt).getTime();
 
     const elapsed = Number.isFinite(startedAt)
@@ -31,9 +33,7 @@ export default function HeartFusionAnimation({
     const totalDuration = 3000;
     const remaining = Math.max(0, totalDuration - elapsed);
 
-    progress.setValue(
-      Math.min(elapsed / totalDuration, 1)
-    );
+    progress.setValue(Math.min(elapsed / totalDuration, 1));
 
     if (remaining === 0) {
       if (!completedRef.current) {
@@ -58,16 +58,7 @@ export default function HeartFusionAnimation({
     });
 
     return () => animation.stop();
-  }, [
-    progress,
-    onComplete,
-    fusionStartedAt,
-    serverOffset,
-  ]);
-  
-
-    return () => animation.stop();
-  }, [progress, onComplete]);
+  }, [progress, onComplete, fusionStartedAt, serverOffset]);
 
   const topY = progress.interpolate({
     inputRange: [0, 0.65, 1],
@@ -106,48 +97,42 @@ export default function HeartFusionAnimation({
 
   return (
     <View style={styles.container}>
-      {/* First partner's selected heart */}
-      {/* First partner's selected heart */}
-<Animated.View
-  style={[
-    styles.heart,
-    {
-      opacity: sourceOpacity,
-      transform: [{ translateY: topY }],
-    },
-  ]}
->
-  <CrystalHeart
-    color={firstHeart?.color || '#ff75ad'}
-    size={105}
-  />
-  <Text style={styles.heartName}>
-    {firstHeart?.name || 'Your Heart'}
-  </Text>
-</Animated.View>
+      <Animated.View
+        style={[
+          styles.heart,
+          {
+            opacity: sourceOpacity,
+            transform: [{ translateY: topY }],
+          },
+        ]}
+      >
+        <CrystalHeart
+          color={firstHeart?.color || '#ff75ad'}
+          size={105}
+        />
+        <Text style={styles.heartName}>
+          {firstHeart?.name || 'Your Heart'}
+        </Text>
+      </Animated.View>
 
-{/* Second partner's selected heart */}
-<Animated.View
-  style={[
-    styles.heart,
-    {
-      opacity: sourceOpacity,
-      transform: [{ translateY: bottomY }],
-    },
-  ]}
->
-  <CrystalHeart
-    color={secondHeart?.color || '#75caff'}
-    size={105}
-  />
-  <Text style={styles.heartName}>
-    {secondHeart?.name || "Partner's Heart"}
-  </Text>
-</Animated.View>
+      <Animated.View
+        style={[
+          styles.heart,
+          {
+            opacity: sourceOpacity,
+            transform: [{ translateY: bottomY }],
+          },
+        ]}
+      >
+        <CrystalHeart
+          color={secondHeart?.color || '#75caff'}
+          size={105}
+        />
+        <Text style={styles.heartName}>
+          {secondHeart?.name || "Partner's Heart"}
+        </Text>
+      </Animated.View>
 
-      
-
-      {/* Fusion burst */}
       <Animated.View
         style={[
           styles.burst,
@@ -160,7 +145,6 @@ export default function HeartFusionAnimation({
         <Text style={styles.burstText}>✨💥✨</Text>
       </Animated.View>
 
-      {/* Newly generated Surprise Crystal Heart */}
       <Animated.View
         style={[
           styles.finalHeart,
