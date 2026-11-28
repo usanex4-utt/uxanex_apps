@@ -8,6 +8,9 @@ import {
 } from 'react-native';
 
 import heartFusionApi from './heartFusionApi';
+
+import { subscribeHeartFusion } from './heartFusionEvents';
+
 import HeartSelectionScreen from './HeartSelectionScreen';
 import TwoHeartsOneLoveScreen from './TwoHeartsOneLoveScreen';
 
