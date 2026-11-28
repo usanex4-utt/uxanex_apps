@@ -102,8 +102,10 @@ export default function HeartFusionController({
     const timer = setInterval(() => {
       refreshSession(session.id).catch(() => {});
     }, 2000);
-
     
+
+    return () => clearInterval(timer);
+  }, [session?.id, session?.status, refreshSession]);
   // Couple Chat WebSocket events से session तुरंत refresh करें।
   useEffect(() => {
     const unsubscribe = subscribeHeartFusion((event) => {
@@ -116,10 +118,6 @@ export default function HeartFusionController({
 
     return unsubscribe;
   }, [refreshSession, loadActiveSession]);
-    
-
-    return () => clearInterval(timer);
-  }, [session?.id, session?.status, refreshSession]);
 
   // Countdown display और server-authoritative fusion request.
   useEffect(() => {
