@@ -36,7 +36,7 @@ import {
   pick3,
   rank,
 } from "../../components/couple/coupleUtils";
-
+import { publishHeartFusion } from "../../features/two-hearts-one-love/heartFusionEvents";
 // Media MIME helper — handles platforms where `a.type` is undefined
 function inferMediaMeta(asset) {
   const mime = (asset?.mimeType || "").toLowerCase();
@@ -272,6 +272,9 @@ export default function CoupleChatScreen({ navigation, route }) {
               setMood(ev.mood);
             }
             break;
+          case "heart_fusion_updated":
+           publishHeartFusion(ev);
+           break;
 
           case "error":
             flash(ev.message || "Something went wrong");
