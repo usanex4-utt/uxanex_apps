@@ -7,6 +7,7 @@ import {
   Platform,
   Alert,
   Keyboard,
+  Pressable, 
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -649,6 +650,24 @@ const uploadAndSend = async (file) => {
         mood={m}
         accent={accent}
       />
+      <Pressable
+        onPress={() => navigation.navigate("HeartFusion", { partner })}
+        style={{
+          marginHorizontal: 14,
+          marginTop: 10,
+          marginBottom: 6,
+          paddingVertical: 13,
+          borderRadius: 14,
+          backgroundColor: "#35152f",
+          borderWidth: 1,
+          borderColor: "#d9468f",
+          alignItems: "center",
+        }}
+      >
+        <Text style={{ color: "#ffffff", fontWeight: "700", fontSize: 14 }}>
+          💎 Send Two Hearts One Love ❤️
+        </Text>
+      </Pressable>
 
       {notice ? (
         <View className="flex-row items-center px-4 py-2.5 bg-[#ffe3e3]">
