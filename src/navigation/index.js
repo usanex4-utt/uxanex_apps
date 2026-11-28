@@ -289,6 +289,11 @@ export default function Navigation() {
               component={CoupleChatScreen}
             />
 
+
+            <Stack.Screen
+              name="HeartFusion"
+              component={HeartFusionScreen}
+            />
             {/* NEXA AI */}
             <Stack.Screen
               name="Nexa"
