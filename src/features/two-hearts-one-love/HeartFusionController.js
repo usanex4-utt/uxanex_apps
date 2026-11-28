@@ -103,6 +103,21 @@ export default function HeartFusionController({
       refreshSession(session.id).catch(() => {});
     }, 2000);
 
+    
+  // Couple Chat WebSocket events से session तुरंत refresh करें।
+  useEffect(() => {
+    const unsubscribe = subscribeHeartFusion((event) => {
+      if (event?.session_id) {
+        refreshSession(event.session_id).catch(() => {});
+      } else {
+        loadActiveSession().catch(() => {});
+      }
+    });
+
+    return unsubscribe;
+  }, [refreshSession, loadActiveSession]);
+    
+
     return () => clearInterval(timer);
   }, [session?.id, session?.status, refreshSession]);
 
